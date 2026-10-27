@@ -14,14 +14,17 @@ const BUTTONS: { type: ReportType; label: string; style: string }[] = [
 export function ReportButtons({ spaceId, onReported }: { spaceId: string; onReported: (type: ReportType) => void }) {
   const [sending, setSending] = useState<ReportType | null>(null);
   const [message, setMessage] = useState<{ kind: "ok" | "error"; text: string } | null>(null);
+  const [earned, setEarned] = useState<number | null>(null);
 
   async function send(type: ReportType) {
     setSending(type);
     setMessage(null);
+    setEarned(null);
     const res = await postWithSession("/api/reports", { spaceId, type });
     setSending(null);
     if (res.ok) {
       setMessage({ kind: "ok", text: type === "AVAILABLE" ? "Check-in yapıldı, teşekkürler!" : "Bildirimin kaydedildi, teşekkürler!" });
+      setEarned(res.data.points ?? 0);
       onReported(type);
     } else {
       setMessage({ kind: "error", text: res.error });
@@ -49,6 +52,7 @@ export function ReportButtons({ spaceId, onReported }: { spaceId: string; onRepo
       <p aria-live="polite" className={`text-sm ${message?.kind === "error" ? "font-semibold text-red-800 dark:text-red-300" : ""}`}>
         {message?.text}
       </p>
+      {earned !== null && earned > 0 && <p className="text-sm font-semibold">+{earned} puan kazandın</p>}
       <p className="text-xs opacity-70">Bildirimler anonimdir; ad, e-posta veya konum saklanmaz.</p>
     </section>
   );

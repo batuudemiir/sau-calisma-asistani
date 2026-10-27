@@ -93,20 +93,29 @@ async function load(ds: DataSource, opts: SearchOptions) {
     opts.demoMode ? ds.librarySimulation() : Promise.resolve(null),
     ds.ratings(),
   ]);
-  const simulation = storedSimulation?.pattern === "DAILY"
-    ? { ...storedSimulation, level: simulatedLibraryLevel(now.minute), updatedAtMs: reportNow(opts) }
-    : storedSimulation;
+  const simulation =
+    storedSimulation?.pattern === "DAILY"
+      ? { ...storedSimulation, level: simulatedLibraryLevel(now.minute), updatedAtMs: reportNow(opts) }
+      : storedSimulation;
   // Demo modu kapalıyken örnek (simüle) bildirimler hiç hesaba katılmaz
   const reports = opts.demoMode ? fetchedReports : fetchedReports.filter((r) => !r.isSimulated);
   const buildingName = new Map(buildings.map((b) => [b.id, b.name]));
   const sourceOf = (spaceId: string) => sources.find((s) => s.spaceIds.includes(spaceId)) ?? null;
   const toSourceDTO = (s: SourceSummary | null): SourceDTO | null =>
     s && term
-      ? { department: s.department, termLabel: term.label, url: s.url, isSimulated: s.isSimulated, isManual: s.parseMethod === "MANUAL", isPartial: s.coverage === "PARTIAL" }
+      ? {
+          department: s.department,
+          termLabel: term.label,
+          url: s.url,
+          isSimulated: s.isSimulated,
+          isManual: s.parseMethod === "MANUAL",
+          isPartial: s.coverage === "PARTIAL",
+        }
       : null;
   // Merkez kütüphane her zaman ilk sırada; kaydı yoksa "Doluluk verisi yok" diyen varsayılan kart
   const storedPlaces = spaces.filter(isPlace);
-  const library = storedPlaces.find((s) => s.id === DEFAULT_LIBRARY.id) ?? storedPlaces.find((s) => s.kind === "LIBRARY") ?? DEFAULT_LIBRARY;
+  const library =
+    storedPlaces.find((s) => s.id === DEFAULT_LIBRARY.id) ?? storedPlaces.find((s) => s.kind === "LIBRARY") ?? DEFAULT_LIBRARY;
   const places = [library, ...storedPlaces.filter((s) => s.id !== library.id).sort((a, b) => a.code.localeCompare(b.code, "tr"))];
   // Demo modu kapalıyken simüle puanlar hiç gösterilmez
   const visibleRatings = opts.demoMode ? ratings : ratings.filter((r) => !r.isSimulated);
@@ -114,7 +123,24 @@ async function load(ds: DataSource, opts: SearchOptions) {
   // Tam kaynak varsa o geçerli; yalnızca kısmi kaynakta geçen oda "Program kısmi" olur
   const publishedSpaceIds = new Set(sources.filter((s) => s.coverage !== "PARTIAL").flatMap((s) => s.spaceIds));
   const partialSpaceIds = new Set(sources.filter((s) => s.coverage === "PARTIAL").flatMap((s) => s.spaceIds));
-  return { now, term, spaces, sources, blocks, reports, simulation, buildings, buildingName, sourceOf, toSourceDTO, library, places, ratingOf, publishedSpaceIds, partialSpaceIds };
+  return {
+    now,
+    term,
+    spaces,
+    sources,
+    blocks,
+    reports,
+    simulation,
+    buildings,
+    buildingName,
+    sourceOf,
+    toSourceDTO,
+    library,
+    places,
+    ratingOf,
+    publishedSpaceIds,
+    partialSpaceIds,
+  };
 }
 
 export async function runSearch(ds: DataSource, opts: SearchOptions): Promise<SearchResponse> {
@@ -197,7 +223,13 @@ export async function spaceDetail(ds: DataSource, spaceId: string, opts: SearchO
       rating: d.ratingOf(space.id),
       excludedBecause,
     },
-    today: today.map(({ startMinute, endMinute, courseCode, courseName, sourceRef }) => ({ startMinute, endMinute, courseCode, courseName, sourceRef })),
+    today: today.map(({ startMinute, endMinute, courseCode, courseName, sourceRef }) => ({
+      startMinute,
+      endMinute,
+      courseCode,
+      courseName,
+      sourceRef,
+    })),
     recentReports: reports
       .sort((a, b) => b.createdAtMs - a.createdAtMs)
       .map((r) => ({ type: r.type, minutesAgo: Math.floor((reportNow(opts) - r.createdAtMs) / 60_000) })),
@@ -214,7 +246,12 @@ function evaluateSpace(d: Loaded, space: Space, isLibrary: boolean, opts: Search
   const reports = d.reports.filter((r) => r.spaceId === space.id);
   const nowMs = reportNow(opts);
   if (isLibrary) {
-    return { status: evaluateTrust({ base: LIBRARY_BASE, reports, nowMs }), freeUntil: null, nextClass: null, excludedBecause: null };
+    return {
+      status: evaluateTrust({ base: LIBRARY_BASE, reports, nowMs }),
+      freeUntil: null,
+      nextClass: null,
+      excludedBecause: null,
+    };
   }
   const program = checkProgram({
     now: d.now,
@@ -226,11 +263,21 @@ function evaluateSpace(d: Loaded, space: Space, isLibrary: boolean, opts: Search
     partialSpaceIds: d.partialSpaceIds,
   });
   if (program.kind === "UNKNOWN") {
-    return { status: { code: "UNKNOWN", reason: program.reason } as Status, freeUntil: null, nextClass: null, excludedBecause: null };
+    return {
+      status: { code: "UNKNOWN", reason: program.reason } as Status,
+      freeUntil: null,
+      nextClass: null,
+      excludedBecause: null,
+    };
   }
   const status = evaluateTrust({ base: program.kind === "PARTIAL" ? PARTIAL_BASE : CLASSROOM_BASE, reports, nowMs });
   if (program.kind === "EXCLUDED") return { status, freeUntil: null, nextClass: null, excludedBecause: program.why as Excluded };
-  return { status, freeUntil: program.freeUntil as number | null, nextClass: program.nextClass, excludedBecause: null as Excluded | null };
+  return {
+    status,
+    freeUntil: program.freeUntil as number | null,
+    nextClass: program.nextClass,
+    excludedBecause: null as Excluded | null,
+  };
 }
 
 export interface MapSpaceDTO {
@@ -271,7 +318,14 @@ export async function mapView(ds: DataSource, opts: SearchOptions): Promise<MapR
         .sort((a, b) => a.code.localeCompare(b.code, "tr", { numeric: true }))
         .map((s) => {
           const e = evaluateSpace(d, s, false, opts);
-          return { spaceId: s.id, code: s.code, isSimulated: s.isSimulated, status: e.status, excludedBecause: e.excludedBecause, rating: d.ratingOf(s.id) };
+          return {
+            spaceId: s.id,
+            code: s.code,
+            isSimulated: s.isSimulated,
+            status: e.status,
+            excludedBecause: e.excludedBecause,
+            rating: d.ratingOf(s.id),
+          };
         }),
     })),
   };

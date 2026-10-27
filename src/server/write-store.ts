@@ -1,3 +1,4 @@
+import type { Award, OtherReport, PointKind, ReportAward, UserPoints } from "@/domain/points";
 import type { Checkin, Rating, Scores } from "@/domain/ratings";
 import type { ReportType } from "@/domain/types";
 import type { RateDecision, RecentWrite } from "./rate-limit";
@@ -9,7 +10,26 @@ export interface NewReport {
   createdAtMs: number;
 }
 
-export type WriteResult = RateDecision & { id?: string };
+/** points: bu katkıyla kazanılan toplam puan (bonus dahil). */
+export type WriteResult = RateDecision & { id?: string; points?: number };
+
+/** Puan hesabı (saf, src/domain/points): mevcut kullanıcı durumu + aynı yere son bildirimler → yeni durum. */
+export type ReportAwardFn = (user: UserPoints, recentOnSpace: OtherReport[]) => ReportAward;
+export type RatingAwardFn = (user: UserPoints) => { user: UserPoints; award: Award };
+
+export interface PointEventDTO {
+  kind: PointKind;
+  points: number;
+  spaceId: string;
+  createdAtMs: number;
+}
+
+export interface Profile {
+  user: UserPoints;
+  /** Sunucuda doğrulanmış SAÜ öğrenci hesabına bağlı mı. E-posta saklanmaz. */
+  student: boolean;
+  events: PointEventDTO[];
+}
 
 export interface NewRating {
   spaceId: string;
@@ -24,11 +44,25 @@ export type RatingDecision = { ok: true; checkinId: string } | { ok: false; erro
 /** Sunucu tarafı yazmalar. Okuma + karar + yazma atomiktir (yarış durumunda hız sınırı aşılmaz). */
 export interface WriteStore {
   spaceExists(spaceId: string): Promise<boolean>;
-  addReport(report: NewReport, sinceMs: number, decide: (recent: RecentWrite[]) => RateDecision): Promise<WriteResult>;
+  /** Puan, bildirimle aynı transaction'da yazılır (award verilmezse puan yok). */
+  addReport(
+    report: NewReport,
+    sinceMs: number,
+    decide: (recent: RecentWrite[]) => RateDecision,
+    award?: ReportAwardFn,
+  ): Promise<WriteResult>;
   /** Atomik: uid'nin since'ten beri check-in'lerini ve değerlendirmelerini okur, decide ok ise kaydeder. */
   addRating(
     rating: NewRating,
     sinceMs: number,
-    decide: (mine: { checkins: Checkin[]; ratings: Pick<Rating, "uid" | "checkinReportId" | "spaceId" | "createdAtMs">[] }) => RatingDecision,
-  ): Promise<RatingDecision & { id?: string }>;
+    decide: (mine: {
+      checkins: Checkin[];
+      ratings: Pick<Rating, "uid" | "checkinReportId" | "spaceId" | "createdAtMs">[];
+    }) => RatingDecision,
+    award?: RatingAwardFn,
+  ): Promise<RatingDecision & { id?: string; points?: number }>;
+  /** Puan durumu ve son katkılar (en yeni önce). */
+  profile(uid: string, limit: number): Promise<Profile>;
+  /** Hesap sunucuda SAÜ öğrenci hesabı olarak doğrulandı. */
+  markStudent(uid: string): Promise<void>;
 }

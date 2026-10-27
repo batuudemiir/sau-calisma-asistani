@@ -9,7 +9,7 @@ export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
   try {
     const result = await submitReport(firestoreWriteStore(), uid, body, Date.now());
-    if (result.ok) return Response.json({ id: result.id }, { status: 201 });
+    if (result.ok) return Response.json({ id: result.id, points: result.points ?? 0 }, { status: 201 });
     if ("retryAfterSec" in result) {
       return Response.json({ error: result.error }, { status: 429, headers: { "Retry-After": String(result.retryAfterSec) } });
     }

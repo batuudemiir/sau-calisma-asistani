@@ -14,7 +14,16 @@ function data(over: Partial<FakeData> = {}): FakeData {
     spaces: [A201, A202, A203],
     buildings: [{ id: "isletme-a", name: "İşletme Fakültesi A Blok", campus: "Esentepe", isSimulated: false }],
     sources: [
-      { id: "isletme-2026-guz-v1", termId: TERM.id, department: "İşletme", url: "https://x.invalid/p.xlsx", spaceIds: [A201.id, A202.id], isSimulated: false, parseMethod: "DETERMINISTIC", coverage: "FULL" },
+      {
+        id: "isletme-2026-guz-v1",
+        termId: TERM.id,
+        department: "İşletme",
+        url: "https://x.invalid/p.xlsx",
+        spaceIds: [A201.id, A202.id],
+        isSimulated: false,
+        parseMethod: "DETERMINISTIC",
+        coverage: "FULL",
+      },
     ],
     blocks: [block(A201, hm(14, 10), hm(16)), block(A202, hm(13, 30), hm(15))],
     reports: [],
@@ -43,7 +52,11 @@ describe("runSearch", () => {
 
   it("kütüphane kaydı yoksa varsayılan kart: Doluluk verisi yok", async () => {
     const res = await runSearch(fakeSource(data()), opts);
-    expect(res.places[0]).toMatchObject({ spaceId: DEFAULT_LIBRARY.id, status: { code: "UNKNOWN", reason: "NO_SOURCE" }, simulation: null });
+    expect(res.places[0]).toMatchObject({
+      spaceId: DEFAULT_LIBRARY.id,
+      status: { code: "UNKNOWN", reason: "NO_SOURCE" },
+      simulation: null,
+    });
   });
 
   it("çalışma yerleri: kütüphane ilk sırada, kafeler alfabetik; derslik listesine girmez; bildirim kendi etiketini değiştirir", async () => {
@@ -67,11 +80,17 @@ describe("runSearch", () => {
     const simulation = { level: "BUSY" as const, updatedAtMs: opts.nowMs, isSimulated: true as const };
     const d = data({ spaces: [A201, LIBRARY], simulation });
     expect((await runSearch(fakeSource(d), opts)).places[0].simulation).toBeNull();
-    expect((await runSearch(fakeSource(d), { ...opts, demoMode: true })).places[0]).toMatchObject({ spaceId: LIBRARY.id, simulation });
+    expect((await runSearch(fakeSource(d), { ...opts, demoMode: true })).places[0]).toMatchObject({
+      spaceId: LIBRARY.id,
+      simulation,
+    });
   });
 
   it("DAILY desenli simülasyon program saatine göre seviye verir", async () => {
-    const d = data({ spaces: [A201, LIBRARY], simulation: { level: "LOW", pattern: "DAILY", updatedAtMs: 0, isSimulated: true } });
+    const d = data({
+      spaces: [A201, LIBRARY],
+      simulation: { level: "LOW", pattern: "DAILY", updatedAtMs: 0, isSimulated: true },
+    });
     const res = await runSearch(fakeSource(d), { ...opts, demoMode: true });
     expect(res.places[0].simulation).toMatchObject({ level: "BUSY", isSimulated: true });
   });
@@ -91,7 +110,12 @@ describe("runSearch", () => {
 
   it("puan özeti karta eklenir; simüle puanlar yalnızca demo modunda, gerçek ortalamaya karışmadan", async () => {
     const r = (isSimulated: boolean, n: 1 | 2 | 3 | 4 | 5) => ({
-      spaceId: A201.id, uid: "u", checkinReportId: "c", createdAtMs: 0, isSimulated, scores: { quiet: n, power: n, wifi: n, light: n },
+      spaceId: A201.id,
+      uid: "u",
+      checkinReportId: "c",
+      createdAtMs: 0,
+      isSimulated,
+      scores: { quiet: n, power: n, wifi: n, light: n },
     });
     const d = data({ ratings: [r(false, 4), r(false, 4), r(false, 5), r(true, 1), r(true, 1), r(true, 1)] });
     const off = await runSearch(fakeSource(d), opts);
@@ -108,7 +132,16 @@ describe("runSearch", () => {
     const d = data({
       spaces: [B1, B2],
       sources: [
-        { id: "ekip", termId: TERM.id, department: "Ekip", url: "", spaceIds: [B1.id, B2.id], isSimulated: false, parseMethod: "MANUAL", coverage: "PARTIAL" },
+        {
+          id: "ekip",
+          termId: TERM.id,
+          department: "Ekip",
+          url: "",
+          spaceIds: [B1.id, B2.id],
+          isSimulated: false,
+          parseMethod: "MANUAL",
+          coverage: "PARTIAL",
+        },
       ],
       blocks: [block(B1, hm(13, 30), hm(15), { sourceId: "ekip" }), block(B2, hm(16, 10), hm(18), { sourceId: "ekip" })],
       reports: [{ ...report(B2, "BUSY", 1, opts.nowMs), isSimulated: true }],
@@ -133,14 +166,25 @@ describe("spaceDetail", () => {
     const d = data({ reports: [report(A202, "BUSY", 3, opts.nowMs, "gizli-uid")] });
     const res = await spaceDetail(fakeSource(d), A202.id, opts);
     expect(res?.space).toMatchObject({ code: "A202", excludedBecause: "CLASS_CONFLICT", status: { code: "REPORTED_BUSY" } });
-    expect(res?.today).toEqual([{ startMinute: hm(13, 30), endMinute: hm(15), courseCode: "UTC425", courseName: "Kültürlerarası Pazarlama", sourceRef: "s.2, satır 14" }]);
+    expect(res?.today).toEqual([
+      {
+        startMinute: hm(13, 30),
+        endMinute: hm(15),
+        courseCode: "UTC425",
+        courseName: "Kültürlerarası Pazarlama",
+        sourceRef: "s.2, satır 14",
+      },
+    ]);
     expect(res?.recentReports).toEqual([{ type: "BUSY", minutesAgo: 3 }]);
     expect(JSON.stringify(res)).not.toContain("gizli-uid");
   });
 
   it("bilinmeyen alan → null; kütüphane varsayılan kartla açılır", async () => {
     expect(await spaceDetail(fakeSource(data()), "yok", opts)).toBeNull();
-    expect((await spaceDetail(fakeSource(data()), DEFAULT_LIBRARY.id, opts))?.space.status).toEqual({ code: "UNKNOWN", reason: "NO_SOURCE" });
+    expect((await spaceDetail(fakeSource(data()), DEFAULT_LIBRARY.id, opts))?.space.status).toEqual({
+      code: "UNKNOWN",
+      reason: "NO_SOURCE",
+    });
   });
 });
 
@@ -155,7 +199,13 @@ describe("parseQuery", () => {
 
   it("demo saati yalnızca demo modunda, Istanbul saatiyle", () => {
     expect(p("d=30&at=2026-10-27T13:00").ok).toBe(false);
-    expect(p("d=30&at=2026-10-27T13:00", true)).toEqual({ ok: true, durationMin: 30, nowMs: nowMsAt(13), reportNowMs: 1000, isDemoClock: true });
+    expect(p("d=30&at=2026-10-27T13:00", true)).toEqual({
+      ok: true,
+      durationMin: 30,
+      nowMs: nowMsAt(13),
+      reportNowMs: 1000,
+      isDemoClock: true,
+    });
     expect(p("d=30&at=dün", true).ok).toBe(false);
   });
 });

@@ -73,6 +73,7 @@ export function RatingForm({ spaceId, onRated }: { spaceId: string; onRated: () 
   const [scores, setScores] = useState<Partial<Record<Criterion, number>>>({});
   const [sending, setSending] = useState(false);
   const [message, setMessage] = useState<{ kind: "ok" | "error"; text: string } | null>(null);
+  const [earned, setEarned] = useState<number | null>(null);
   const complete = CRITERIA.every((c) => scores[c]);
 
   async function submit(e: React.FormEvent) {
@@ -80,10 +81,12 @@ export function RatingForm({ spaceId, onRated }: { spaceId: string; onRated: () 
     if (!complete) return;
     setSending(true);
     setMessage(null);
+    setEarned(null);
     const res = await postWithSession("/api/ratings", { spaceId, scores });
     setSending(false);
     if (res.ok) {
       setMessage({ kind: "ok", text: "Değerlendirmen kaydedildi, teşekkürler!" });
+      setEarned(res.data.points ?? 0);
       setScores({});
       onRated();
     } else {
@@ -129,6 +132,7 @@ export function RatingForm({ spaceId, onRated }: { spaceId: string; onRated: () 
       <p aria-live="polite" className={`text-sm ${message?.kind === "error" ? "font-semibold text-red-800 dark:text-red-300" : ""}`}>
         {message?.text}
       </p>
+      {earned !== null && earned > 0 && <p className="text-sm font-semibold">+{earned} puan kazandın</p>}
     </form>
   );
 }

@@ -1,5 +1,7 @@
 import { z } from "zod";
 import { RATING_WINDOW_MIN } from "@/domain/config";
+import { awardRating } from "@/domain/points";
+import { toLocalTime } from "@/domain/time";
 import { CAN_RATE_MESSAGES, CRITERIA, canRate, type Criterion, type Scores } from "@/domain/ratings";
 import { checkRatingRate } from "./rate-limit";
 import { DEFAULT_LIBRARY } from "./search-service";
@@ -12,7 +14,7 @@ export const RatingBodySchema = z.object({
   scores: z.strictObject(Object.fromEntries(CRITERIA.map((c) => [c, ScoreSchema])) as Record<Criterion, typeof ScoreSchema>),
 });
 
-export type RatingResult = (RatingDecision & { id?: string }) | { ok: false; error: string; status: 400 | 404 };
+export type RatingResult = (RatingDecision & { id?: string; points?: number }) | { ok: false; error: string; status: 400 | 404 };
 
 export async function submitRating(store: WriteStore, uid: string, body: unknown, nowMs: number): Promise<RatingResult> {
   const parsed = RatingBodySchema.safeParse(body);
@@ -26,10 +28,15 @@ export async function submitRating(store: WriteStore, uid: string, body: unknown
   const sinceMs = nowMs - 2 * RATING_WINDOW_MIN * 60_000;
   // Zod 1-5 tam sayı olduğunu doğruladı; Scores'a daraltmak güvenli
   const rating = { spaceId, uid, scores: scores as Scores, createdAtMs: nowMs };
-  return store.addRating(rating, sinceMs, ({ checkins, ratings }) => {
-    const rate = checkRatingRate(ratings, nowMs);
-    if (!rate.ok) return rate;
-    const decision = canRate({ uid, spaceId, nowMs, checkins, ratings });
-    return decision.ok ? decision : { ok: false, error: CAN_RATE_MESSAGES[decision.reason] };
-  });
+  return store.addRating(
+    rating,
+    sinceMs,
+    ({ checkins, ratings }) => {
+      const rate = checkRatingRate(ratings, nowMs);
+      if (!rate.ok) return rate;
+      const decision = canRate({ uid, spaceId, nowMs, checkins, ratings });
+      return decision.ok ? decision : { ok: false, error: CAN_RATE_MESSAGES[decision.reason] };
+    },
+    (user) => awardRating(user, toLocalTime(nowMs).dateISO),
+  );
 }

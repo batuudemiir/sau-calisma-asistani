@@ -74,7 +74,9 @@ test("check-in diğer cihazda 5 sn içinde görünür, aynı odaya ikinci bildir
   await a.getByRole("button", { name: "Buradayım, uygun (check-in)" }).click();
   await expect(reportMessage(a)).toHaveText("Check-in yapıldı, teşekkürler!");
 
-  await expect(b.getByRole("listitem").filter({ hasText: "Ö-103" }).getByText("Öğrenci doğruladı")).toBeVisible({ timeout: 5_000 });
+  await expect(b.getByRole("listitem").filter({ hasText: "Ö-103" }).getByText("Öğrenci doğruladı")).toBeVisible({
+    timeout: 5_000,
+  });
 
   await a.getByRole("button", { name: "Dolu" }).click();
   await expect(reportMessage(a)).toHaveText("Bu alan için 10 dakikada bir bildirim yapabilirsin");
@@ -149,4 +151,34 @@ test("arama Türkçe karakter katlar, filtre puansızı dışarıda bırakır ve
   await expect(page.getByRole("listitem").filter({ hasText: "Ö-204" })).toHaveCount(0);
   await page.getByRole("navigation", { name: "Ana gezinme" }).getByRole("link", { name: "Harita" }).click();
   await expect(page).toHaveURL(/f=quiet/);
+});
+
+test("puan: check-in +5, profilde görünür; SAÜ dışı Google reddedilir, öğrenci hesabına bağlanınca puan korunur", async ({
+  browser,
+}) => {
+  const p = await newPhone(browser);
+  await p.goto(`/?${Q}&s=kantin`);
+  const panel = p.getByRole("dialog", { name: "Kantin" });
+  await panel.getByRole("button", { name: "Buradayım, uygun (check-in)" }).click();
+  await expect(panel.getByText("+5 puan kazandın")).toBeVisible();
+
+  await p.getByRole("navigation", { name: "Ana gezinme" }).getByRole("link", { name: "Profil" }).click();
+  await expect(p.getByRole("heading", { name: "Katkıların bu cihazda anonim" })).toBeVisible();
+  await expect(p.getByTestId("level")).toHaveText("Yeni");
+  await expect(p.getByText(/^5\s*puan/)).toBeVisible();
+  await expect(p.getByRole("listitem").filter({ hasText: "Check-in · Kantin" })).toContainText("+5");
+
+  await p.evaluate(() => (window.__fakeGoogleEmail = "biri@gmail.com"));
+  await p.getByRole("button", { name: "SAÜ hesabıyla giriş yap (Google)" }).click();
+  await expect(p.getByText(/Yalnızca SAÜ öğrenci hesabı/)).toBeVisible();
+  await expect(p.getByRole("heading", { name: "Katkıların bu cihazda anonim" })).toBeVisible();
+
+  await p.evaluate(() => (window.__fakeGoogleEmail = "b221210001@ogr.sakarya.edu.tr"));
+  await p.getByRole("button", { name: "SAÜ hesabıyla giriş yap (Google)" }).click();
+  await expect(p.getByRole("heading", { name: "SAÜ öğrenci hesabı" })).toBeVisible();
+  await expect(p.getByText("b221210001@ogr.sakarya.edu.tr")).toBeVisible();
+  await expect(p.getByText(/^5\s*puan/)).toBeVisible(); // girişten önceki puan korunur
+
+  await p.getByRole("button", { name: "Çıkış yap" }).click();
+  await expect(p.getByRole("heading", { name: "Katkıların bu cihazda anonim" })).toBeVisible();
 });

@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { awardReport } from "@/domain/points";
+import { toLocalTime } from "@/domain/time";
 import { checkReportRate } from "./rate-limit";
 import { DEFAULT_LIBRARY } from "./search-service";
 import type { WriteResult, WriteStore } from "./write-store";
@@ -19,7 +21,11 @@ export async function submitReport(store: WriteStore, uid: string, body: unknown
   if (spaceId !== DEFAULT_LIBRARY.id && !(await store.spaceExists(spaceId))) {
     return { ok: false, error: "Alan bulunamadı", status: 404 };
   }
-  return store.addReport({ spaceId, type, uid, createdAtMs: nowMs }, nowMs - HOUR_MS, (recent) =>
-    checkReportRate(spaceId, recent, nowMs),
+  const dayKey = toLocalTime(nowMs).dateISO;
+  return store.addReport(
+    { spaceId, type, uid, createdAtMs: nowMs },
+    nowMs - HOUR_MS,
+    (recent) => checkReportRate(spaceId, recent, nowMs),
+    (user, recentOnSpace) => awardReport(user, { uid, spaceId, type, nowMs, dayKey, recentOnSpace }),
   );
 }

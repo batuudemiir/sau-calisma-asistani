@@ -54,11 +54,18 @@ export function firestoreSource(db: Firestore = adminDb()): DataSource {
 
     async reportsSince(sinceMs, spaceId) {
       let q = db.collection("spaceReports").where("createdAt", ">=", Timestamp.fromMillis(sinceMs));
-      if (spaceId) q = db.collection("spaceReports").where("spaceId", "==", spaceId).where("createdAt", ">=", Timestamp.fromMillis(sinceMs));
+      if (spaceId)
+        q = db.collection("spaceReports").where("spaceId", "==", spaceId).where("createdAt", ">=", Timestamp.fromMillis(sinceMs));
       const snap = await q.get();
       return snap.docs.map((d) => {
         const r = d.data();
-        return { spaceId: r.spaceId, type: r.type, uid: r.uid, createdAtMs: toMs(r.createdAt), isSimulated: r.isSimulated === true } as SpaceReport;
+        return {
+          spaceId: r.spaceId,
+          type: r.type,
+          uid: r.uid,
+          createdAtMs: toMs(r.createdAt),
+          isSimulated: r.isSimulated === true,
+        } as SpaceReport;
       });
     },
 
@@ -66,14 +73,26 @@ export function firestoreSource(db: Firestore = adminDb()): DataSource {
       const doc = await db.collection("simulations").doc("library").get();
       if (!doc.exists) return null;
       const s = doc.data()!;
-      return { level: s.level, pattern: s.pattern === "DAILY" ? "DAILY" : undefined, updatedAtMs: toMs(s.updatedAt), isSimulated: true } as LibrarySimulation;
+      return {
+        level: s.level,
+        pattern: s.pattern === "DAILY" ? "DAILY" : undefined,
+        updatedAtMs: toMs(s.updatedAt),
+        isSimulated: true,
+      } as LibrarySimulation;
     },
 
     async ratings() {
       const snap = await db.collection("spaceRatings").get();
       return snap.docs.map((d) => {
         const r = d.data();
-        return { spaceId: r.spaceId, uid: r.uid, checkinReportId: r.checkinReportId, scores: r.scores, createdAtMs: toMs(r.createdAt), isSimulated: r.isSimulated === true } as Rating;
+        return {
+          spaceId: r.spaceId,
+          uid: r.uid,
+          checkinReportId: r.checkinReportId,
+          scores: r.scores,
+          createdAtMs: toMs(r.createdAt),
+          isSimulated: r.isSimulated === true,
+        } as Rating;
       });
     },
   };

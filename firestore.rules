@@ -9,6 +9,7 @@ service cloud.firestore {
     match /spaces/{id} { allow read: if true; allow write: if false; }
     match /scheduleBlocks/{id} { allow read: if true; allow write: if false; }
     // spaceReports ve spaceRatings anonim uid içerir; istemciye kapalıdır, API uid'siz özet döndürür.
+    // users ve pointEvents (kişisel puanlar) de kapalıdır; yalnızca /api/profile sahibine döndürür.
 
     match /{document=**} { allow read, write: if false; }
   }
