@@ -1,0 +1,26 @@
+# Firebase App Hosting yapılandırması (Plan A). DOĞRULANMADI: gerçek bir backend'de henüz denenmedi.
+# Admin SDK App Hosting'de varsayılan kimliği kullanır; FIREBASE_SERVICE_ACCOUNT gerekmez.
+# NEXT_PUBLIC_ değerleri gizli değildir ama derleme sırasında pakete gömülür, bu yüzden BUILD'de de gerekir.
+# <...> ile işaretli değerleri Firebase konsolundaki Web App yapılandırmasından doldur.
+
+runConfig:
+  minInstances: 0
+  maxInstances: 2
+
+env:
+  - variable: NEXT_PUBLIC_FIREBASE_API_KEY
+    value: "<apiKey>"
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    value: "<projectId>.firebaseapp.com"
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    value: "<projectId>"
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_FIREBASE_APP_ID
+    value: "<appId>"
+    availability: [BUILD, RUNTIME]
+  # Demo sırasında etiketli simülasyonu ve demo saatini (?at=) açar
+  - variable: DEMO_MODE
+    value: "true"
+    availability: [RUNTIME]

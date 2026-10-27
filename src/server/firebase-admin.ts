@@ -15,6 +15,9 @@ function adminApp(): App {
   const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
   if (process.env.FIRESTORE_EMULATOR_HOST && projectId) return initializeApp({ projectId });
 
+  // Firebase App Hosting / Cloud Run: varsayılan uygulama kimliği (servis hesabı JSON'u gerekmez)
+  if (process.env.K_SERVICE || process.env.FIREBASE_CONFIG) return initializeApp();
+
   // Değeri değil, yalnızca eksik olduğunu bildir (kural 7).
   throw new Error("FIREBASE_SERVICE_ACCOUNT tanımlı değil (emulator için FIRESTORE_EMULATOR_HOST ve proje kimliği gerekir).");
 }

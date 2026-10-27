@@ -13,7 +13,8 @@
     "ingest": "tsx --env-file-if-exists=.env.local scripts/ingest/index.ts",
     "publish-schedule": "tsx --env-file-if-exists=.env.local scripts/publish/index.ts",
     "emulators": "firebase emulators:start --only firestore,auth",
-    "seed-demo": "tsx --env-file-if-exists=.env.local scripts/seed-demo/index.ts"
+    "seed-demo": "tsx --env-file-if-exists=.env.local scripts/seed-demo/index.ts",
+    "demo:local": "firebase emulators:exec --only firestore,auth --project demo-sau-calisma --ui \"npm run seed-demo && next dev\""
   },
   "devDependencies": {
     "@google/genai": "^2.31.0",
