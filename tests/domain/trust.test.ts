@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CLASSROOM_BASE, LIBRARY_BASE, evaluateTrust } from "../../src/domain/trust";
+import { CLASSROOM_BASE, LIBRARY_BASE, PARTIAL_BASE, evaluateTrust } from "../../src/domain/trust";
 import type { SpaceReport } from "../../src/domain/types";
 import { LIBRARY, nowMsAt, report, space } from "./fixtures";
 
@@ -90,5 +90,25 @@ describe("kütüphane (T-L1, T-L2)", () => {
 
   it("4 dk önce BUSY → REPORTED_BUSY", () => {
     expect(library([report(LIBRARY, "BUSY", 4, NOW)])).toMatchObject({ code: "REPORTED_BUSY", minutesAgo: 4 });
+  });
+});
+
+describe("kısmi kaynak ve örnek bildirimler", () => {
+  const partial = (reports: SpaceReport[]) => evaluateTrust({ base: PARTIAL_BASE, reports, nowMs: NOW });
+
+  it("T26: kısmi kaynaklı oda bildirim yokken 'Program kısmi'; asla PROGRAM_FREE değil", () => {
+    expect(partial([])).toEqual({ code: "UNKNOWN", reason: "PARTIAL_SOURCE" });
+    expect(partial([report(A204, "BUSY", 25, NOW)])).toEqual({ code: "UNKNOWN", reason: "PARTIAL_SOURCE" });
+  });
+
+  it("T27: kısmi kaynaklı odada yerinde bildirim etiketi değiştirir", () => {
+    expect(partial([report(A204, "AVAILABLE", 3, NOW)])).toMatchObject({ code: "VERIFIED_FREE" });
+    expect(partial([report(A204, "BUSY", 3, NOW)])).toMatchObject({ code: "REPORTED_BUSY" });
+  });
+
+  it("kararı örnek bildirim verdiyse simulated işaretlenir; gerçek bildirimde alan yok", () => {
+    const sim = { ...report(A204, "BUSY", 2, NOW), isSimulated: true };
+    expect(classroom([sim])).toMatchObject({ code: "REPORTED_BUSY", simulated: true });
+    expect(classroom([report(A204, "BUSY", 2, NOW)])).not.toHaveProperty("simulated");
   });
 });

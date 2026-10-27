@@ -10,6 +10,7 @@ export function StatusBadge({ status, isLibrary = false }: { status: Status; isL
         {statusTitle(status, isLibrary)}
       </span>
       {detail && <span className="text-sm opacity-80">{detail}</span>}
+      {"simulated" in status && status.simulated && <SimulatedBadge />}
     </div>
   );
 }

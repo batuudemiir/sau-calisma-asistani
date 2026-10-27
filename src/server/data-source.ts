@@ -10,6 +10,7 @@ export interface SourceSummary {
   isSimulated: boolean;
   /** MANUAL: ekip tarafından elle derlenmiş (Plan B) */
   parseMethod: "GEMINI" | "DETERMINISTIC" | "MANUAL";
+  coverage: "FULL" | "PARTIAL";
 }
 
 /** Arama servisinin ihtiyaç duyduğu okuma işlemleri. Firestore uygulaması ve testlerde bellek içi sahte uygulama vardır. */

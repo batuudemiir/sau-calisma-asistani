@@ -14,7 +14,7 @@ function data(over: Partial<FakeData> = {}): FakeData {
     spaces: [A201, A202, A203],
     buildings: [{ id: "isletme-a", name: "İşletme Fakültesi A Blok", campus: "Esentepe", isSimulated: false }],
     sources: [
-      { id: "isletme-2026-guz-v1", termId: TERM.id, department: "İşletme", url: "https://x.invalid/p.xlsx", spaceIds: [A201.id, A202.id], isSimulated: false, parseMethod: "DETERMINISTIC" },
+      { id: "isletme-2026-guz-v1", termId: TERM.id, department: "İşletme", url: "https://x.invalid/p.xlsx", spaceIds: [A201.id, A202.id], isSimulated: false, parseMethod: "DETERMINISTIC", coverage: "FULL" },
     ],
     blocks: [block(A201, hm(14, 10), hm(16)), block(A202, hm(13, 30), hm(15))],
     reports: [],
@@ -36,7 +36,7 @@ describe("runSearch", () => {
     expect(res.results[0]).toMatchObject({
       buildingName: "İşletme Fakültesi A Blok",
       nextClass: { courseCode: "UTC425", startMinute: hm(14, 10) },
-      source: { department: "İşletme", termLabel: "2026-2027 Güz", isManual: false },
+      source: { department: "İşletme", termLabel: "2026-2027 Güz", isManual: false, isPartial: false },
     });
     expect(res.results[1].source).toBeNull();
   });
@@ -83,6 +83,26 @@ describe("runSearch", () => {
     const on = await runSearch(fakeSource(d), { ...opts, demoMode: true });
     expect(on.results[0].rating.simulated).toMatchObject({ count: 3, overall: 1 });
     expect(JSON.stringify(on)).not.toContain('"uid"');
+  });
+
+  it("kişisel programdan (kısmi) gelen oda: bilinen dersle elenir, değilse 'Program kısmi'; örnek bildirim etiketlenir", async () => {
+    const B1 = space("B101");
+    const B2 = space("B102");
+    const d = data({
+      spaces: [B1, B2],
+      sources: [
+        { id: "ekip", termId: TERM.id, department: "Ekip", url: "", spaceIds: [B1.id, B2.id], isSimulated: false, parseMethod: "MANUAL", coverage: "PARTIAL" },
+      ],
+      blocks: [block(B1, hm(13, 30), hm(15), { sourceId: "ekip" }), block(B2, hm(16, 10), hm(18), { sourceId: "ekip" })],
+      reports: [{ ...report(B2, "BUSY", 1, opts.nowMs), isSimulated: true }],
+    });
+    const res = await runSearch(fakeSource(d), { ...opts, demoMode: true });
+    expect(res.results.map((r) => [r.code, r.status.code, r.freeUntil])).toEqual([["B102", "REPORTED_BUSY", hm(16)]]);
+    expect(res.results[0].status).toMatchObject({ simulated: true });
+    expect(res.results[0].source).toMatchObject({ isManual: true, isPartial: true });
+    // Demo modu kapalı: örnek bildirim yok sayılır
+    const quiet = await runSearch(fakeSource(d), opts);
+    expect(quiet.results[0].status).toEqual({ code: "UNKNOWN", reason: "PARTIAL_SOURCE" });
   });
 
   it("aktif dönem yoksa her oda UNKNOWN(STALE_SOURCE)", async () => {

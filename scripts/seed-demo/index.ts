@@ -1,12 +1,16 @@
-// Kullanım: DEMO_MODE=true npm run seed-demo [-- --clear]
+// Kullanım: DEMO_MODE=true npm run seed-demo [-- --clear | --only-library]
 // Örnek bina, odalar, program ve kütüphane simülasyonu yazar. --clear yalnızca isSimulated kayıtları siler.
+// --only-library: örnek binayı yazmadan yalnızca dönem (yoksa), kütüphane kartı, simülasyonu ve örnek puanlarını yazar
+// (kendi programınızla yapılan demo için).
 
 import { Timestamp } from "firebase-admin/firestore";
 import { parseArgs } from "node:util";
 import { scriptDb } from "../lib/admin";
 import { DEMO_SOURCE_ID, demoPlan } from "./plan";
 
-const { values } = parseArgs({ options: { clear: { type: "boolean", default: false } } });
+const { values } = parseArgs({
+  options: { clear: { type: "boolean", default: false }, "only-library": { type: "boolean", default: false } },
+});
 
 async function clear(db: ReturnType<typeof scriptDb>) {
   for (const col of ["spaces", "buildings", "scheduleBlocks", "scheduleSources", "spaceReports", "spaceRatings"]) {
@@ -31,13 +35,17 @@ async function main() {
   // Aktif dönem zaten varsa dokunma (gerçek yayın tarafından oluşturulmuş olabilir)
   const termRef = db.collection("terms").doc(p.term.id);
   if (!(await termRef.get()).exists) batch.set(termRef, p.term);
-  batch.set(db.collection("buildings").doc(p.building.id), p.building);
+  const onlyLibrary = values["only-library"];
+  if (!onlyLibrary) batch.set(db.collection("buildings").doc(p.building.id), p.building);
   const libRef = db.collection("spaces").doc(p.library.id);
   if (!(await libRef.get()).exists) batch.set(libRef, p.library);
-  for (const s of p.spaces) batch.set(db.collection("spaces").doc(s.id), s);
-  batch.set(db.collection("scheduleSources").doc(DEMO_SOURCE_ID), p.source);
-  p.blocks.forEach((b, i) => batch.set(db.collection("scheduleBlocks").doc(`${DEMO_SOURCE_ID}-${String(i).padStart(4, "0")}`), b));
-  p.ratings.forEach((r, i) =>
+  if (!onlyLibrary) {
+    for (const s of p.spaces) batch.set(db.collection("spaces").doc(s.id), s);
+    batch.set(db.collection("scheduleSources").doc(DEMO_SOURCE_ID), p.source);
+    p.blocks.forEach((b, i) => batch.set(db.collection("scheduleBlocks").doc(`${DEMO_SOURCE_ID}-${String(i).padStart(4, "0")}`), b));
+  }
+  const ratings = onlyLibrary ? p.ratings.filter((r) => r.spaceId === p.library.id) : p.ratings;
+  ratings.forEach((r, i) =>
     batch.set(db.collection("spaceRatings").doc(`${DEMO_SOURCE_ID}-puan-${i}`), { ...r, createdAt: Timestamp.now() }),
   );
   batch.set(db.collection("simulations").doc("library"), {
@@ -48,7 +56,11 @@ async function main() {
     isSimulated: true,
   });
   await batch.commit();
-  console.log(`Örnek veri yazıldı: ${p.spaces.length} oda, ${p.blocks.length} ders bloğu, ${p.ratings.length} örnek puan, kütüphane simülasyonu (gün içi örnek desen).`);
+  console.log(
+    onlyLibrary
+      ? `Yalnızca kütüphane örnek verisi yazıldı: simülasyon (gün içi örnek desen), ${ratings.length} örnek puan.`
+      : `Örnek veri yazıldı: ${p.spaces.length} oda, ${p.blocks.length} ders bloğu, ${ratings.length} örnek puan, kütüphane simülasyonu (gün içi örnek desen).`,
+  );
 }
 
 main().catch((e: unknown) => {

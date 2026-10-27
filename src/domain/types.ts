@@ -68,13 +68,16 @@ export type UnknownReason =
   | "STALE_SOURCE"
   | "DATA_INCOMPLETE"
   | "CONFLICTING_REPORTS"
-  | "REPORTED_OUTDATED";
+  | "REPORTED_OUTDATED"
+  /** Oda yalnızca kısmi bir kaynakta (ör. ekibin kişisel programları) geçiyor: bilinen dersler dışında durum bilinmiyor. */
+  | "PARTIAL_SOURCE";
 
 export type Status =
-  | { code: "VERIFIED_FREE"; minutesAgo: number; reportCount: number }
+  // simulated: kararı veren bildirim "Örnek demo verisi" ise true (yalnızca DEMO_MODE'da oluşabilir)
+  | { code: "VERIFIED_FREE"; minutesAgo: number; reportCount: number; simulated?: true }
   | { code: "PROGRAM_FREE" }
   | { code: "UNKNOWN"; reason: UnknownReason }
-  | { code: "REPORTED_BUSY"; minutesAgo: number; reportType: "BUSY" | "UNUSABLE" };
+  | { code: "REPORTED_BUSY"; minutesAgo: number; reportType: "BUSY" | "UNUSABLE"; simulated?: true };
 
 export interface NextClass {
   courseCode: string;
@@ -121,6 +124,7 @@ export const UNKNOWN_REASON_LABELS: Record<UnknownReason, string> = {
   DATA_INCOMPLETE: "Program verisi eksik",
   CONFLICTING_REPORTS: "Bildirimler çelişkili",
   REPORTED_OUTDATED: "Bilgi güncel değil bildirildi",
+  PARTIAL_SOURCE: "Program kısmi: yalnızca bilinen dersler",
 };
 
 export const LIBRARY_NO_DATA_LABEL = "Doluluk verisi yok";

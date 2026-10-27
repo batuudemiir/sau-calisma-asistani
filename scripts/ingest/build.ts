@@ -22,7 +22,7 @@ export function termMatches(documentTerm: string | null, termLabel: string): boo
 }
 
 export interface BuildDraftInput {
-  source: Omit<DraftSource, "documentTerm">;
+  source: Omit<DraftSource, "documentTerm" | "coverage"> & { coverage?: DraftSource["coverage"] };
   documentTerm: string | null;
   termLabel: string;
   rooms: readonly string[];
@@ -36,5 +36,5 @@ export function buildDraft(input: BuildDraftInput): Draft {
     input.rows.map((r) => rawToDraft(r.raw, r.uncertain ?? false)),
     { rooms: new Set(rooms), termMatches: termMatches(input.documentTerm, input.termLabel), sourceText: input.sourceText },
   );
-  return { source: { ...input.source, documentTerm: input.documentTerm }, rooms, blocks };
+  return { source: { coverage: "FULL", ...input.source, documentTerm: input.documentTerm }, rooms, blocks };
 }

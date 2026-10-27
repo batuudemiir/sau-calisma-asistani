@@ -14,6 +14,15 @@ Amaç: Canlı demonun (3-5 dk) adım adım provası. `DEMO_AND_PITCH.md` neyin a
 - [ ] Demo saatini seç: gerçek saat 08.00-22.00 dışındaysa ya da o saatte uygun oda azsa `&at=` kullan.
       Örnek veri için iyi bir an: `at=2026-10-27T13:00` (Salı 13.00).
 
+## İlk demo: kendi ders programımızla
+
+- Veri: ekibin kişisel programları, `--coverage PARTIAL` (README "İlk demo" bölümü). Söylenecek:
+  "Bu yalnızca bizim derslerimiz; o yüzden uygulama odaya 'boş' demiyor, 'Program kısmi' diyor. Bilinen dersimiz
+  varsa odayı listeden çıkarıyor."
+- Etkileri göstermek için dizüstünden: `DEMO_MODE=true npm run demo-report -- <oda> dolu` → telefonda 4 sn içinde
+  "Dolu bildirildi · Örnek demo verisi". Ardından telefondan gerçek check-in → "Öğrenci doğruladı" (etiketsiz, gerçek).
+- Haritada yapay bildirimli odalar `*` ile işaretlidir.
+
 ## Akış (DEMO_AND_PITCH.md tablosuyla aynı sıra)
 
 | Adım | A telefonu | Söylenecek |

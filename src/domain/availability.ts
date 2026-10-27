@@ -8,15 +8,19 @@ export interface ProgramCheckInput {
   space: Space;
   /** Günün blokları; motor oda, gün, dönem ve PUBLISHED durumuna göre kendisi süzer. */
   blocks: readonly ScheduleBlock[];
-  /** En az bir PUBLISHED kaynakta geçen oda kimlikleri. */
+  /** En az bir PUBLISHED tam kaynakta (odanın tüm programı) geçen oda kimlikleri. */
   publishedSpaceIds: ReadonlySet<string>;
+  /** Yalnızca kısmi kaynakta (ör. ekibin kişisel programları) geçen odalar: bilinen dersler eler, gerisi bilinmez. */
+  partialSpaceIds?: ReadonlySet<string>;
   hours?: BuildingHours;
 }
 
 export type ProgramCheck =
   | { kind: "EXCLUDED"; why: "BUILDING_CLOSED" | "CLASS_CONFLICT" }
   | { kind: "UNKNOWN"; reason: UnknownReason }
-  | { kind: "FREE"; freeUntil: number; nextClass: NextClass | null };
+  | { kind: "FREE"; freeUntil: number; nextClass: NextClass | null }
+  /** Bilinen derslerle çakışma yok ama programın tamamı bilinmiyor; freeUntil/nextClass yalnızca bilinen derslere göre. */
+  | { kind: "PARTIAL"; freeUntil: number; nextClass: NextClass | null };
 
 export function isTermValid(term: Term | null, dateISO: string): term is Term {
   return term !== null && term.isActive && term.startsOn <= dateISO && dateISO <= term.endsOn;
@@ -24,6 +28,7 @@ export function isTermValid(term: Term | null, dateISO: string): term is Term {
 
 export function checkProgram(input: ProgramCheckInput): ProgramCheck {
   const { now, durationMin, term, space, blocks, publishedSpaceIds } = input;
+  const partialSpaceIds = input.partialSpaceIds ?? new Set<string>();
   const hours = input.hours ?? DEFAULT_HOURS;
   if (!isDuration(durationMin)) throw new RangeError(`Geçersiz süre: ${durationMin}`);
 
@@ -33,7 +38,8 @@ export function checkProgram(input: ProgramCheckInput): ProgramCheck {
 
   if (wStart < hours.openMinute || wEnd > hours.closeMinute) return { kind: "EXCLUDED", why: "BUILDING_CLOSED" };
   if (!isTermValid(term, now.dateISO)) return { kind: "UNKNOWN", reason: "STALE_SOURCE" };
-  if (!publishedSpaceIds.has(space.id)) return { kind: "UNKNOWN", reason: "NO_SOURCE" };
+  const isFull = publishedSpaceIds.has(space.id);
+  if (!isFull && !partialSpaceIds.has(space.id)) return { kind: "UNKNOWN", reason: "NO_SOURCE" };
   if (space.dataQuality === "INCOMPLETE") return { kind: "UNKNOWN", reason: "DATA_INCOMPLETE" };
 
   const today = blocks.filter(
@@ -49,7 +55,7 @@ export function checkProgram(input: ProgramCheckInput): ProgramCheck {
     .reduce<ScheduleBlock | null>((min, b) => (min === null || b.startMinute < min.startMinute ? b : min), null);
 
   return {
-    kind: "FREE",
+    kind: isFull ? "FREE" : "PARTIAL",
     freeUntil: next ? next.startMinute - BUFFER_MIN : hours.closeMinute,
     nextClass: next
       ? {

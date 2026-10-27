@@ -119,6 +119,7 @@ Tek aktif dönem. Dönem değişince eski dönemin `isActive=false` olur; motor 
   "url": "https://...", "format": "PDF",           // PDF | XLSX | CSV (CSV = elle derlenmiş, Plan B)
   "fetchedAt": "2026-10-27T18:30:00+03:00", "sha256": "…",
   "parseMethod": "GEMINI",                          // GEMINI | DETERMINISTIC | MANUAL
+  "coverage": "FULL",                               // FULL: odaların tüm programı · PARTIAL: yalnızca bazı dersler (kişisel programlar)
   "status": "PUBLISHED",                            // PUBLISHED | SUPERSEDED
   "blockCount": 84, "flaggedCount": 3, "reviewedBy": "ekip",
   "spaceIds": ["isletme-a-A204", "…"]                // kaynağın kapsadığı odalar (dersi olmasa da)

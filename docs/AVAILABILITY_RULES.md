@@ -28,7 +28,7 @@ aktif dönem, o günün yayımlanmış blokları, aday alanlar, son 30 dakikanı
 | `UNKNOWN` | Durum bilinmiyor | Veri eksik, eski veya çelişkili (`reason` ile birlikte) |
 | `REPORTED_BUSY` | Dolu bildirildi | Son 20 dk içinde dolu/kullanılamaz bildirimi |
 
-`UNKNOWN` nedenleri: `NO_SOURCE`, `STALE_SOURCE`, `DATA_INCOMPLETE`, `CONFLICTING_REPORTS`, `REPORTED_OUTDATED`.
+`UNKNOWN` nedenleri: `NO_SOURCE`, `STALE_SOURCE`, `DATA_INCOMPLETE`, `CONFLICTING_REPORTS`, `REPORTED_OUTDATED`, `PARTIAL_SOURCE`.
 Arayüz yüzde veya olasılık göstermez. Renk tek başına anlam taşımaz; her etiket metinle yazılır.
 
 ## 1. Program kontrolü (her derslik için)
@@ -37,11 +37,12 @@ Arayüz yüzde veya olasılık göstermez. Renk tek başına anlam taşımaz; he
 W = [nowMin, nowMin + durationMin]
 0. W.start < OPEN_MINUTE veya W.end > CLOSE_MINUTE ise       → sonuçlardan çıkar (bina kapalı)
 1. Aktif dönem yoksa veya now dönem tarihleri dışındaysa     → UNKNOWN(STALE_SOURCE)
-2. Oda hiçbir PUBLISHED kaynakta geçmiyorsa                  → UNKNOWN(NO_SOURCE)
+2. Oda hiçbir PUBLISHED kaynakta (tam veya kısmi) geçmiyorsa → UNKNOWN(NO_SOURCE)
 3. Oda dataQuality = INCOMPLETE ise                          → UNKNOWN(DATA_INCOMPLETE)
 5. Bugünkü herhangi bir blok b için
      b.start - BUFFER < W.end  VE  b.end + BUFFER > W.start  → sonuçlardan çıkar (ders var)
-6. Aksi halde programFree = true
+6. Oda yalnızca kısmi kaynakta (coverage=PARTIAL) geçiyorsa → PARTIAL (freeUntil/nextClass bilinen derslere göre)
+7. Aksi halde programFree = true
      freeUntil = (now'dan sonra başlayan ilk bloğun start'ı) - BUFFER, yoksa CLOSE_MINUTE
      nextClass = o blok (ders kodu + saat) veya null
 ```
@@ -52,13 +53,15 @@ Notlar:
 - Bina saati kontrolü en baştadır: bina kapalıyken veri eksik odalar da listelenmez (T7b).
 - Dönem tarihleri dahildir: `startsOn <= bugün <= endsOn` (Europe/Istanbul takvim günü).
 - `UNKNOWN` odalarda `freeUntil = null`; bu odalar güven değerlendirmesine girmez.
+- Kısmi kaynak (ör. ekibin kişisel programları) yalnızca bazı dersleri bilir: bilinen ders çakışması odayı eler,
+  ama çakışma yokluğu "boş" anlamına gelmez. Aynı oda tam kaynakta da varsa tam kaynak geçerlidir.
 - `weekday`: Pazartesi=1 … Pazar=7 (JS `getDay()` Pazar=0 döndürür; dönüşüm `src/domain/time.ts`).
 - Çakışan iki blok yayımlanmaz (veri hazırlamada elenir); yine de motor ikisini de dikkate alır.
 
 ## 2. Güven değerlendirmesi (programFree olan derslikler ve kütüphane için)
 
 ```
-base = derslik için PROGRAM_FREE, kütüphane için UNKNOWN(NO_SOURCE)
+base = derslik için PROGRAM_FREE, kısmi kaynaklı oda için UNKNOWN(PARTIAL_SOURCE), kütüphane için UNKNOWN(NO_SOURCE)
 R = son REPORT_TTL_MIN dakikadaki bildirimler, yeniden eskiye
 1. R boşsa                                            → base
 2. En yeni bildirim OUTDATED ise                      → UNKNOWN(REPORTED_OUTDATED)
@@ -69,6 +72,9 @@ R = son REPORT_TTL_MIN dakikadaki bildirimler, yeniden eskiye
 6. pos var                                            → VERIFIED_FREE (kaç dk önce, kaç bildirim)
 7. Aksi halde                                         → base
 ```
+
+Kararı veren bildirim örnek (`isSimulated`) ise sonuç `simulated: true` taşır ve "Örnek demo verisi" etiketiyle gösterilir;
+`DEMO_MODE` kapalıyken örnek bildirimler hiç hesaba katılmaz.
 
 `accessStatus = UNKNOWN` etiketi değiştirmez; kartta "Erişim durumu doğrulanmadı" notu çıkar.
 
@@ -146,6 +152,10 @@ Tüm örneklerde gün Salı (2), `BUFFER_MIN = 10`, kapanış 22.00.
 | T-L1 | Kütüphane, bildirim yok | `UNKNOWN(NO_SOURCE)` ("Doluluk verisi yok") |
 | T-L2 | Kütüphane, yalnızca 25 dk önce BUSY | `UNKNOWN(NO_SOURCE)` (asla `PROGRAM_FREE` değil) |
 | T18 | Aynı uid aynı odaya 4 dk arayla iki bildirim | İkincisi hız sınırıyla reddedilir (`src/server` testi) |
+| T24 | Kısmi kaynak, 13.00, 60 dk, bilinen ders 15.10 | PARTIAL, `freeUntil = 15.00` |
+| T25 | Kısmi kaynak, bilinen ders 13.30 | Listeden çıkar |
+| T26 | Kısmi kaynak, bildirim yok / yalnızca 25 dk önce BUSY | `UNKNOWN(PARTIAL_SOURCE)` (asla `PROGRAM_FREE` değil) |
+| T27 | Kısmi kaynak, 3 dk önce AVAILABLE / BUSY | `VERIFIED_FREE` / `REPORTED_BUSY` |
 | T19 | Check-in yokken değerlendirme | Reddedilir |
 | T20 | Check-in 190 dk önce | Reddedilir (süre doldu) |
 | T21 | Aynı check-in'e ikinci değerlendirme | Reddedilir |

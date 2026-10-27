@@ -30,6 +30,7 @@ const FILL: Record<Tone, string> = {
 };
 
 const toneOf = (s: MapSpaceDTO): Tone => (s.excludedBecause ? "EXCLUDED" : s.status.code);
+const isSimStatus = (s: { status: Status; excludedBecause?: unknown }) => !s.excludedBecause && "simulated" in s.status && s.status.simulated === true;
 
 /** Haritada gösterilecek puan: gerçek yeterliyse o, değilse (demo) simüle; ikisi de yoksa null. */
 function shownRating(r: { real: RatingSummary; simulated: RatingSummary }) {
@@ -44,7 +45,9 @@ function ratingText(r: { real: RatingSummary; simulated: RatingSummary }) {
 }
 
 function ariaFor(code: string, s: MapSpaceDTO) {
-  const state = s.excludedBecause ? "seçilen süre için uygun değil" : statusTitle(s.status as Status);
+  const state = s.excludedBecause
+    ? "seçilen süre için uygun değil"
+    : `${statusTitle(s.status as Status)}${isSimStatus(s) ? " (örnek demo verisi)" : ""}`;
   const r = shownRating(s.rating);
   return `${code}: ${state}. ${r ? `Ortalama puan ${r.value.toFixed(1)}${r.simulated ? ", örnek demo verisi" : ""}` : "Yeterli değerlendirme yok"}`;
 }
@@ -58,7 +61,8 @@ export function MapView() {
 
   const building = data?.buildings.find((b) => b.id === selected) ?? null;
   const anySimulatedRating =
-    data?.buildings.some((b) => b.spaces.some((s) => shownRating(s.rating)?.simulated)) || (data && shownRating(data.library.rating)?.simulated);
+    data?.buildings.some((b) => b.spaces.some((s) => shownRating(s.rating)?.simulated || isSimStatus(s))) ||
+    (data && shownRating(data.library.rating)?.simulated);
 
   return (
     <main className="mx-auto w-full max-w-md flex-1 space-y-4 px-4 py-6">
@@ -112,7 +116,7 @@ export function MapView() {
           </ul>
           {anySimulatedRating && (
             <p className="flex items-center gap-2 text-xs">
-              <SimulatedBadge /> * işaretli puanlar örnek demo verisidir.
+              <SimulatedBadge /> * işaretli puan ve bildirimler örnek demo verisidir.
             </p>
           )}
           <p className="text-xs opacity-70">Şematik çizim, ölçekli değildir. Renk tek başına anlam taşımaz; her odada durum metni yazar.</p>
@@ -210,7 +214,7 @@ function BuildingMap({ spaces, query }: { spaces: MapSpaceDTO[]; query: string }
                   </text>
                   <text x={x + 6} y={y + 36} className="fill-current text-[9.5px]">
                     {/* Dar hücrede kesilmesin diye uzun etiket iki satıra bölünür */}
-                    {SHORT[tone].split(/ (?=boş$)/).map((line, li) => (
+                    {`${SHORT[tone]}${isSimStatus(s) ? "*" : ""}`.split(/ (?=boş\*?$)/).map((line, li) => (
                       <tspan key={li} x={x + 6} dy={li === 0 ? 0 : 11}>
                         {line}
                       </tspan>

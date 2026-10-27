@@ -37,6 +37,7 @@ export function firestoreSource(db: Firestore = adminDb()): DataSource {
           spaceIds: s.spaceIds ?? [],
           isSimulated: s.isSimulated === true,
           parseMethod: s.parseMethod ?? "DETERMINISTIC",
+          coverage: s.coverage === "PARTIAL" ? "PARTIAL" : "FULL",
         } satisfies SourceSummary;
       });
     },

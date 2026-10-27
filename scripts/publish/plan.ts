@@ -1,4 +1,4 @@
-import type { DataQuality, ScheduleBlock, SourceStatus, Space } from "../../src/domain/types";
+import type { DataQuality, ScheduleBlock, SourceStatus, Space, Term } from "../../src/domain/types";
 import type { Draft } from "../ingest/schema";
 
 export interface ExistingSource {
@@ -18,6 +18,7 @@ export interface SourceDoc {
   fetchedAt: string;
   sha256: string;
   parseMethod: "GEMINI" | "DETERMINISTIC" | "MANUAL";
+  coverage: "FULL" | "PARTIAL";
   status: SourceStatus;
   blockCount: number;
   flaggedCount: number;
@@ -84,6 +85,7 @@ export function planPublish(draft: Draft, existing: readonly ExistingSource[], r
       fetchedAt: source.fetchedAt,
       sha256: source.sha256,
       parseMethod: source.parseMethod,
+      coverage: source.coverage,
       status: "PUBLISHED",
       blockCount: blocks.length,
       flaggedCount: draft.blocks.length - clean.length,
@@ -109,4 +111,14 @@ export function planRollback(sourceId: string, existing: readonly ExistingSource
     .sort((a, b) => (b.publishedAt ?? "").localeCompare(a.publishedAt ?? ""))[0];
   if (!previous) throw new Error(`Geri dönülecek önceki kaynak yok: ${sourceId}`);
   return { supersede: current.id, republish: previous.id };
+}
+
+/** Dönem kaydı yoksa oluşturulacak belge; tarihler elle verilir (uydurulmaz). */
+export function planTerm(termId: string, label?: string, startsOn?: string, endsOn?: string): Term {
+  const iso = /^\d{4}-\d{2}-\d{2}$/;
+  if (!label || !startsOn || !endsOn || !iso.test(startsOn) || !iso.test(endsOn)) {
+    throw new Error(`terms/${termId} yok: --term-label "2026-2027 Güz" --starts-on YYYY-AA-GG --ends-on YYYY-AA-GG ver`);
+  }
+  if (startsOn > endsOn) throw new Error("--starts-on, --ends-on'dan sonra olamaz");
+  return { id: termId, label, startsOn, endsOn, isActive: true };
 }

@@ -1,7 +1,7 @@
 import { checkProgram } from "./availability";
 import type { BuildingHours } from "./config";
 import { rankResults } from "./ranking";
-import { CLASSROOM_BASE, LIBRARY_BASE, evaluateTrust } from "./trust";
+import { CLASSROOM_BASE, LIBRARY_BASE, PARTIAL_BASE, evaluateTrust } from "./trust";
 import type {
   LibraryResult,
   LibrarySimulation,
@@ -21,6 +21,7 @@ export interface SearchInput {
   spaces: readonly Space[]; // derslikler ve çalışma alanları (kütüphane hariç)
   blocks: readonly ScheduleBlock[];
   publishedSpaceIds: ReadonlySet<string>;
+  partialSpaceIds?: ReadonlySet<string>;
   reports: readonly SpaceReport[];
   hours?: BuildingHours;
   library?: { space: Space; simulation: LibrarySimulation | null } | null;
@@ -44,9 +45,11 @@ export function searchSpaces(input: SearchInput): SearchOutput {
       results.push({ space, status: { code: "UNKNOWN", reason: program.reason }, freeUntil: null, nextClass: null });
       continue;
     }
+    // Kısmi kaynakta taban "Program kısmi"dir; yalnızca yerinde yapılan bildirim etiketi değiştirebilir
+    const base = program.kind === "PARTIAL" ? PARTIAL_BASE : CLASSROOM_BASE;
     results.push({
       space,
-      status: evaluateTrust({ base: CLASSROOM_BASE, reports: reportsFor(space.id), nowMs: input.nowMs }),
+      status: evaluateTrust({ base, reports: reportsFor(space.id), nowMs: input.nowMs }),
       freeUntil: program.freeUntil,
       nextClass: program.nextClass,
     });

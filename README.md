@@ -22,7 +22,7 @@ bilinmeyen bilgi asla "boş" kabul edilmez.
 
 | Konu | Durum |
 |---|---|
-| Uygunluk/güven/sıralama/değerlendirme kuralları | 95 birim testi geçiyor (T1-T23 dahil) |
+| Uygunluk/güven/sıralama/değerlendirme kuralları | 107 birim testi geçiyor (T1-T27 dahil) |
 | Uçtan uca akış (arama, ayrıntı, check-in, puan, harita) | `npm run test:e2e` ile 3 Playwright senaryosu geçiyor (emulator + örnek veri); check-in diğer cihazda ≤5 sn |
 | Erişilebilirlik | axe (WCAG 2.0/2.1/2.2 AA) açık ve koyu temada 5 sayfada ihlal bulmadı; SVG metin kontrastı elle kontrol edildi |
 | Gerçek SAÜ ders programı | **Yok.** Geliştirme ortamından sakarya.edu.tr erişilemedi; belge eklenip `ingest` ile işlenmeli |
@@ -71,7 +71,8 @@ Sonra http://localhost:3000 adresini aç (dev modunda ilk API isteği derleme y�
 | `npm run test:e2e` | Playwright: production build + emulator + örnek veriyle 3 uçtan uca senaryo (Java gerekir) |
 | `npm run typecheck` / `npm run lint` | Tip kontrolü / ESLint |
 | `npm run demo:local` | Emulator + örnek veri + dev sunucusu |
-| `npm run seed-demo [-- --clear]` | Örnek veri yazar / yalnızca `isSimulated` kayıtları siler (`DEMO_MODE=true` gerekir) |
+| `npm run seed-demo [-- --clear \| --only-library]` | Örnek veri yazar / yalnızca `isSimulated` kayıtları siler / yalnızca kütüphane örneği (`DEMO_MODE=true` gerekir) |
+| `npm run demo-report -- <oda> <uygun\|dolu\|kullanilamiyor\|guncel_degil> [--ago dk]` | Demo için etiketli yapay bildirim (`DEMO_MODE=true` gerekir) |
 | `npm run ingest -- <dosya> ...` | Kaynak belgeyi taslak JSON'a çevirir (`data/drafts/`) |
 | `npm run publish-schedule -- <taslak> ...` | İncelenmiş taslağı Firestore'a yayımlar; `--rollback <sourceId>` |
 
@@ -89,6 +90,29 @@ Sonra http://localhost:3000 adresini aç (dev modunda ilk API isteği derleme y�
 4. Yayımla: `npm run publish-schedule -- data/drafts/<id>.json --reviewed-by <ad> --building-name "İşletme Fakültesi A Blok"`
    (`needsReview` kayıtlar yayımlanmaz; bu kayıtların odası "Program verisi eksik" görünür.)
    Sunucu program verisini 60 sn önbellekte tuttuğu için yeni yayın en geç 1 dakika içinde görünür.
+
+### İlk demo: ekibin kendi ders programıyla
+
+Kişisel programlar yalnızca **bizim** derslerimizi bilir; o odalarda başka derslerin olup olmadığını bilmez.
+Bu yüzden kaynak `--coverage PARTIAL` ile yüklenir: bilinen dersle çakışan oda elenir, diğer saatlerde oda
+"Program kısmi: yalnızca bilinen dersler" görünür ve asla kendiliğinden "boş" denmez. Yerinde yapılan bildirim etiketi değiştirir.
+
+```bash
+# 1) data/sources/elle-giris-sablonu.csv → data/sources/ekip-programi.csv olarak kopyala, derslerinizi yazın
+npm run ingest -- data/sources/ekip-programi.csv --coverage PARTIAL --building isletme-a
+#    (dönem "2026-2027 Güz", bölüm "Ekip" varsayılır; odalar CSV'den çıkarılır)
+# 2) çıktıdaki listeyi kendi programınızla karşılaştırın, sonra yayımlayın
+npm run publish-schedule -- data/drafts/ekip-2026-guz-v1.json --reviewed-by ekip \
+  --building-name "İşletme Fakültesi" --term-label "2026-2027 Güz" --starts-on <dönem başı> --ends-on <dönem sonu>
+# 3) yalnızca kütüphane örnek verisi (örnek bina yüklenmez)
+DEMO_MODE=true npm run seed-demo -- --only-library
+# 4) demo sırasında etiketli yapay bildirimler (30 dk etkili; "Örnek demo verisi" olarak görünür)
+DEMO_MODE=true npm run demo-report -- A204 dolu
+DEMO_MODE=true npm run demo-report -- A205 uygun --ago 3
+```
+
+Emulator ile yerelde: önce `npm run emulators` (ayrı terminal), sonra yukarıdaki komutları
+`FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 NEXT_PUBLIC_FIREBASE_PROJECT_ID=demo-sau-calisma` ile çalıştırın ve `npm run dev`.
 
 ### Plan B: belge bulunamazsa elle derlenmiş program
 

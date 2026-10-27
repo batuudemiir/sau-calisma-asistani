@@ -50,6 +50,8 @@ export const DraftSourceSchema = z.object({
   fetchedAt: z.string(),
   sha256: z.string().regex(/^[a-f0-9]{64}$/),
   parseMethod: z.enum(["GEMINI", "DETERMINISTIC", "MANUAL"]),
+  /** FULL: odaların tüm programı (resmî program, kapı çizelgesi). PARTIAL: yalnızca bazı dersler (kişisel programlar). */
+  coverage: z.enum(["FULL", "PARTIAL"]).default("FULL"),
   /** Belgede yazan dönem (ör. "2026-2027 Güz"); termId ile uyuşmazsa tüm kayıtlar işaretlenir. */
   documentTerm: z.string().nullable(),
 });

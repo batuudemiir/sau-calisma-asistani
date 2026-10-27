@@ -96,3 +96,19 @@ describe("program kontrolü — ek kenar durumlar", () => {
     expect(() => check(at(13), 45)).toThrow(RangeError);
   });
 });
+
+describe("kısmi kaynak (ekibin kişisel programları)", () => {
+  const partial = { publishedSpaceIds: new Set<string>(), partialSpaceIds: new Set([A204.id]) };
+
+  it("T24: bilinen ders yoksa PARTIAL; freeUntil bilinen bir sonraki derse göre", () => {
+    expect(check(at(13), 60, [block(A204, hm(15, 10), hm(17))], partial)).toMatchObject({ kind: "PARTIAL", freeUntil: hm(15) });
+  });
+
+  it("T25: bilinen dersle çakışan oda yine listeden çıkar", () => {
+    expect(check(at(13), 60, [block(A204, hm(13, 30), hm(15))], partial)).toEqual({ kind: "EXCLUDED", why: "CLASS_CONFLICT" });
+  });
+
+  it("aynı oda tam kaynakta da varsa FREE (tam kaynak önceliklidir)", () => {
+    expect(check(at(13), 60, [], { ...partial, publishedSpaceIds: new Set([A204.id]) }).kind).toBe("FREE");
+  });
+});

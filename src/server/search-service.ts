@@ -4,7 +4,7 @@ import { checkProgram } from "@/domain/availability";
 import { searchSpaces } from "@/domain/search";
 import { toLocalTime } from "@/domain/time";
 import { summarizeSpaceRatings, type Rating, type RatingSummary } from "@/domain/ratings";
-import { CLASSROOM_BASE, evaluateTrust, LIBRARY_BASE } from "@/domain/trust";
+import { CLASSROOM_BASE, evaluateTrust, LIBRARY_BASE, PARTIAL_BASE } from "@/domain/trust";
 import type { AccessStatus, LibrarySimulation, NextClass, ReportType, Space, SpaceKind, Status } from "@/domain/types";
 import type { DataSource, SourceSummary } from "./data-source";
 
@@ -24,6 +24,7 @@ export interface SourceDTO {
   url: string;
   isSimulated: boolean;
   isManual: boolean;
+  isPartial: boolean;
 }
 
 export interface ResultDTO {
@@ -74,7 +75,7 @@ const reportNow = (opts: SearchOptions) => opts.reportNowMs ?? opts.nowMs;
 async function load(ds: DataSource, opts: SearchOptions) {
   const now = toLocalTime(opts.nowMs);
   const term = await ds.activeTerm();
-  const [spaces, buildings, sources, blocks, reports, storedSimulation, ratings] = await Promise.all([
+  const [spaces, buildings, sources, blocks, fetchedReports, storedSimulation, ratings] = await Promise.all([
     ds.spaces(),
     ds.buildings(),
     term ? ds.publishedSources(term.id) : Promise.resolve([] as SourceSummary[]),
@@ -86,17 +87,22 @@ async function load(ds: DataSource, opts: SearchOptions) {
   const simulation = storedSimulation?.pattern === "DAILY"
     ? { ...storedSimulation, level: simulatedLibraryLevel(now.minute), updatedAtMs: reportNow(opts) }
     : storedSimulation;
+  // Demo modu kapalıyken örnek (simüle) bildirimler hiç hesaba katılmaz
+  const reports = opts.demoMode ? fetchedReports : fetchedReports.filter((r) => !r.isSimulated);
   const buildingName = new Map(buildings.map((b) => [b.id, b.name]));
   const sourceOf = (spaceId: string) => sources.find((s) => s.spaceIds.includes(spaceId)) ?? null;
   const toSourceDTO = (s: SourceSummary | null): SourceDTO | null =>
     s && term
-      ? { department: s.department, termLabel: term.label, url: s.url, isSimulated: s.isSimulated, isManual: s.parseMethod === "MANUAL" }
+      ? { department: s.department, termLabel: term.label, url: s.url, isSimulated: s.isSimulated, isManual: s.parseMethod === "MANUAL", isPartial: s.coverage === "PARTIAL" }
       : null;
   const library = spaces.find((s) => s.kind === "LIBRARY") ?? DEFAULT_LIBRARY;
   // Demo modu kapalıyken simüle puanlar hiç gösterilmez
   const visibleRatings = opts.demoMode ? ratings : ratings.filter((r) => !r.isSimulated);
   const ratingOf = (spaceId: string) => summarizeSpaceRatings(visibleRatings.filter((r: Rating) => r.spaceId === spaceId));
-  return { now, term, spaces, sources, blocks, reports, simulation, buildingName, sourceOf, toSourceDTO, library, ratingOf };
+  // Tam kaynak varsa o geçerli; yalnızca kısmi kaynakta geçen oda "Program kısmi" olur
+  const publishedSpaceIds = new Set(sources.filter((s) => s.coverage !== "PARTIAL").flatMap((s) => s.spaceIds));
+  const partialSpaceIds = new Set(sources.filter((s) => s.coverage === "PARTIAL").flatMap((s) => s.spaceIds));
+  return { now, term, spaces, sources, blocks, reports, simulation, buildingName, sourceOf, toSourceDTO, library, ratingOf, publishedSpaceIds, partialSpaceIds };
 }
 
 export async function runSearch(ds: DataSource, opts: SearchOptions): Promise<SearchResponse> {
@@ -108,7 +114,8 @@ export async function runSearch(ds: DataSource, opts: SearchOptions): Promise<Se
     term: d.term,
     spaces: d.spaces,
     blocks: d.blocks,
-    publishedSpaceIds: new Set(d.sources.flatMap((s) => s.spaceIds)),
+    publishedSpaceIds: d.publishedSpaceIds,
+    partialSpaceIds: d.partialSpaceIds,
     reports: d.reports,
     library: { space: d.library, simulation: d.simulation },
   });
@@ -135,7 +142,7 @@ export async function runSearch(ds: DataSource, opts: SearchOptions): Promise<Se
       status: r.status,
       freeUntil: r.freeUntil,
       nextClass: r.nextClass,
-      source: d.toSourceDTO(r.nextClass ? (d.sources.find((s) => s.id === r.nextClass!.sourceId) ?? null) : d.sourceOf(r.space.id)),
+      source: d.toSourceDTO((r.nextClass && d.sources.find((s) => s.id === r.nextClass!.sourceId)) || d.sourceOf(r.space.id)),
       rating: d.ratingOf(r.space.id),
     })),
   };
@@ -205,12 +212,13 @@ function evaluateSpace(d: Loaded, space: Space, isLibrary: boolean, opts: Search
     term: d.term,
     space,
     blocks: d.blocks,
-    publishedSpaceIds: new Set(d.sources.flatMap((s) => s.spaceIds)),
+    publishedSpaceIds: d.publishedSpaceIds,
+    partialSpaceIds: d.partialSpaceIds,
   });
   if (program.kind === "UNKNOWN") {
     return { status: { code: "UNKNOWN", reason: program.reason } as Status, freeUntil: null, nextClass: null, excludedBecause: null };
   }
-  const status = evaluateTrust({ base: CLASSROOM_BASE, reports, nowMs });
+  const status = evaluateTrust({ base: program.kind === "PARTIAL" ? PARTIAL_BASE : CLASSROOM_BASE, reports, nowMs });
   if (program.kind === "EXCLUDED") return { status, freeUntil: null, nextClass: null, excludedBecause: program.why as Excluded };
   return { status, freeUntil: program.freeUntil as number | null, nextClass: program.nextClass, excludedBecause: null as Excluded | null };
 }

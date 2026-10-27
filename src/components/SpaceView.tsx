@@ -81,10 +81,12 @@ export function SpaceView() {
           {!isLibrary && (
             <section aria-labelledby="today-title" className="space-y-2">
               <h2 id="today-title" className="text-lg font-bold">
-                Bugünkü program ({WEEKDAY_NAMES[data.now.weekday]})
+                {s.source?.isPartial ? "Bugün bilinen dersler" : "Bugünkü program"} ({WEEKDAY_NAMES[data.now.weekday]})
               </h2>
               {data.today.length === 0 ? (
-                <p className="text-sm">Yayımlanmış programda bugün bu odada ders yok.</p>
+                <p className="text-sm">
+                  {s.source?.isPartial ? "Bugün bu odada bilinen ders yok." : "Yayımlanmış programda bugün bu odada ders yok."}
+                </p>
               ) : (
                 <ul className="divide-y divide-zinc-300 rounded-lg border border-zinc-300 text-sm dark:divide-zinc-700 dark:border-zinc-700">
                   {data.today.map((b) => (

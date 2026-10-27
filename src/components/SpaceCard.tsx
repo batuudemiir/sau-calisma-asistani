@@ -29,21 +29,30 @@ export function SpaceCard({ r, href }: { r: ResultDTO; href: string }) {
 }
 
 export function SpaceFacts({ r }: { r: ResultDTO }) {
+  // Kısmi kaynakta (kişisel programlar) yalnızca bilinen dersler var: "boş" denmez, "bilinen ders yok" denir
+  const partial = r.source?.isPartial ?? false;
   return (
     <ul className="mt-3 space-y-1 text-sm">
-      {r.freeUntil !== null && <li>{time(r.freeUntil)} saatine kadar boş (programa göre)</li>}
+      {r.freeUntil !== null &&
+        (partial ? (
+          <li>{time(r.freeUntil)} saatine kadar bilinen ders yok</li>
+        ) : (
+          <li>{time(r.freeUntil)} saatine kadar boş (programa göre)</li>
+        ))}
       {r.freeUntil !== null &&
         (r.nextClass ? (
           <li>
-            Sonraki ders: {time(r.nextClass.startMinute)} · {r.nextClass.courseCode} {r.nextClass.courseName}
+            {partial ? "Bilinen sonraki ders" : "Sonraki ders"}: {time(r.nextClass.startMinute)} · {r.nextClass.courseCode}{" "}
+            {r.nextClass.courseName}
           </li>
         ) : (
-          <li>Bugün başka ders yok (programa göre)</li>
+          <li>{partial ? "Bugün bilinen başka ders yok" : "Bugün başka ders yok (programa göre)"}</li>
         ))}
       {r.source && (
         <li className="opacity-80">
-          Kaynak: {r.source.department} · {r.source.termLabel} programı
-          {r.source.isManual && !r.source.isSimulated && " (ekip tarafından elle derlenmiş)"}
+          Kaynak: {r.source.department} · {r.source.termLabel}
+          {partial ? " · ekibin kişisel programları (kısmi)" : " programı"}
+          {r.source.isManual && !r.source.isSimulated && !partial && " (ekip tarafından elle derlenmiş)"}
         </li>
       )}
       {r.accessStatus !== "OPEN" && <li className="opacity-80">{ACCESS_UNVERIFIED_LABEL}</li>}
