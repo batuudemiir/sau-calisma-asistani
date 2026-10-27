@@ -20,7 +20,7 @@ export function ResultsView() {
   return (
     <main className="mx-auto w-full max-w-md flex-1 space-y-5 px-4 py-6">
       <header className="space-y-3">
-        <Link href="/" className="text-sm underline">
+        <Link href="/" className="inline-flex min-h-11 items-center text-sm underline">
           ← Başa dön
         </Link>
         <h1 className="text-2xl font-bold">{d} dakika çalışabileceğin yerler</h1>
@@ -43,7 +43,7 @@ export function ResultsView() {
             {data.now.isDemoClock && <strong className="ml-1">(demo saati)</strong>}
           </p>
         )}
-        <Link href={`/map?${query}`} className="inline-block text-sm font-semibold underline">
+        <Link href={`/map?${query}`} className="inline-flex min-h-11 items-center text-sm font-semibold underline">
           Haritada gör →
         </Link>
       </header>

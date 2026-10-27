@@ -23,7 +23,8 @@ bilinmeyen bilgi asla "boş" kabul edilmez.
 | Konu | Durum |
 |---|---|
 | Uygunluk/güven/sıralama/değerlendirme kuralları | 91 birim testi geçiyor (T1-T23 dahil) |
-| Uçtan uca akış (arama, ayrıntı, check-in, puan, harita) | Firebase Emulator + örnek veriyle tarayıcıda denendi; check-in sonrası diğer cihaz 2,1 sn'de güncellendi |
+| Uçtan uca akış (arama, ayrıntı, check-in, puan, harita) | `npm run test:e2e` ile 3 Playwright senaryosu geçiyor (emulator + örnek veri); check-in diğer cihazda ≤5 sn |
+| Erişilebilirlik | axe (WCAG 2.0/2.1/2.2 AA) açık ve koyu temada 5 sayfada ihlal bulmadı; SVG metin kontrastı elle kontrol edildi |
 | Gerçek SAÜ ders programı | **Yok.** Geliştirme ortamından sakarya.edu.tr erişilemedi; belge eklenip `ingest` ile işlenmeli |
 | Gemini ile PDF ayrıştırma | Kod ve yanıt doğrulama testli; **gerçek API çağrısı doğrulanmadı** (anahtar yok). Model `GEMINI_MODEL` ile seçilir |
 | Firebase App Hosting dağıtımı | `apphosting.yaml` hazır; **canlı ortamda doğrulanmadı** |
@@ -31,7 +32,7 @@ bilinmeyen bilgi asla "boş" kabul edilmez.
 ## Teknolojiler
 
 Next.js 16 (App Router) · TypeScript · Tailwind CSS 4 · Cloud Firestore · Firebase Anonymous Auth ·
-Firebase Admin SDK · Zod · Gemini API (`@google/genai`, yalnızca betiklerde) · ExcelJS · Vitest · Playwright (elle e2e)
+Firebase Admin SDK · Zod · Gemini API (`@google/genai`, yalnızca betiklerde) · ExcelJS · Vitest · Playwright
 
 ## Yerel çalıştırma (Emulator + örnek veri)
 
@@ -57,7 +58,7 @@ DEMO_MODE=true
 npm run demo:local      # emulator'ları açar, örnek veriyi yükler, next dev başlatır
 ```
 
-Sonra http://localhost:3000 adresini aç. Gece geliştirme yaparken bina kapalı görünür; demo modunda program saati
+Sonra http://localhost:3000 adresini aç (dev modunda ilk API isteği derleme yüzünden 10-20 sn sürebilir). Gece geliştirme yaparken bina kapalı görünür; demo modunda program saati
 `?at=` ile verilebilir: http://localhost:3000/results?d=60&at=2026-10-27T13:00
 (demo saati yalnızca ders programını kaydırır; bildirimler gerçek saatle değerlendirilir).
 
@@ -67,6 +68,7 @@ Sonra http://localhost:3000 adresini aç. Gece geliştirme yaparken bina kapalı
 |---|---|
 | `npm run dev` | Geliştirme sunucusu |
 | `npm test` | Vitest (domain, sunucu servisleri, veri hattı) |
+| `npm run test:e2e` | Playwright: production build + emulator + örnek veriyle 3 uçtan uca senaryo (Java gerekir) |
 | `npm run typecheck` / `npm run lint` | Tip kontrolü / ESLint |
 | `npm run demo:local` | Emulator + örnek veri + dev sunucusu |
 | `npm run seed-demo [-- --clear]` | Örnek veri yazar / yalnızca `isSimulated` kayıtları siler (`DEMO_MODE=true` gerekir) |

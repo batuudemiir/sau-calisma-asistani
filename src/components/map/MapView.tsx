@@ -64,15 +64,15 @@ export function MapView() {
     <main className="mx-auto w-full max-w-md flex-1 space-y-4 px-4 py-6">
       <nav className="flex justify-between text-sm">
         {building ? (
-          <Link href={`/map?${query}`} className="underline">
+          <Link href={`/map?${query}`} className="inline-flex min-h-11 items-center underline">
             ← Kampüs
           </Link>
         ) : (
-          <Link href={`/results?${query}`} className="underline">
+          <Link href={`/results?${query}`} className="inline-flex min-h-11 items-center underline">
             ← Liste görünümü
           </Link>
         )}
-        <Link href={`/results?${query}`} className="underline">
+        <Link href={`/results?${query}`} className="inline-flex min-h-11 items-center underline">
           Liste
         </Link>
       </nav>

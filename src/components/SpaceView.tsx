@@ -28,7 +28,7 @@ export function SpaceView() {
 
   return (
     <main className="mx-auto w-full max-w-md flex-1 space-y-5 px-4 py-6">
-      <Link href={`/results?${query}`} className="text-sm underline">
+      <Link href={`/results?${query}`} className="inline-flex min-h-11 items-center text-sm underline">
         ← Sonuçlara dön
       </Link>
 
