@@ -52,6 +52,7 @@ describe("planPublish", () => {
       ["isletme-a-A204", "OK", "UNKNOWN"],
       ["isletme-a-A205", "INCOMPLETE", "UNKNOWN"],
     ]);
+    expect(plan.source.spaceIds).toEqual(["isletme-a-A204", "isletme-a-A205"]);
     expect(plan.supersede).toEqual(["isletme-2026-guz-v1"]);
   });
 

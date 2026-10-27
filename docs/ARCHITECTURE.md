@@ -120,7 +120,8 @@ Tek aktif dönem. Dönem değişince eski dönemin `isActive=false` olur; motor 
   "fetchedAt": "2026-10-27T18:30:00+03:00", "sha256": "…",
   "parseMethod": "GEMINI",                          // GEMINI | DETERMINISTIC | MANUAL
   "status": "PUBLISHED",                            // PUBLISHED | SUPERSEDED
-  "blockCount": 84, "flaggedCount": 3, "reviewedBy": "ekip"
+  "blockCount": 84, "flaggedCount": 3, "reviewedBy": "ekip",
+  "spaceIds": ["isletme-a-A204", "…"]                // kaynağın kapsadığı odalar (dersi olmasa da)
 }
 ```
 Yeni sürüm yayımlanınca eskisi `SUPERSEDED` olur; motor yalnızca `PUBLISHED` kaynakların bloklarını kullanır.

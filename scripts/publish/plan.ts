@@ -23,6 +23,8 @@ export interface SourceDoc {
   flaggedCount: number;
   reviewedBy: string;
   publishedAt: string;
+  /** Bu kaynağın kapsadığı odalar (dersi olmasa da). Motor "oda yayımlanmış kaynakta var mı?" sorusunu buradan yanıtlar. */
+  spaceIds: string[];
 }
 
 export interface PublishPlan {
@@ -87,6 +89,7 @@ export function planPublish(draft: Draft, existing: readonly ExistingSource[], r
       flaggedCount: draft.blocks.length - clean.length,
       reviewedBy,
       publishedAt: nowISO,
+      spaceIds: spaces.map((s) => s.id),
     },
     blocks,
     spaces,

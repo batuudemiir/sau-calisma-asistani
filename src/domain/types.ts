@@ -16,6 +16,13 @@ export interface Term {
   isActive: boolean;
 }
 
+export interface Building {
+  id: string;
+  name: string;
+  campus: string;
+  isSimulated: boolean;
+}
+
 export interface Space {
   id: string;
   buildingId: string;
