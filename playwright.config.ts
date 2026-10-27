@@ -14,7 +14,7 @@ export default defineConfig({
   },
   webServer: {
     command:
-      'npm run build && firebase emulators:exec --only firestore,auth --project demo-sau-calisma "npm run seed-demo && next start -p 3000"',
+      'npm run build && firebase emulators:exec --only firestore,auth --project demo-sau-calisma "npm run seed-campus && npm run seed-demo && next start -p 3000"',
     url: "http://127.0.0.1:3000",
     timeout: 300_000,
     reuseExistingServer: false,

@@ -38,7 +38,8 @@ export function searchSpaces(input: SearchInput): SearchOutput {
 
   const results: SpaceResult[] = [];
   for (const space of input.spaces) {
-    if (space.kind === "LIBRARY") continue;
+    // Kütüphane ve çalışma alanlarının ders programı yoktur; ayrı "çalışma yerleri" olarak değerlendirilir
+    if (space.kind === "LIBRARY" || space.kind === "STUDY_AREA") continue;
     const program = checkProgram({ ...input, space });
     if (program.kind === "EXCLUDED") continue;
     if (program.kind === "UNKNOWN") {

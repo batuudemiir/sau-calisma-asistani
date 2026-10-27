@@ -21,6 +21,8 @@ export interface Building {
   name: string;
   campus: string;
   isSimulated: boolean;
+  /** OpenStreetMap kaydı ("way/123"); konum ve bina sınırı buradan çizilir. */
+  osm?: string | null;
 }
 
 export interface Space {
@@ -31,6 +33,9 @@ export interface Space {
   accessStatus: AccessStatus;
   dataQuality: DataQuality;
   isSimulated: boolean;
+  /** Çalışma yerleri (LIBRARY, STUDY_AREA) için OSM kaydı ve açılış saatleri (kaynağında yazdığı gibi). */
+  osm?: string | null;
+  openingHours?: string | null;
 }
 
 export interface ScheduleBlock {

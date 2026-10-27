@@ -11,6 +11,7 @@ GDG on Campus SAÜ Hackathon, 27-28 Ekim 2026. Teslim: 28 Ekim 13.00.
 - `docs/MVP_IMPLEMENTATION_PLAN.md` — aşamalar ve kabul kriterleri
 - `docs/DEMO_AND_PITCH.md` — demo akışı
 - `docs/DEMO_RUNBOOK.md` — demo provası, kontrol listesi, bilinen tuzaklar
+- `docs/CAMPUS_RESEARCH.md` — kampüs verisinin kaynakları (OSM), doğrulananlar ve eksikler
 
 ## Sabit kurallar
 1. Dar kapsamlı çalış; bir aşamanın kabul kriterleri karşılanmadan sonrakine geçme.

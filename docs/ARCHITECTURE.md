@@ -98,7 +98,7 @@ Tek aktif dönem. Dönem değişince eski dönemin `isActive=false` olur; motor 
 
 ### `buildings/{buildingId}`
 ```json
-{ "id": "isletme-a", "name": "İşletme Fakültesi A Blok", "campus": "Esentepe", "isSimulated": false }
+{ "id": "bilisim-fakultesi", "name": "Bilgisayar ve Bilişim Bilimleri Fakültesi", "campus": "Esentepe", "osm": "way/1216863645", "isSimulated": false }
 ```
 
 ### `spaces/{spaceId}`
@@ -108,6 +108,7 @@ Tek aktif dönem. Dönem değişince eski dönemin `isActive=false` olur; motor 
   "kind": "CLASSROOM",              // CLASSROOM | LIBRARY | STUDY_AREA
   "accessStatus": "UNKNOWN",        // OPEN | RESTRICTED | UNKNOWN
   "dataQuality": "OK",              // OK | INCOMPLETE (varsayılan OK)
+  "osm": null, "openingHours": null, // çalışma yerleri (LIBRARY, STUDY_AREA) için OSM kaydı ve açılış saati
   "isSimulated": false
 }
 ```
@@ -166,6 +167,11 @@ Serbest metin alanı yoktur.
 Yalnızca `DEMO_MODE=true` iken yazılır ve okunur.
 
 `spaceStatus` koleksiyonu kullanılmıyor: durum her istekte son bildirimlerden hesaplanır; veri küçük, önbellek gereksiz.
+
+### Kampüs kataloğu (`src/data/campus.ts`, `data/campus/esentepe-osm.json`)
+Bina konumları ve sınırları OpenStreetMap'ten (ODbL; bkz. `docs/CAMPUS_RESEARCH.md`). `npm run seed-campus` çalışma
+yerlerini (`spaces`, kind LIBRARY/STUDY_AREA) ve bina konumlarını (`buildings.osm`) yazar. Çalışma yerlerinin ders
+programı yoktur; durumları yalnızca bildirimden gelir (taban: "Doluluk verisi yok"). Harita SVG'dir, paket kullanılmaz.
 
 ## 5. Veri hazırlama hattı
 

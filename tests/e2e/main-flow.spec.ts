@@ -32,7 +32,12 @@ test("ana sayfadan süre seçilir, sonuçlar etiket ve kaynakla listelenir", asy
   await expect(page.getByRole("listitem").filter({ hasText: "Ö-204" }).getByText("Program verisi eksik")).toBeVisible();
   // Dersi olan oda listede yok
   await expect(page.getByRole("listitem").filter({ hasText: "Ö-101" })).toHaveCount(0);
-  await expect(page.getByText("Doluluk verisi yok")).toBeVisible();
+  // Çalışma yerleri: merkez kütüphane ilk kart, diğerleri açılır listede
+  const library = page.getByRole("link", { name: /Süleyman Demirel Kütüphanesi/ });
+  await expect(library.getByText("Doluluk verisi yok")).toBeVisible();
+  await expect(library.getByText("7/24 açık (OpenStreetMap)")).toBeVisible();
+  await page.getByText(/Diğer çalışma yerleri/).click();
+  await expect(page.getByRole("link", { name: /Taş Kafe/ })).toBeVisible();
 });
 
 test("check-in diğer cihazda 5 sn içinde görünür, aynı odaya ikinci bildirim hız sınırına takılır (T18)", async ({ browser }) => {

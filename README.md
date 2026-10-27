@@ -14,7 +14,8 @@ bilinmeyen bilgi asla "boş" kabul edilmez.
 - **Güven etiketleri:** son 30 dk öğrenci bildirimleri, çelişki ve "bilgi güncel değil" durumları
 - **Check-in ve bildirim:** anonim oturum, tek dokunuş, hız sınırı (aynı oda 10 dk'da 1, saatte 20)
 - **Değerlendirme:** check-in sonrası 3 saat içinde Sessizlik / Priz / İnternet / Işık için 1-5 puan; 3 değerlendirmeden önce ortalama gösterilmez
-- **SVG kampüs/bina haritası:** her odada durum metni ve ortalama puan (harita paketi yok, şematik çizim)
+- **Gerçek kampüs haritası:** OpenStreetMap'ten 181 binanın gerçek konum ve sınırları (SVG, harita paketi yok); kat görünümünde her odada durum ve puan
+- **Çalışma yerleri:** Merkez Kütüphane, Kütüphane Ek Bina ve kampüsteki 4 kafe/kantin — açılış saati (kaynaklıysa), bildirim ve puanla
 - **Kütüphane kartı:** bildirim tabanlı; demo modunda "Örnek demo verisi" etiketli gün içi doluluk deseni
 - **Veri hazırlama hattı:** XLSX → deterministik ayrıştırma, PDF → Gemini (yapılandırılmış JSON), elle derlenmiş CSV (Plan B), Zod + kalite kuralları, insan kontrolü, yayın/geri dönüş
 
@@ -22,7 +23,9 @@ bilinmeyen bilgi asla "boş" kabul edilmez.
 
 | Konu | Durum |
 |---|---|
-| Uygunluk/güven/sıralama/değerlendirme kuralları | 107 birim testi geçiyor (T1-T27 dahil) |
+| Uygunluk/güven/sıralama/değerlendirme kuralları | 112 birim testi geçiyor (T1-T27 dahil) |
+| Kampüs konumları | OSM'den 181 bina; 43 adlı. İşletme, Siyasal, İletişim, Sağlık Bilimleri fakültelerinin binası OSM'de adlı değil |
+| SABİS ders programı | **Erişilemedi** (ağ politikası); içe aktarıcı erişim açılınca yazılacak |
 | Uçtan uca akış (arama, ayrıntı, check-in, puan, harita) | `npm run test:e2e` ile 3 Playwright senaryosu geçiyor (emulator + örnek veri); check-in diğer cihazda ≤5 sn |
 | Erişilebilirlik | axe (WCAG 2.0/2.1/2.2 AA) açık ve koyu temada 5 sayfada ihlal bulmadı; SVG metin kontrastı elle kontrol edildi |
 | Gerçek SAÜ ders programı | **Yok.** Geliştirme ortamından sakarya.edu.tr erişilemedi; belge eklenip `ingest` ile işlenmeli |
@@ -71,6 +74,7 @@ Sonra http://localhost:3000 adresini aç (dev modunda ilk API isteği derleme y�
 | `npm run test:e2e` | Playwright: production build + emulator + örnek veriyle 3 uçtan uca senaryo (Java gerekir) |
 | `npm run typecheck` / `npm run lint` | Tip kontrolü / ESLint |
 | `npm run demo:local` | Emulator + örnek veri + dev sunucusu |
+| `npm run seed-campus` | Kampüs kataloğu: çalışma yerleri + bina konumları (gerçek veri, OSM) |
 | `npm run seed-demo [-- --clear \| --only-library]` | Örnek veri yazar / yalnızca `isSimulated` kayıtları siler / yalnızca kütüphane örneği (`DEMO_MODE=true` gerekir) |
 | `npm run demo-report -- <oda> <uygun\|dolu\|kullanilamiyor\|guncel_degil> [--ago dk]` | Demo için etiketli yapay bildirim (`DEMO_MODE=true` gerekir) |
 | `npm run ingest -- <dosya> ...` | Kaynak belgeyi taslak JSON'a çevirir (`data/drafts/`) |
@@ -129,6 +133,11 @@ Bu kaynaklar `parseMethod=MANUAL` olarak yayımlanır ve kartta "ekip tarafında
 5. Demo için: `DEMO_MODE=true` ile `seed-demo`'yu üretim projesine karşı çalıştır (servis hesabıyla) ya da gerçek programı yayımla.
 
 Plan B: Vercel — aynı `NEXT_PUBLIC_*` değişkenleri + `FIREBASE_SERVICE_ACCOUNT` (tek satır JSON) + `DEMO_MODE`.
+
+## Kampüs verisi
+
+Konum verisi © OpenStreetMap katkıda bulunanlar (ODbL). Kaynaklar, doğrulananlar ve eksikler: `docs/CAMPUS_RESEARCH.md`.
+Yeniden üretmek için: `python3 -I scripts/campus/gpkg_to_json.py <sau_kampus.gpkg> data/campus/esentepe-osm.json`.
 
 ## Güvenlik ve gizlilik
 

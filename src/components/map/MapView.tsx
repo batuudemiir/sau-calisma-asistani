@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import type { RatingSummary } from "@/domain/ratings";
 import type { Status, StatusCode } from "@/domain/types";
 import { WEEKDAY_NAMES, statusTitle, time } from "@/lib/labels";
-import { campusRects, floorRows } from "@/lib/map-geometry";
+import { CAMPUS, CAMPUS_PLACES, MISSING_LOCATIONS, OSM_ATTRIBUTION, osmBuilding, osmUrl, type PlaceCategory } from "@/data/campus";
+import { floorRows, projector, toPath } from "@/lib/map-geometry";
 import { carryQuery, durationParam, useApi } from "@/lib/use-api";
 import type { MapResponse, MapSpaceDTO } from "@/server/search-service";
 import { POLL_MS } from "../ResultsView";
@@ -62,7 +64,7 @@ export function MapView() {
   const building = data?.buildings.find((b) => b.id === selected) ?? null;
   const anySimulatedRating =
     data?.buildings.some((b) => b.spaces.some((s) => shownRating(s.rating)?.simulated || isSimStatus(s))) ||
-    (data && shownRating(data.library.rating)?.simulated);
+    data?.places.some((p) => shownRating(p.rating)?.simulated || isSimStatus(p));
 
   return (
     <main className="mx-auto w-full max-w-md flex-1 space-y-4 px-4 py-6">
@@ -119,56 +121,184 @@ export function MapView() {
               <SimulatedBadge /> * işaretli puan ve bildirimler örnek demo verisidir.
             </p>
           )}
-          <p className="text-xs opacity-70">Şematik çizim, ölçekli değildir. Renk tek başına anlam taşımaz; her odada durum metni yazar.</p>
+          <p className="text-xs opacity-70">
+            {building
+              ? "Kat görünümü şematiktir, ölçekli değildir."
+              : "Bina konum ve sınırları gerçek ölçeklidir; adlar ve etiketler gönüllü haritacılardandır, eksik olabilir."}{" "}
+            Renk tek başına anlam taşımaz; her yerde durum metni yazar.
+          </p>
+          <p className="text-xs opacity-70">
+            Harita verisi{" "}
+            <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer" className="underline">
+              {OSM_ATTRIBUTION}
+            </a>
+          </p>
         </>
       )}
     </main>
   );
 }
 
+const CATEGORY_LABEL: Record<PlaceCategory, string> = {
+  FACULTY: "Fakülte / öğretim binası",
+  LAB: "Laboratuvar / araştırma merkezi",
+  LIBRARY: "Kütüphane",
+  CAFE: "Kafe / kantin",
+  OTHER: "Diğer",
+};
+
+/** Numaralı rehber: haritadaki işaret numarası = listedeki sıra. */
+const GUIDE = CAMPUS_PLACES.filter((p) => (p.category === "FACULTY" || p.category === "LAB") && osmBuilding(p.osm));
+
+// Kampüs sınırı geniş ormanlık alan içerir; harita binaların kapladığı alana kırpılır (telefonda okunur kalsın)
+const VIEW_POINTS = CAMPUS.buildings.flatMap((b) => b.outline);
+
+/** Merkez görünümü: çalışma yerleri ve derslikli binaların çevresi (~120 m pay). */
+function centerPoints(data: MapResponse): [number, number][] {
+  const centers = [...data.places.map((p) => p.osm), ...data.buildings.map((b) => b.osm)]
+    .map((o) => (o ? osmBuilding(o)?.center : null))
+    .filter((c): c is [number, number] => Boolean(c));
+  if (centers.length === 0) return VIEW_POINTS;
+  const pad = 0.0011; // ≈120 m
+  return centers.flatMap(([lat, lng]) => [
+    [lat - pad, lng - pad * 1.3],
+    [lat + pad, lng + pad * 1.3],
+  ]);
+}
+
 function CampusMap({ data, query }: { data: MapResponse; query: string }) {
-  // Kütüphane kartı her zaman "kutuphane" yerleşim anahtarını kullanır (binalar listesinde kütüphane yer almaz)
-  const ids = ["kutuphane", ...data.buildings.map((b) => b.id)];
-  const { rects, height } = campusRects(ids);
-  const libRect = rects.get(ids[0])!;
+  const [zoom, setZoom] = useState<"center" | "all">("center");
+  const { project, height } = projector(zoom === "center" ? centerPoints(data) : VIEW_POINTS, 360, 12);
+  const shape = (outline: [number, number][]) => toPath(outline.map(project));
+  const appBuildings = data.buildings.filter((b) => b.osm && osmBuilding(b.osm));
+  const appOsm = new Set(appBuildings.map((b) => b.osm));
+  const placeOsm = new Set(data.places.map((p) => p.osm).filter(Boolean));
 
   return (
-    <svg viewBox={`0 0 360 ${height}`} className="w-full" role="group" aria-label="Kampüs binaları">
-      <a href={`/spaces/${encodeURIComponent(data.library.spaceId)}?${query}`} aria-label={`${data.library.name}: ${statusTitle(data.library.status, true)}`}>
-        <rect {...rectProps(libRect)} rx="10" className={FILL[data.library.status.code]} strokeWidth="2" />
-        <text x={libRect.x + 10} y={libRect.y + 24} className="fill-current text-[13px] font-bold">
-          {data.library.name}
-        </text>
-        <text x={libRect.x + 10} y={libRect.y + 46} className="fill-current text-[11px]">
-          {statusTitle(data.library.status, true)}
-        </text>
-        <text x={libRect.x + 10} y={libRect.y + 66} className="fill-current text-[11px]">
-          {ratingText(data.library.rating)}
-        </text>
-      </a>
-      {data.buildings.map((b) => {
-        const r = rects.get(b.id)!;
-        const free = b.spaces.filter((s) => !s.excludedBecause && (s.status.code === "PROGRAM_FREE" || s.status.code === "VERIFIED_FREE")).length;
-        const verified = b.spaces.filter((s) => !s.excludedBecause && s.status.code === "VERIFIED_FREE").length;
-        return (
-          <a key={b.id} href={`/map?${query}&b=${encodeURIComponent(b.id)}`} aria-label={`${b.name}: ${free} uygun görünen oda, ${verified} öğrenci doğruladı. Odaları gör.`}>
-            <rect {...rectProps(r)} rx="10" className="fill-background stroke-current" strokeWidth="2" />
-            <text x={r.x + 10} y={r.y + 24} className="fill-current text-[13px] font-bold">
-              {b.name.length > 20 ? `${b.name.slice(0, 19)}…` : b.name}
-            </text>
-            <text x={r.x + 10} y={r.y + 46} className="fill-current text-[11px]">
-              {free} uygun görünen oda
-            </text>
-            <text x={r.x + 10} y={r.y + 64} className="fill-current text-[11px]">
-              {verified} öğrenci doğruladı
-            </text>
-            <text x={r.x + 10} y={r.y + 84} className="fill-current text-[11px] underline">
-              Odaları gör →
-            </text>
-          </a>
-        );
-      })}
-    </svg>
+    <>
+      <div className="flex gap-2" role="group" aria-label="Harita görünümü">
+        {(["center", "all"] as const).map((z) => (
+          <button
+            key={z}
+            type="button"
+            onClick={() => setZoom(z)}
+            aria-pressed={zoom === z}
+            className={`min-h-11 flex-1 rounded-lg border px-3 text-sm font-semibold ${zoom === z ? "border-current bg-foreground text-background" : "border-zinc-400"}`}
+          >
+            {z === "center" ? "Merkez" : "Tüm kampüs"}
+          </button>
+        ))}
+      </div>
+      <svg viewBox={`0 0 360 ${height}`} className="w-full overflow-hidden" role="group" aria-label="Esentepe kampüsü, gerçek bina konumları">
+        <path d={shape(CAMPUS.boundary)} className="fill-zinc-50 stroke-zinc-400 dark:fill-zinc-900 dark:stroke-zinc-600" strokeDasharray="4 3" />
+        {CAMPUS.buildings
+          .filter((b) => !appOsm.has(b.osm) && !placeOsm.has(b.osm))
+          .map((b) => (
+            <path key={b.osm} d={shape(b.outline)} className="fill-zinc-300 dark:fill-zinc-700">
+              {b.name && <title>{b.name}</title>}
+            </path>
+          ))}
+        {GUIDE.map((p, i) => {
+          const b = osmBuilding(p.osm)!;
+          const [x, y] = project(b.center);
+          return (
+            <g key={p.id} aria-hidden="true">
+              <path d={shape(b.outline)} className="fill-zinc-400 dark:fill-zinc-500" />
+              <circle cx={x} cy={y} r="6" className="fill-background stroke-current" strokeWidth="1" />
+              <text x={x} y={y + 2.6} textAnchor="middle" className="fill-current text-[7px] font-bold">
+                {i + 1}
+              </text>
+            </g>
+          );
+        })}
+        {appBuildings.map((b) => {
+          const ob = osmBuilding(b.osm!)!;
+          const [x, y] = project(ob.center);
+          const free = b.spaces.filter((s) => !s.excludedBecause && (s.status.code === "PROGRAM_FREE" || s.status.code === "VERIFIED_FREE")).length;
+          return (
+            <a key={b.id} href={`/map?${query}&b=${encodeURIComponent(b.id)}`} aria-label={`${b.name}: ${free} uygun görünen oda. Odaları gör.`}>
+              <path d={shape(ob.outline)} className={FILL.PROGRAM_FREE} strokeWidth="2" />
+              <text x={x} y={y - 9} textAnchor="middle" className="fill-current text-[9px] font-bold">
+                {free} oda
+              </text>
+            </a>
+          );
+        })}
+        {data.places
+          .filter((p) => p.osm && osmBuilding(p.osm))
+          .map((p) => {
+            const ob = osmBuilding(p.osm!)!;
+            const [x, y] = project(ob.center);
+            return (
+              <a key={p.spaceId} href={`/spaces/${encodeURIComponent(p.spaceId)}?${query}`} aria-label={`${p.name}: ${statusTitle(p.status, true)}`}>
+                <path d={shape(ob.outline)} className={FILL[p.status.code]} strokeWidth="1.5" />
+                <circle cx={x} cy={y} r="8.5" className={FILL[p.status.code]} strokeWidth="1.5" />
+                <text x={x} y={y + 3.5} textAnchor="middle" className="fill-current text-[10px] font-bold">
+                  {p.kind === "LIBRARY" ? "K" : "C"}
+                </text>
+              </a>
+            );
+          })}
+      </svg>
+      <p className="text-xs">
+        <strong>K</strong> kütüphane · <strong>C</strong> kafe/kantin · mavi çerçeve: derslikleri uygulamada olan bina · numaralar aşağıdaki rehberde
+      </p>
+
+      <section aria-labelledby="study-title" className="space-y-1">
+        <h2 id="study-title" className="font-bold">
+          Çalışma yerleri
+        </h2>
+        <ul className="space-y-1 text-sm">
+          {data.places.map((p) => (
+            <li key={p.spaceId}>
+              <a href={`/spaces/${encodeURIComponent(p.spaceId)}?${query}`} className="inline-flex min-h-11 items-center gap-2 underline">
+                {p.kind === "LIBRARY" ? "K" : "C"} · {p.name} — {statusTitle(p.status, true)}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {data.buildings.some((b) => !b.osm || !osmBuilding(b.osm)) && (
+        <section aria-labelledby="nolocation-title" className="space-y-1">
+          <h2 id="nolocation-title" className="font-bold">
+            Konumu haritada olmayan binalar
+          </h2>
+          <ul className="text-sm">
+            {data.buildings
+              .filter((b) => !b.osm || !osmBuilding(b.osm))
+              .map((b) => (
+                <li key={b.id}>
+                  <a href={`/map?${query}&b=${encodeURIComponent(b.id)}`} className="inline-flex min-h-11 items-center underline">
+                    {b.name} — odaları gör
+                  </a>
+                </li>
+              ))}
+          </ul>
+        </section>
+      )}
+
+      <details className="rounded-lg border border-zinc-300 p-3 text-sm dark:border-zinc-700">
+        <summary className="min-h-11 cursor-pointer content-center font-semibold">Kampüs rehberi (numaralı binalar)</summary>
+        <ol className="mt-2 list-decimal space-y-1 pl-6">
+          {GUIDE.map((p) => (
+            <li key={p.id}>
+              <a href={osmUrl(p.osm)} target="_blank" rel="noreferrer" className="underline">
+                {p.name}
+              </a>
+              <span className="opacity-70">
+                {" "}
+                · {CATEGORY_LABEL[p.category]}
+                {p.operator ? ` · ${p.operator}` : ""}
+              </span>
+            </li>
+          ))}
+        </ol>
+        <p className="mt-2 text-xs opacity-80">
+          Konumu açık kaynakta bulunamayanlar (haritada gösterilmez): {MISSING_LOCATIONS.join("; ")}.
+        </p>
+      </details>
+    </>
   );
 }
 
@@ -233,4 +363,3 @@ function BuildingMap({ spaces, query }: { spaces: MapSpaceDTO[]; query: string }
   );
 }
 
-const rectProps = (r: { x: number; y: number; w: number; h: number }) => ({ x: r.x, y: r.y, width: r.w, height: r.h });

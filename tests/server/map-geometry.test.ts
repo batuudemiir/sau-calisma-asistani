@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { campusRects, floorOf, floorRows } from "../../src/lib/map-geometry";
+import { floorOf, floorRows } from "../../src/lib/map-geometry";
 
 describe("harita geometrisi", () => {
   it("kat: ilk rakam", () => {
@@ -17,17 +17,26 @@ describe("harita geometrisi", () => {
       [null, ["Amfi"]],
     ]);
   });
+});
 
-  it("çizilmiş yerleşim korunur, bilinmeyen binalar çakışmadan boş hücrelere yerleşir", () => {
-    const ids = ["kutuphane", "isletme-a", "demo-blok", "yeni-1", "yeni-2", "yeni-3", "yeni-4"];
-    const { rects, height } = campusRects(ids);
-    expect(rects.get("kutuphane")).toEqual({ x: 20, y: 20, w: 150, h: 95 });
-    const all = ids.map((id) => rects.get(id)!);
-    for (let i = 0; i < all.length; i++)
-      for (let j = i + 1; j < all.length; j++) {
-        const [a, b] = [all[i], all[j]];
-        expect(a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h).toBe(false);
-      }
-    expect(height).toBeGreaterThanOrEqual(Math.max(...all.map((r) => r.y + r.h)));
+describe("izdüşüm", () => {
+  it("kuzey yukarıda, doğu sağda; genişliğe sığar; ölçek kampüs boyutunda makul", async () => {
+    const { projector } = await import("../../src/lib/map-geometry");
+    const { CAMPUS } = await import("../../src/data/campus");
+    const { project, height, metersPerUnit } = projector(CAMPUS.boundary, 360);
+    const north = project([40.748, 30.33]);
+    const south = project([40.736, 30.33]);
+    const east = project([40.74, 30.34]);
+    const west = project([40.74, 30.322]);
+    expect(north[1]).toBeLessThan(south[1]);
+    expect(east[0]).toBeGreaterThan(west[0]);
+    for (const p of CAMPUS.boundary.map(project)) {
+      expect(p[0]).toBeGreaterThanOrEqual(0);
+      expect(p[0]).toBeLessThanOrEqual(360);
+      expect(p[1]).toBeLessThanOrEqual(height);
+    }
+    // ~1,6 km genişlik / 344 birim ≈ 4-5 m
+    expect(metersPerUnit).toBeGreaterThan(3);
+    expect(metersPerUnit).toBeLessThan(6);
   });
 });

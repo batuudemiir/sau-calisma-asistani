@@ -5,6 +5,8 @@ import { useParams, useSearchParams } from "next/navigation";
 import { LIBRARY_LEVEL_LABELS, REPORT_LABELS, WEEKDAY_NAMES, ago, time } from "@/lib/labels";
 import { carryQuery, useApi } from "@/lib/use-api";
 import type { SpaceDetailResponse } from "@/server/search-service";
+import { placeById, osmUrl } from "@/data/campus";
+import { openingHoursText } from "./PlaceCard";
 import { RatingForm, RatingSummaryView } from "./Ratings";
 import { ReportButtons } from "./ReportButtons";
 import { POLL_MS } from "./ResultsView";
@@ -33,7 +35,8 @@ export function SpaceView() {
   const { data, error, loading, reload } = useApi<SpaceDetailResponse>(`/api/spaces/${encodeURIComponent(id)}?${query}`, POLL_MS);
 
   const s = data?.space;
-  const isLibrary = s?.kind === "LIBRARY";
+  // Kütüphane ve çalışma alanlarının ders programı yok; durum yalnızca bildirimden
+  const isLibrary = s?.kind === "LIBRARY" || s?.kind === "STUDY_AREA";
 
   return (
     <main className="mx-auto w-full max-w-md flex-1 space-y-5 px-4 py-6">
@@ -77,6 +80,8 @@ export function SpaceView() {
               <SimulatedBadge />
             </p>
           )}
+
+          {data.place && <PlaceInfo spaceId={s.spaceId} openingHours={data.place.openingHours} osm={data.place.osm} />}
 
           {!isLibrary && (
             <section aria-labelledby="today-title" className="space-y-2">
@@ -134,5 +139,35 @@ export function SpaceView() {
         </>
       )}
     </main>
+  );
+}
+
+function PlaceInfo({ spaceId, openingHours, osm }: { spaceId: string; openingHours: string | null; osm: string | null }) {
+  const facts = placeById(spaceId)?.facts ?? [];
+  return (
+    <section aria-labelledby="place-title" className="space-y-2 text-sm">
+      <h2 id="place-title" className="text-lg font-bold">
+        Bu yer hakkında
+      </h2>
+      <p>{openingHoursText(openingHours) ?? "Açılış saatleri bilinmiyor."}</p>
+      <p className="opacity-80">Doluluk yalnızca öğrenci bildirimleriyle bilinir; ölçüm yoktur.</p>
+      {facts.length > 0 && (
+        <ul className="list-disc space-y-1 pl-5">
+          {facts.map((f) => (
+            <li key={f.text}>
+              {f.text}{" "}
+              <a href={f.source} target="_blank" rel="noreferrer" className="underline">
+                (kaynak)
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+      {osm && (
+        <a href={osmUrl(osm)} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center underline">
+          Konumu OpenStreetMap&apos;te aç
+        </a>
+      )}
+    </section>
   );
 }

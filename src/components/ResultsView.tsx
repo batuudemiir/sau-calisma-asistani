@@ -6,7 +6,7 @@ import { DURATIONS } from "@/domain/config";
 import { WEEKDAY_NAMES, time } from "@/lib/labels";
 import { carryQuery, durationParam, useApi } from "@/lib/use-api";
 import type { SearchResponse } from "@/server/search-service";
-import { LibraryCard } from "./LibraryCard";
+import { PlaceCard } from "./PlaceCard";
 import { SpaceCard } from "./SpaceCard";
 
 export const POLL_MS = 4000;
@@ -60,11 +60,27 @@ export function ResultsView() {
 
       {data && (
         <>
-          <LibraryCard
-            lib={data.library}
-            href={`/spaces/${encodeURIComponent(data.library.spaceId)}?${query}`}
-            nowMs={data.now.nowMs}
-          />
+          <section aria-labelledby="places-title" className="space-y-3">
+            <h2 id="places-title" className="sr-only">
+              Çalışma yerleri
+            </h2>
+            <PlaceCard place={data.places[0]} href={`/spaces/${encodeURIComponent(data.places[0].spaceId)}?${query}`} nowMs={data.now.nowMs} />
+            {data.places.length > 1 && (
+              <details className="rounded-xl border border-zinc-300 p-3 dark:border-zinc-700">
+                <summary className="min-h-11 cursor-pointer content-center font-semibold">
+                  Diğer çalışma yerleri ({data.places.length - 1}) — kütüphane ek bina, kafeler
+                </summary>
+                <ul className="mt-2 space-y-2">
+                  {data.places.slice(1).map((p) => (
+                    <li key={p.spaceId}>
+                      <PlaceCard place={p} href={`/spaces/${encodeURIComponent(p.spaceId)}?${query}`} nowMs={data.now.nowMs} compact />
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            )}
+          </section>
+          <h2 className="text-lg font-bold">Derslikler</h2>
           {data.results.length === 0 ? (
             <p className="rounded-lg border border-zinc-400 p-4">
               Bu süre için programda uygun görünen derslik yok. Daha kısa bir süre deneyebilirsin.

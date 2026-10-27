@@ -43,20 +43,37 @@ describe("runSearch", () => {
 
   it("kütüphane kaydı yoksa varsayılan kart: Doluluk verisi yok", async () => {
     const res = await runSearch(fakeSource(data()), opts);
-    expect(res.library).toMatchObject({ spaceId: DEFAULT_LIBRARY.id, status: { code: "UNKNOWN", reason: "NO_SOURCE" }, simulation: null });
+    expect(res.places[0]).toMatchObject({ spaceId: DEFAULT_LIBRARY.id, status: { code: "UNKNOWN", reason: "NO_SOURCE" }, simulation: null });
+  });
+
+  it("çalışma yerleri: kütüphane ilk sırada, kafeler alfabetik; derslik listesine girmez; bildirim kendi etiketini değiştirir", async () => {
+    const cafe = { ...space("Taş Kafe"), id: "tas-kafe", kind: "STUDY_AREA" as const, openingHours: null, osm: "way/389850270" };
+    const kantin = { ...space("Kantin"), id: "kantin", kind: "STUDY_AREA" as const };
+    const d = data({ spaces: [A201, cafe, kantin, LIBRARY], reports: [report(cafe, "BUSY", 2, opts.nowMs)] });
+    const res = await runSearch(fakeSource(d), opts);
+    expect(res.places.map((p) => [p.spaceId, p.status.code])).toEqual([
+      [LIBRARY.id, "UNKNOWN"],
+      ["kantin", "UNKNOWN"],
+      ["tas-kafe", "REPORTED_BUSY"],
+    ]);
+    expect(res.places[2]).toMatchObject({ osm: "way/389850270", simulation: null });
+    expect(res.results.map((r) => r.code)).toEqual(["A201"]);
+    const detail = await spaceDetail(fakeSource(d), "tas-kafe", opts);
+    expect(detail?.place).toEqual({ openingHours: null, osm: "way/389850270" });
+    expect(detail?.today).toEqual([]);
   });
 
   it("simülasyon yalnızca demo modunda okunur", async () => {
     const simulation = { level: "BUSY" as const, updatedAtMs: opts.nowMs, isSimulated: true as const };
     const d = data({ spaces: [A201, LIBRARY], simulation });
-    expect((await runSearch(fakeSource(d), opts)).library.simulation).toBeNull();
-    expect((await runSearch(fakeSource(d), { ...opts, demoMode: true })).library).toMatchObject({ spaceId: LIBRARY.id, simulation });
+    expect((await runSearch(fakeSource(d), opts)).places[0].simulation).toBeNull();
+    expect((await runSearch(fakeSource(d), { ...opts, demoMode: true })).places[0]).toMatchObject({ spaceId: LIBRARY.id, simulation });
   });
 
   it("DAILY desenli simülasyon program saatine göre seviye verir", async () => {
     const d = data({ spaces: [A201, LIBRARY], simulation: { level: "LOW", pattern: "DAILY", updatedAtMs: 0, isSimulated: true } });
     const res = await runSearch(fakeSource(d), { ...opts, demoMode: true });
-    expect(res.library.simulation).toMatchObject({ level: "BUSY", isSimulated: true });
+    expect(res.places[0].simulation).toMatchObject({ level: "BUSY", isSimulated: true });
   });
 
   it("bildirim etiketi değiştirir", async () => {
@@ -153,6 +170,6 @@ describe("mapView", () => {
       ["A202", "PROGRAM_FREE", "CLASS_CONFLICT"],
       ["A203", "UNKNOWN", null],
     ]);
-    expect(res.library.spaceId).toBe(LIBRARY.id);
+    expect(res.places[0].spaceId).toBe(LIBRARY.id);
   });
 });
