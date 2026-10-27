@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server";
-import { firestoreSource } from "@/server/firestore-source";
+import { sharedSource } from "@/server/firestore-source";
 import { isDemoMode, parseQuery } from "@/server/request";
 import { mapView } from "@/server/search-service";
 
@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
   if (!q.ok) return Response.json({ error: q.error }, { status: 400 });
 
   try {
-    const body = await mapView(firestoreSource(), { ...q, demoMode });
+    const body = await mapView(sharedSource(), { ...q, demoMode });
     return Response.json(body, { headers: { "Cache-Control": "no-store" } });
   } catch (e) {
     console.error("map failed:", e instanceof Error ? e.message : "unknown");

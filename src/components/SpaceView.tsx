@@ -16,9 +16,18 @@ const EXCLUDED_TEXT = {
   CLASS_CONFLICT: "Seçilen süre içinde (10 dk geçiş payıyla) programda ders var.",
 } as const;
 
+function safeDecode(s: string) {
+  try {
+    return decodeURIComponent(s);
+  } catch {
+    return s; // bozuk kodlama: olduğu gibi gönder, API "bulunamadı" der
+  }
+}
+
 export function SpaceView() {
   // useParams kodlanmış değeri döndürür ("Ö" → "%C3%96"); tekrar kodlamamak için önce çöz.
-  const id = decodeURIComponent(useParams<{ id: string }>().id);
+  const rawId = useParams<{ id: string }>().id;
+  const id = safeDecode(rawId);
   const params = useSearchParams();
   const query = carryQuery(params);
   const { data, error, loading, reload } = useApi<SpaceDetailResponse>(`/api/spaces/${encodeURIComponent(id)}?${query}`, POLL_MS);

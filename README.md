@@ -88,6 +88,7 @@ Sonra http://localhost:3000 adresini aç (dev modunda ilk API isteği derleme y�
 3. Listeyi kaynak belgeyle **elle** karşılaştır.
 4. Yayımla: `npm run publish-schedule -- data/drafts/<id>.json --reviewed-by <ad> --building-name "İşletme Fakültesi A Blok"`
    (`needsReview` kayıtlar yayımlanmaz; bu kayıtların odası "Program verisi eksik" görünür.)
+   Sunucu program verisini 60 sn önbellekte tuttuğu için yeni yayın en geç 1 dakika içinde görünür.
 
 ### Plan B: belge bulunamazsa elle derlenmiş program
 

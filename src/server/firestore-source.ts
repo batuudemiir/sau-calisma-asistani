@@ -3,6 +3,7 @@ import "server-only";
 import { Timestamp, type Firestore } from "firebase-admin/firestore";
 import type { Rating } from "@/domain/ratings";
 import type { Building, LibrarySimulation, ScheduleBlock, Space, SpaceReport, Term } from "@/domain/types";
+import { cachedSource } from "./cached-source";
 import type { DataSource, SourceSummary } from "./data-source";
 import { adminDb } from "./firebase-admin";
 
@@ -75,4 +76,12 @@ export function firestoreSource(db: Firestore = adminDb()): DataSource {
       });
     },
   };
+}
+
+let shared: DataSource | null = null;
+
+/** Route handler'ların kullandığı, statik veriyi önbelleğe alan tekil kaynak (sunucu örneği başına). */
+export function sharedSource(): DataSource {
+  shared ??= cachedSource(firestoreSource());
+  return shared;
 }
