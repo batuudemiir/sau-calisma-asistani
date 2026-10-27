@@ -6,7 +6,15 @@ import { useSearchParams } from "next/navigation";
 import type { RatingSummary } from "@/domain/ratings";
 import type { Status, StatusCode } from "@/domain/types";
 import { WEEKDAY_NAMES, statusTitle, time } from "@/lib/labels";
-import { CAMPUS, CAMPUS_PLACES, MISSING_LOCATIONS, OSM_ATTRIBUTION, osmBuilding, osmUrl, type PlaceCategory } from "@/data/campus";
+import {
+  CAMPUS,
+  CAMPUS_PLACES,
+  MISSING_LOCATIONS,
+  OSM_ATTRIBUTION,
+  osmBuilding,
+  osmUrl,
+  type PlaceCategory,
+} from "@/data/campus";
 import { floorRows, projector, toPath } from "@/lib/map-geometry";
 import { carryQuery, durationParam, useApi } from "@/lib/use-api";
 import type { MapResponse, MapSpaceDTO } from "@/server/search-service";
@@ -32,7 +40,8 @@ const FILL: Record<Tone, string> = {
 };
 
 const toneOf = (s: MapSpaceDTO): Tone => (s.excludedBecause ? "EXCLUDED" : s.status.code);
-const isSimStatus = (s: { status: Status; excludedBecause?: unknown }) => !s.excludedBecause && "simulated" in s.status && s.status.simulated === true;
+const isSimStatus = (s: { status: Status; excludedBecause?: unknown }) =>
+  !s.excludedBecause && "simulated" in s.status && s.status.simulated === true;
 
 /** Haritada gösterilecek puan: gerçek yeterliyse o, değilse (demo) simüle; ikisi de yoksa null. */
 function shownRating(r: { real: RatingSummary; simulated: RatingSummary }) {
@@ -67,7 +76,7 @@ export function MapView() {
     data?.places.some((p) => shownRating(p.rating)?.simulated || isSimStatus(p));
 
   return (
-    <main className="mx-auto w-full max-w-md flex-1 space-y-4 px-4 py-6">
+    <main className="mx-auto w-full max-w-md flex-1 space-y-4 px-4 py-6 lg:max-w-6xl lg:px-8 lg:py-10">
       <nav className="flex justify-between text-sm">
         {building ? (
           <Link href={`/map?${query}`} className="inline-flex min-h-11 items-center underline">
@@ -109,7 +118,16 @@ export function MapView() {
             {(Object.keys(SHORT) as Tone[]).map((t) => (
               <li key={t} className="flex items-center gap-1.5">
                 <svg width="14" height="14" aria-hidden="true">
-                  <rect x="1" y="1" width="12" height="12" rx="2" className={FILL[t]} strokeWidth="1.5" strokeDasharray={t === "EXCLUDED" ? "3 2" : undefined} />
+                  <rect
+                    x="1"
+                    y="1"
+                    width="12"
+                    height="12"
+                    rx="2"
+                    className={FILL[t]}
+                    strokeWidth="1.5"
+                    strokeDasharray={t === "EXCLUDED" ? "3 2" : undefined}
+                  />
                 </svg>
                 {SHORT[t]}
               </li>
@@ -175,130 +193,160 @@ function CampusMap({ data, query }: { data: MapResponse; query: string }) {
   const placeOsm = new Set(data.places.map((p) => p.osm).filter(Boolean));
 
   return (
-    <>
-      <div className="flex gap-2" role="group" aria-label="Harita görünümü">
-        {(["center", "all"] as const).map((z) => (
-          <button
-            key={z}
-            type="button"
-            onClick={() => setZoom(z)}
-            aria-pressed={zoom === z}
-            className={`min-h-11 flex-1 rounded-lg border px-3 text-sm font-semibold ${zoom === z ? "border-current bg-foreground text-background" : "border-zinc-400"}`}
-          >
-            {z === "center" ? "Merkez" : "Tüm kampüs"}
-          </button>
-        ))}
-      </div>
-      <svg viewBox={`0 0 360 ${height}`} className="w-full overflow-hidden" role="group" aria-label="Esentepe kampüsü, gerçek bina konumları">
-        <path d={shape(CAMPUS.boundary)} className="fill-zinc-50 stroke-zinc-400 dark:fill-zinc-900 dark:stroke-zinc-600" strokeDasharray="4 3" />
-        {CAMPUS.buildings
-          .filter((b) => !appOsm.has(b.osm) && !placeOsm.has(b.osm))
-          .map((b) => (
-            <path key={b.osm} d={shape(b.outline)} className="fill-zinc-300 dark:fill-zinc-700">
-              {b.name && <title>{b.name}</title>}
-            </path>
+    <div className="space-y-4 lg:grid lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start lg:gap-8 lg:space-y-0">
+      <div className="space-y-3">
+        <div className="flex gap-2 lg:max-w-sm" role="group" aria-label="Harita görünümü">
+          {(["center", "all"] as const).map((z) => (
+            <button
+              key={z}
+              type="button"
+              onClick={() => setZoom(z)}
+              aria-pressed={zoom === z}
+              className={`min-h-11 flex-1 rounded-lg border px-3 text-sm font-semibold ${zoom === z ? "border-current bg-foreground text-background" : "border-zinc-400"}`}
+            >
+              {z === "center" ? "Merkez" : "Tüm kampüs"}
+            </button>
           ))}
-        {GUIDE.map((p, i) => {
-          const b = osmBuilding(p.osm)!;
-          const [x, y] = project(b.center);
-          return (
-            <g key={p.id} aria-hidden="true">
-              <path d={shape(b.outline)} className="fill-zinc-400 dark:fill-zinc-500" />
-              <circle cx={x} cy={y} r="6" className="fill-background stroke-current" strokeWidth="1" />
-              <text x={x} y={y + 2.6} textAnchor="middle" className="fill-current text-[7px] font-bold">
-                {i + 1}
-              </text>
-            </g>
-          );
-        })}
-        {appBuildings.map((b) => {
-          const ob = osmBuilding(b.osm!)!;
-          const [x, y] = project(ob.center);
-          const free = b.spaces.filter((s) => !s.excludedBecause && (s.status.code === "PROGRAM_FREE" || s.status.code === "VERIFIED_FREE")).length;
-          return (
-            <a key={b.id} href={`/map?${query}&b=${encodeURIComponent(b.id)}`} aria-label={`${b.name}: ${free} uygun görünen oda. Odaları gör.`}>
-              <path d={shape(ob.outline)} className={FILL.PROGRAM_FREE} strokeWidth="2" />
-              <text x={x} y={y - 9} textAnchor="middle" className="fill-current text-[9px] font-bold">
-                {free} oda
-              </text>
-            </a>
-          );
-        })}
-        {data.places
-          .filter((p) => p.osm && osmBuilding(p.osm))
-          .map((p) => {
-            const ob = osmBuilding(p.osm!)!;
-            const [x, y] = project(ob.center);
+        </div>
+        <svg
+          viewBox={`0 0 360 ${height}`}
+          className="w-full overflow-hidden"
+          role="group"
+          aria-label="Esentepe kampüsü, gerçek bina konumları"
+        >
+          <path
+            d={shape(CAMPUS.boundary)}
+            className="fill-zinc-50 stroke-zinc-400 dark:fill-zinc-900 dark:stroke-zinc-600"
+            strokeDasharray="4 3"
+          />
+          {CAMPUS.buildings
+            .filter((b) => !appOsm.has(b.osm) && !placeOsm.has(b.osm))
+            .map((b) => (
+              <path key={b.osm} d={shape(b.outline)} className="fill-zinc-300 dark:fill-zinc-700">
+                {b.name && <title>{b.name}</title>}
+              </path>
+            ))}
+          {GUIDE.map((p, i) => {
+            const b = osmBuilding(p.osm)!;
+            const [x, y] = project(b.center);
             return (
-              <a key={p.spaceId} href={`/spaces/${encodeURIComponent(p.spaceId)}?${query}`} aria-label={`${p.name}: ${statusTitle(p.status, true)}`}>
-                <path d={shape(ob.outline)} className={FILL[p.status.code]} strokeWidth="1.5" />
-                <circle cx={x} cy={y} r="8.5" className={FILL[p.status.code]} strokeWidth="1.5" />
-                <text x={x} y={y + 3.5} textAnchor="middle" className="fill-current text-[10px] font-bold">
-                  {p.kind === "LIBRARY" ? "K" : "C"}
+              <g key={p.id} aria-hidden="true">
+                <path d={shape(b.outline)} className="fill-zinc-400 dark:fill-zinc-500" />
+                <circle cx={x} cy={y} r="6" className="fill-background stroke-current" strokeWidth="1" />
+                <text x={x} y={y + 2.6} textAnchor="middle" className="fill-current text-[7px] font-bold">
+                  {i + 1}
+                </text>
+              </g>
+            );
+          })}
+          {appBuildings.map((b) => {
+            const ob = osmBuilding(b.osm!)!;
+            const [x, y] = project(ob.center);
+            const free = b.spaces.filter(
+              (s) => !s.excludedBecause && (s.status.code === "PROGRAM_FREE" || s.status.code === "VERIFIED_FREE"),
+            ).length;
+            return (
+              <a
+                key={b.id}
+                href={`/map?${query}&b=${encodeURIComponent(b.id)}`}
+                aria-label={`${b.name}: ${free} uygun görünen oda. Odaları gör.`}
+              >
+                <path d={shape(ob.outline)} className={FILL.PROGRAM_FREE} strokeWidth="2" />
+                <text x={x} y={y - 9} textAnchor="middle" className="fill-current text-[9px] font-bold">
+                  {free} oda
                 </text>
               </a>
             );
           })}
-      </svg>
-      <p className="text-xs">
-        <strong>K</strong> kütüphane · <strong>C</strong> kafe/kantin · mavi çerçeve: derslikleri uygulamada olan bina · numaralar aşağıdaki rehberde
-      </p>
+          {data.places
+            .filter((p) => p.osm && osmBuilding(p.osm))
+            .map((p) => {
+              const ob = osmBuilding(p.osm!)!;
+              const [x, y] = project(ob.center);
+              return (
+                <a
+                  key={p.spaceId}
+                  href={`/spaces/${encodeURIComponent(p.spaceId)}?${query}`}
+                  aria-label={`${p.name}: ${statusTitle(p.status, true)}`}
+                >
+                  <path d={shape(ob.outline)} className={FILL[p.status.code]} strokeWidth="1.5" />
+                  <circle cx={x} cy={y} r="8.5" className={FILL[p.status.code]} strokeWidth="1.5" />
+                  <text x={x} y={y + 3.5} textAnchor="middle" className="fill-current text-[10px] font-bold">
+                    {p.kind === "LIBRARY" ? "K" : "C"}
+                  </text>
+                </a>
+              );
+            })}
+        </svg>
+        <p className="text-xs">
+          <strong>K</strong> kütüphane · <strong>C</strong> kafe/kantin · mavi çerçeve: derslikleri uygulamada olan bina ·
+          numaralar aşağıdaki rehberde
+        </p>
+      </div>
 
-      <section aria-labelledby="study-title" className="space-y-1">
-        <h2 id="study-title" className="font-bold">
-          Çalışma yerleri
-        </h2>
-        <ul className="space-y-1 text-sm">
-          {data.places.map((p) => (
-            <li key={p.spaceId}>
-              <a href={`/spaces/${encodeURIComponent(p.spaceId)}?${query}`} className="inline-flex min-h-11 items-center gap-2 underline">
-                {p.kind === "LIBRARY" ? "K" : "C"} · {p.name} — {statusTitle(p.status, true)}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      {data.buildings.some((b) => !b.osm || !osmBuilding(b.osm)) && (
-        <section aria-labelledby="nolocation-title" className="space-y-1">
-          <h2 id="nolocation-title" className="font-bold">
-            Konumu haritada olmayan binalar
+      <div className="space-y-4">
+        <section aria-labelledby="study-title" className="space-y-1">
+          <h2 id="study-title" className="font-bold">
+            Çalışma yerleri
           </h2>
-          <ul className="text-sm">
-            {data.buildings
-              .filter((b) => !b.osm || !osmBuilding(b.osm))
-              .map((b) => (
-                <li key={b.id}>
-                  <a href={`/map?${query}&b=${encodeURIComponent(b.id)}`} className="inline-flex min-h-11 items-center underline">
-                    {b.name} — odaları gör
-                  </a>
-                </li>
-              ))}
+          <ul className="space-y-1 text-sm">
+            {data.places.map((p) => (
+              <li key={p.spaceId}>
+                <a
+                  href={`/spaces/${encodeURIComponent(p.spaceId)}?${query}`}
+                  className="inline-flex min-h-11 items-center gap-2 underline"
+                >
+                  {p.kind === "LIBRARY" ? "K" : "C"} · {p.name} — {statusTitle(p.status, true)}
+                </a>
+              </li>
+            ))}
           </ul>
         </section>
-      )}
 
-      <details className="rounded-lg border border-zinc-300 p-3 text-sm dark:border-zinc-700">
-        <summary className="min-h-11 cursor-pointer content-center font-semibold">Kampüs rehberi (numaralı binalar)</summary>
-        <ol className="mt-2 list-decimal space-y-1 pl-6">
-          {GUIDE.map((p) => (
-            <li key={p.id}>
-              <a href={osmUrl(p.osm)} target="_blank" rel="noreferrer" className="underline">
-                {p.name}
-              </a>
-              <span className="opacity-70">
-                {" "}
-                · {CATEGORY_LABEL[p.category]}
-                {p.operator ? ` · ${p.operator}` : ""}
-              </span>
-            </li>
-          ))}
-        </ol>
-        <p className="mt-2 text-xs opacity-80">
-          Konumu açık kaynakta bulunamayanlar (haritada gösterilmez): {MISSING_LOCATIONS.join("; ")}.
-        </p>
-      </details>
-    </>
+        {data.buildings.some((b) => !b.osm || !osmBuilding(b.osm)) && (
+          <section aria-labelledby="nolocation-title" className="space-y-1">
+            <h2 id="nolocation-title" className="font-bold">
+              Konumu haritada olmayan binalar
+            </h2>
+            <ul className="text-sm">
+              {data.buildings
+                .filter((b) => !b.osm || !osmBuilding(b.osm))
+                .map((b) => (
+                  <li key={b.id}>
+                    <a
+                      href={`/map?${query}&b=${encodeURIComponent(b.id)}`}
+                      className="inline-flex min-h-11 items-center underline"
+                    >
+                      {b.name} — odaları gör
+                    </a>
+                  </li>
+                ))}
+            </ul>
+          </section>
+        )}
+
+        <details className="rounded-lg border border-zinc-300 p-3 text-sm dark:border-zinc-700">
+          <summary className="min-h-11 cursor-pointer content-center font-semibold">Kampüs rehberi (numaralı binalar)</summary>
+          <ol className="mt-2 list-decimal space-y-1 pl-6">
+            {GUIDE.map((p) => (
+              <li key={p.id}>
+                <a href={osmUrl(p.osm)} target="_blank" rel="noreferrer" className="underline">
+                  {p.name}
+                </a>
+                <span className="opacity-70">
+                  {" "}
+                  · {CATEGORY_LABEL[p.category]}
+                  {p.operator ? ` · ${p.operator}` : ""}
+                </span>
+              </li>
+            ))}
+          </ol>
+          <p className="mt-2 text-xs opacity-80">
+            Konumu açık kaynakta bulunamayanlar (haritada gösterilmez): {MISSING_LOCATIONS.join("; ")}.
+          </p>
+        </details>
+      </div>
+    </div>
   );
 }
 
@@ -315,7 +363,7 @@ function BuildingMap({ spaces, query }: { spaces: MapSpaceDTO[]; query: string }
   if (spaces.length === 0) return <p className="text-sm">Bu binada kayıtlı oda yok.</p>;
 
   return (
-    <svg viewBox={`0 0 ${W} ${height}`} className="w-full" role="group" aria-label="Bina odaları, katlara göre">
+    <svg viewBox={`0 0 ${W} ${height}`} className="w-full lg:max-w-3xl" role="group" aria-label="Bina odaları, katlara göre">
       {rows.map((row, ri) => {
         const y0 = ri * rowH + 4;
         return (
@@ -362,4 +410,3 @@ function BuildingMap({ spaces, query }: { spaces: MapSpaceDTO[]; query: string }
     </svg>
   );
 }
-

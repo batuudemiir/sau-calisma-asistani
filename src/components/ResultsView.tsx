@@ -18,13 +18,13 @@ export function ResultsView() {
   const d = durationParam(params);
 
   return (
-    <main className="mx-auto w-full max-w-md flex-1 space-y-5 px-4 py-6">
+    <main className="mx-auto w-full max-w-md flex-1 space-y-5 px-4 py-6 lg:max-w-6xl lg:px-8 lg:py-10">
       <header className="space-y-3">
         <Link href="/" className="inline-flex min-h-11 items-center text-sm underline">
           ← Başa dön
         </Link>
         <h1 className="text-2xl font-bold">{d} dakika çalışabileceğin yerler</h1>
-        <nav aria-label="Süreyi değiştir" className="flex gap-2">
+        <nav aria-label="Süreyi değiştir" className="flex gap-2 lg:max-w-xl">
           {DURATIONS.map((x) => (
             <Link
               key={x}
@@ -59,12 +59,17 @@ export function ResultsView() {
       )}
 
       {data && (
-        <>
-          <section aria-labelledby="places-title" className="space-y-3">
+        // Telefonda tek sütun; geniş ekranda solda çalışma yerleri (kaydırırken sabit), sağda derslikler
+        <div className="space-y-5 lg:grid lg:grid-cols-[22rem_minmax(0,1fr)] lg:items-start lg:gap-8 lg:space-y-0">
+          <section aria-labelledby="places-title" className="space-y-3 lg:sticky lg:top-6">
             <h2 id="places-title" className="sr-only">
               Çalışma yerleri
             </h2>
-            <PlaceCard place={data.places[0]} href={`/spaces/${encodeURIComponent(data.places[0].spaceId)}?${query}`} nowMs={data.now.nowMs} />
+            <PlaceCard
+              place={data.places[0]}
+              href={`/spaces/${encodeURIComponent(data.places[0].spaceId)}?${query}`}
+              nowMs={data.now.nowMs}
+            />
             {data.places.length > 1 && (
               <details className="rounded-xl border border-zinc-300 p-3 dark:border-zinc-700">
                 <summary className="min-h-11 cursor-pointer content-center font-semibold">
@@ -73,31 +78,38 @@ export function ResultsView() {
                 <ul className="mt-2 space-y-2">
                   {data.places.slice(1).map((p) => (
                     <li key={p.spaceId}>
-                      <PlaceCard place={p} href={`/spaces/${encodeURIComponent(p.spaceId)}?${query}`} nowMs={data.now.nowMs} compact />
+                      <PlaceCard
+                        place={p}
+                        href={`/spaces/${encodeURIComponent(p.spaceId)}?${query}`}
+                        nowMs={data.now.nowMs}
+                        compact
+                      />
                     </li>
                   ))}
                 </ul>
               </details>
             )}
           </section>
-          <h2 className="text-lg font-bold">Derslikler</h2>
-          {data.results.length === 0 ? (
-            <p className="rounded-lg border border-zinc-400 p-4">
-              Bu süre için programda uygun görünen derslik yok. Daha kısa bir süre deneyebilirsin.
-              {data.now.minute + d > 1320 && " Bina kapanış saatine (22.00) yakın olabilir."}
+          <div className="space-y-4">
+            <h2 className="text-lg font-bold lg:text-xl">Derslikler</h2>
+            {data.results.length === 0 ? (
+              <p className="rounded-lg border border-zinc-400 p-4">
+                Bu süre için programda uygun görünen derslik yok. Daha kısa bir süre deneyebilirsin.
+                {data.now.minute + d > 1320 && " Bina kapanış saatine (22.00) yakın olabilir."}
+              </p>
+            ) : (
+              <ul className="space-y-3 xl:grid xl:grid-cols-2 xl:gap-3 xl:space-y-0" aria-label="Uygun görünen alanlar">
+                {data.results.map((r) => (
+                  <SpaceCard key={r.spaceId} r={r} href={`/spaces/${encodeURIComponent(r.spaceId)}?${query}`} />
+                ))}
+              </ul>
+            )}
+            <p className="text-xs opacity-70">
+              Sınav, tatil, ders iptali ve program dışı etkinlik bilgisi yok. Programda boş görünen derslik gerçekten boş
+              olmayabilir; gördüğünü bildirerek diğer öğrencilere yardım edebilirsin.
             </p>
-          ) : (
-            <ul className="space-y-3" aria-label="Uygun görünen alanlar">
-              {data.results.map((r) => (
-                <SpaceCard key={r.spaceId} r={r} href={`/spaces/${encodeURIComponent(r.spaceId)}?${query}`} />
-              ))}
-            </ul>
-          )}
-          <p className="text-xs opacity-70">
-            Sınav, tatil, ders iptali ve program dışı etkinlik bilgisi yok. Programda boş görünen derslik gerçekten boş
-            olmayabilir; gördüğünü bildirerek diğer öğrencilere yardım edebilirsin.
-          </p>
-        </>
+          </div>
+        </div>
       )}
     </main>
   );

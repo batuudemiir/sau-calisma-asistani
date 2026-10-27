@@ -39,7 +39,7 @@ export function SpaceView() {
   const isLibrary = s?.kind === "LIBRARY" || s?.kind === "STUDY_AREA";
 
   return (
-    <main className="mx-auto w-full max-w-md flex-1 space-y-5 px-4 py-6">
+    <main className="mx-auto w-full max-w-md flex-1 space-y-5 px-4 py-6 lg:max-w-5xl lg:px-8 lg:py-10">
       <Link href={`/results?${query}`} className="inline-flex min-h-11 items-center text-sm underline">
         ← Sonuçlara dön
       </Link>
@@ -57,7 +57,7 @@ export function SpaceView() {
       {data && s && (
         <>
           <header className="space-y-2">
-            <h1 className="text-3xl font-bold">{s.code}</h1>
+            <h1 className="text-3xl font-bold lg:text-4xl">{s.code}</h1>
             {!isLibrary && <p className="opacity-80">{s.buildingName}</p>}
             {s.excludedBecause ? (
               <>
@@ -72,70 +72,78 @@ export function SpaceView() {
             )}
           </header>
 
-          {!isLibrary && <SpaceFacts r={s} />}
+          <div className="space-y-5 lg:grid lg:grid-cols-2 lg:items-start lg:gap-10 lg:space-y-0">
+            <div className="space-y-5">
+              {!isLibrary && <SpaceFacts r={s} />}
 
-          {data.simulation && (
-            <p className="flex flex-wrap items-center gap-2 text-sm">
-              Yoğunluk: <strong>{LIBRARY_LEVEL_LABELS[data.simulation.level]}</strong>
-              <SimulatedBadge />
-            </p>
-          )}
-
-          {data.place && <PlaceInfo spaceId={s.spaceId} openingHours={data.place.openingHours} osm={data.place.osm} />}
-
-          {!isLibrary && (
-            <section aria-labelledby="today-title" className="space-y-2">
-              <h2 id="today-title" className="text-lg font-bold">
-                {s.source?.isPartial ? "Bugün bilinen dersler" : "Bugünkü program"} ({WEEKDAY_NAMES[data.now.weekday]})
-              </h2>
-              {data.today.length === 0 ? (
-                <p className="text-sm">
-                  {s.source?.isPartial ? "Bugün bu odada bilinen ders yok." : "Yayımlanmış programda bugün bu odada ders yok."}
+              {data.simulation && (
+                <p className="flex flex-wrap items-center gap-2 text-sm">
+                  Yoğunluk: <strong>{LIBRARY_LEVEL_LABELS[data.simulation.level]}</strong>
+                  <SimulatedBadge />
                 </p>
-              ) : (
-                <ul className="divide-y divide-zinc-300 rounded-lg border border-zinc-300 text-sm dark:divide-zinc-700 dark:border-zinc-700">
-                  {data.today.map((b) => (
-                    <li key={`${b.startMinute}-${b.courseCode}`} className="flex gap-3 p-2">
-                      <span className="font-mono">
-                        {time(b.startMinute)}–{time(b.endMinute)}
-                      </span>
-                      <span>
-                        {b.courseCode} {b.courseName}
-                        <span className="block text-xs opacity-70">Belgedeki yeri: {b.sourceRef}</span>
-                      </span>
-                    </li>
-                  ))}
-                </ul>
               )}
-              {s.source?.url && (
-                <a href={s.source.url} target="_blank" rel="noreferrer" className="inline-block text-sm underline">
-                  Kaynak belgeyi aç
-                </a>
+
+              {data.place && <PlaceInfo spaceId={s.spaceId} openingHours={data.place.openingHours} osm={data.place.osm} />}
+
+              {!isLibrary && (
+                <section aria-labelledby="today-title" className="space-y-2">
+                  <h2 id="today-title" className="text-lg font-bold">
+                    {s.source?.isPartial ? "Bugün bilinen dersler" : "Bugünkü program"} ({WEEKDAY_NAMES[data.now.weekday]})
+                  </h2>
+                  {data.today.length === 0 ? (
+                    <p className="text-sm">
+                      {s.source?.isPartial
+                        ? "Bugün bu odada bilinen ders yok."
+                        : "Yayımlanmış programda bugün bu odada ders yok."}
+                    </p>
+                  ) : (
+                    <ul className="divide-y divide-zinc-300 rounded-lg border border-zinc-300 text-sm dark:divide-zinc-700 dark:border-zinc-700">
+                      {data.today.map((b) => (
+                        <li key={`${b.startMinute}-${b.courseCode}`} className="flex gap-3 p-2">
+                          <span className="font-mono">
+                            {time(b.startMinute)}–{time(b.endMinute)}
+                          </span>
+                          <span>
+                            {b.courseCode} {b.courseName}
+                            <span className="block text-xs opacity-70">Belgedeki yeri: {b.sourceRef}</span>
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {s.source?.url && (
+                    <a href={s.source.url} target="_blank" rel="noreferrer" className="inline-block text-sm underline">
+                      Kaynak belgeyi aç
+                    </a>
+                  )}
+                </section>
               )}
-            </section>
-          )}
+            </div>
 
-          <ReportButtons spaceId={s.spaceId} onReported={() => void reload()} />
+            <div className="space-y-5 lg:rounded-2xl lg:border lg:border-zinc-300 lg:p-6 lg:dark:border-zinc-700">
+              <ReportButtons spaceId={s.spaceId} onReported={() => void reload()} />
 
-          <RatingSummaryView rating={s.rating} />
-          <RatingForm spaceId={s.spaceId} onRated={() => void reload()} />
+              <RatingSummaryView rating={s.rating} />
+              <RatingForm spaceId={s.spaceId} onRated={() => void reload()} />
 
-          <section aria-labelledby="reports-title" className="space-y-2">
-            <h2 id="reports-title" className="text-lg font-bold">
-              Son 30 dakikadaki bildirimler
-            </h2>
-            {data.recentReports.length === 0 ? (
-              <p className="text-sm">Henüz bildirim yok.</p>
-            ) : (
-              <ul className="text-sm">
-                {data.recentReports.map((r, i) => (
-                  <li key={i}>
-                    {REPORT_LABELS[r.type]} · {ago(r.minutesAgo)}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
+              <section aria-labelledby="reports-title" className="space-y-2">
+                <h2 id="reports-title" className="text-lg font-bold">
+                  Son 30 dakikadaki bildirimler
+                </h2>
+                {data.recentReports.length === 0 ? (
+                  <p className="text-sm">Henüz bildirim yok.</p>
+                ) : (
+                  <ul className="text-sm">
+                    {data.recentReports.map((r, i) => (
+                      <li key={i}>
+                        {REPORT_LABELS[r.type]} · {ago(r.minutesAgo)}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+            </div>
+          </div>
         </>
       )}
     </main>

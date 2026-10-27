@@ -10,7 +10,7 @@ export function SpaceCard({ r, href }: { r: ResultDTO; href: string }) {
     <li>
       <Link
         href={href}
-        className="block rounded-xl border border-zinc-300 p-4 focus-visible:outline-3 focus-visible:outline-offset-2 dark:border-zinc-700"
+        className="block h-full rounded-xl border border-zinc-300 p-4 focus-visible:outline-3 focus-visible:outline-offset-2 dark:border-zinc-700"
       >
         <div className="flex items-baseline justify-between gap-2">
           <h2 className="text-xl font-bold">{r.code}</h2>
