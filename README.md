@@ -1,5 +1,7 @@
 # SAÜ Çalışma Asistanı — "Şu an nerede çalışabilirim?"
 
+[![CI](https://github.com/batuudemiir/sau-calisma-asistani/actions/workflows/ci.yml/badge.svg)](https://github.com/batuudemiir/sau-calisma-asistani/actions/workflows/ci.yml)
+
 Kütüphanede yer bulamayan SAÜ öğrencisine, seçtiği süre (30/60/90/120 dk) boyunca çalışabileceği alanları
 **bilginin kaynağı ve güven düzeyiyle** gösteren mobil uyumlu web uygulaması.
 GDG on Campus SAÜ Hackathon, 27-28 Ekim 2026.
@@ -36,6 +38,11 @@ bilinmeyen bilgi asla "boş" kabul edilmez.
 
 Next.js 16 (App Router) · TypeScript · Tailwind CSS 4 · Cloud Firestore · Firebase Anonymous Auth ·
 Firebase Admin SDK · Zod · Gemini API (`@google/genai`, yalnızca betiklerde) · ExcelJS · Vitest · Playwright
+
+## Sürekli entegrasyon
+
+Her push ve PR'da GitHub Actions (`.github/workflows/ci.yml`): birim testleri, lint, tip kontrolü, build;
+ardından Firebase Emulator + Playwright ile uçtan uca testler. Gizli anahtar gerekmez.
 
 ## Yerel çalıştırma (Emulator + örnek veri)
 
