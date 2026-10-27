@@ -104,3 +104,27 @@ test("değerlendirme check-in ister, check-in başına bir kez; 3 değerlendirme
   await map.goto(`/?${Q}&b=demo-blok`);
   await expect(map.locator('a[aria-label^="Ö-202"]')).toHaveAttribute("aria-label", /Ortalama puan 4\.0$/);
 });
+
+test("harita: işarete dokununca yer paneli açılır, hızlı check-in panelde ve listede görünür", async ({ browser }) => {
+  const a = await newPhone(browser);
+  await a.goto(`/?${Q}`);
+  await expect(a.getByRole("heading", { level: 2, name: /derslik uygun görünüyor/ })).toBeVisible();
+  await a.locator('a[aria-label^="Taş Kafe"]').click();
+  await expect(a).toHaveURL(/s=tas-kafe/);
+  const panel = a.getByRole("dialog", { name: "Taş Kafe" });
+  await expect(panel.getByRole("heading", { name: "Taş Kafe" })).toBeFocused();
+  await panel.getByRole("button", { name: "Buradayım, uygun (check-in)" }).click();
+  await expect(panel.getByText("Check-in yapıldı, teşekkürler!")).toBeVisible();
+  await expect(panel.getByText("Öğrenci doğruladı")).toBeVisible({ timeout: 5_000 });
+
+  const b = await newPhone(browser);
+  await b.goto(`/liste?${Q}`);
+  await b.getByText(/Diğer çalışma yerleri/).click();
+  await expect(b.getByRole("link", { name: /Taş Kafe/ }).getByText("Öğrenci doğruladı")).toBeVisible({ timeout: 5_000 });
+
+  // Esc paneli kapatır, özet geri gelir
+  await panel.getByRole("button", { name: "Kapat" }).focus();
+  await a.keyboard.press("Escape");
+  await expect(a.getByRole("dialog")).toHaveCount(0);
+  await expect(a).not.toHaveURL(/s=tas-kafe/);
+});

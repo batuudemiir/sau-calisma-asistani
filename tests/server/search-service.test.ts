@@ -172,4 +172,11 @@ describe("mapView", () => {
     ]);
     expect(res.places[0].spaceId).toBe(LIBRARY.id);
   });
+
+  it("sıralı sonuçlar /api/search ile aynı (alt panel)", async () => {
+    const src = fakeSource(data({ spaces: [A203, A202, A201, LIBRARY] }));
+    const [map, search] = await Promise.all([mapView(src, opts), runSearch(src, opts)]);
+    expect(map.results).toEqual(search.results);
+    expect(map.results.map((r) => r.code)).toContain("A201");
+  });
 });

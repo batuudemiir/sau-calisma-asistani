@@ -119,6 +119,17 @@ async function load(ds: DataSource, opts: SearchOptions) {
 
 export async function runSearch(ds: DataSource, opts: SearchOptions): Promise<SearchResponse> {
   const d = await load(ds, opts);
+  return {
+    now: { ...d.now, isDemoClock: opts.isDemoClock ?? false, nowMs: reportNow(opts) },
+    durationMin: opts.durationMin,
+    termLabel: d.term?.label ?? null,
+    places: placeDTOs(d, opts),
+    results: resultDTOs(d, opts),
+  };
+}
+
+/** Uygun görünen derslikler, sıralı (liste ve haritanın alt paneli aynı sırayı kullanır). */
+function resultDTOs(d: Loaded, opts: SearchOptions): ResultDTO[] {
   const out = searchSpaces({
     now: d.now,
     nowMs: reportNow(opts),
@@ -130,26 +141,19 @@ export async function runSearch(ds: DataSource, opts: SearchOptions): Promise<Se
     partialSpaceIds: d.partialSpaceIds,
     reports: d.reports,
   });
-
-  return {
-    now: { ...d.now, isDemoClock: opts.isDemoClock ?? false, nowMs: reportNow(opts) },
-    durationMin: opts.durationMin,
-    termLabel: d.term?.label ?? null,
-    places: placeDTOs(d, opts),
-    results: out.results.map((r) => ({
-      spaceId: r.space.id,
-      code: r.space.code,
-      buildingName: d.buildingName.get(r.space.buildingId) ?? r.space.buildingId,
-      kind: r.space.kind,
-      accessStatus: r.space.accessStatus,
-      isSimulated: r.space.isSimulated,
-      status: r.status,
-      freeUntil: r.freeUntil,
-      nextClass: r.nextClass,
-      source: d.toSourceDTO((r.nextClass && d.sources.find((s) => s.id === r.nextClass!.sourceId)) || d.sourceOf(r.space.id)),
-      rating: d.ratingOf(r.space.id),
-    })),
-  };
+  return out.results.map((r) => ({
+    spaceId: r.space.id,
+    code: r.space.code,
+    buildingName: d.buildingName.get(r.space.buildingId) ?? r.space.buildingId,
+    kind: r.space.kind,
+    accessStatus: r.space.accessStatus,
+    isSimulated: r.space.isSimulated,
+    status: r.status,
+    freeUntil: r.freeUntil,
+    nextClass: r.nextClass,
+    source: d.toSourceDTO((r.nextClass && d.sources.find((s) => s.id === r.nextClass!.sourceId)) || d.sourceOf(r.space.id)),
+    rating: d.ratingOf(r.space.id),
+  }));
 }
 
 export interface SpaceDetailResponse {
@@ -242,6 +246,8 @@ export interface MapResponse {
   now: SearchResponse["now"];
   durationMin: number;
   places: PlaceDTO[];
+  /** Uygun görünen derslikler, /api/search ile aynı sırada (alt panel). */
+  results: ResultDTO[];
   /** Odası olan binalar (ders programından). osm varsa haritada gerçek konumunda çizilir. */
   buildings: { id: string; name: string; isSimulated: boolean; osm: string | null; spaces: MapSpaceDTO[] }[];
 }
@@ -254,6 +260,7 @@ export async function mapView(ds: DataSource, opts: SearchOptions): Promise<MapR
     now: { ...d.now, isDemoClock: opts.isDemoClock ?? false, nowMs: reportNow(opts) },
     durationMin: opts.durationMin,
     places: placeDTOs(d, opts),
+    results: resultDTOs(d, opts),
     buildings: buildingIds.map((id) => ({
       id,
       name: d.buildingName.get(id) ?? id,
