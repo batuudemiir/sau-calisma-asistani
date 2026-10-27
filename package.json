@@ -20,6 +20,7 @@
     "seed-campus": "tsx --env-file-if-exists=.env.local scripts/seed-campus/index.ts"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
     "@google/genai": "^2.31.0",
     "@playwright/test": "^1.63.0",
     "@tailwindcss/turbopack": "^4",

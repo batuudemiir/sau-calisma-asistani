@@ -132,7 +132,7 @@ export function CampusMap({
                   className={FILL.PROGRAM_FREE}
                   strokeWidth={active ? 3 : 1.5}
                 />
-                <text y="4.5" textAnchor="middle" className="fill-current text-[12px] font-bold">
+                <text aria-hidden="true" y="4.5" textAnchor="middle" className="fill-current text-[12px] font-bold">
                   {free} oda
                 </text>
               </g>
@@ -156,7 +156,7 @@ export function CampusMap({
                 <path d={shape(ob.outline)} className={FILL[p.status.code]} strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
                 <g transform={`translate(${x} ${y}) scale(${pz.px})`}>
                   <circle r={active ? 16 : 13} className={FILL[p.status.code]} strokeWidth={active ? 3.5 : 2} />
-                  <text y="5" textAnchor="middle" className="fill-current text-[14px] font-bold">
+                  <text aria-hidden="true" y="5" textAnchor="middle" className="fill-current text-[14px] font-bold">
                     {p.kind === "LIBRARY" ? "K" : "C"}
                   </text>
                 </g>

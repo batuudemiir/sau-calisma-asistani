@@ -40,18 +40,18 @@ export function BuildingMap({ spaces, query }: { spaces: MapSpaceDTO[]; query: s
                     strokeWidth="1.5"
                     strokeDasharray={tone === "EXCLUDED" ? "4 3" : undefined}
                   />
-                  <text x={x + 6} y={y + 18} className="fill-current text-[12px] font-bold">
+                  <text aria-hidden="true" x={x + 6} y={y + 18} className="fill-current text-[12px] font-bold">
                     {s.code}
                   </text>
-                  <text x={x + 6} y={y + 36} className="fill-current text-[9.5px]">
+                  <text aria-hidden="true" x={x + 6} y={y + 36} className="fill-current text-[9.5px]">
                     {/* Dar hücrede kesilmesin diye uzun etiket iki satıra bölünür */}
-                    {`${SHORT[tone]}${isSimStatus(s) ? "*" : ""}`.split(/ (?=boş\*?$)/).map((line, li) => (
+                    {`${SHORT[tone]}${isSimStatus(s) ? "*" : ""}`.split(/(?= boş\*?$)/).map((line, li) => (
                       <tspan key={li} x={x + 6} dy={li === 0 ? 0 : 11}>
                         {line}
                       </tspan>
                     ))}
                   </text>
-                  <text x={x + 6} y={y + 64} className="fill-current text-[11px]">
+                  <text aria-hidden="true" x={x + 6} y={y + 64} className="fill-current text-[11px]">
                     {ratingText(s.rating)}
                   </text>
                 </a>

@@ -140,7 +140,10 @@ Yeniden üretmek için: `python3 -I scripts/campus/gpkg_to_json.py <sau_kampus.g
 
 ## Güvenlik ve gizlilik
 
-- Kişisel veri toplanmaz: bildirim ve puanlarda yalnızca anonim oturum kimliği (uid) tutulur; uid istemciye hiç gönderilmez.
+- Giriş isteğe bağlı. Girişsiz kullanımda yalnızca anonim oturum kimliği (uid) tutulur; uid başka kullanıcılara gönderilmez.
+- SAÜ öğrenci girişi (Google, `@ogr.sakarya.edu.tr`) sunucuda doğrulanır; e-posta Firestore'a yazılmaz.
+  Kişisel puanlar yalnızca sahibine görünür; Profil'den hesap ve kişisel veriler silinebilir.
+- Erişilebilirlik: axe-core taraması CI'da (WCAG 2.2 A/AA kuralları; açık/koyu tema).
 - İstemciden Firestore'a yazma yok (`firestore.rules`); tüm yazmalar Route Handler + Admin SDK + Zod ile.
 - `GEMINI_API_KEY` yalnızca betiklerde; web uygulaması Gemini'yi çağırmaz.
 - KVKK uyumluluğu hakkında garanti verilmez.

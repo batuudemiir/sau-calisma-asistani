@@ -24,6 +24,7 @@ function memoryStore(spaces: string[]) {
       throw new Error("kullanılmıyor");
     },
     markStudent: async () => {},
+    deleteAccountData: async () => {},
     addRating: async () => {
       throw new Error("kullanılmıyor");
     },

@@ -27,13 +27,14 @@ Amaç: Canlı demonun (3-5 dk) adım adım provası. `DEMO_AND_PITCH.md` neyin a
 
 | Adım | A telefonu | Söylenecek |
 |---|---|---|
-| 1 | Ana sayfa → **60 dakika** (demo saati gerekiyorsa adres çubuğuna `&at=...` ekli bağlantı) | "Kayıt yok, konum izni yok." |
+| 1 | Harita ana ekranı açılır (60 dk varsayılan; demo saati için `/?d=60&at=...` bağlantısı) → alt panel "Şu an N derslik uygun görünüyor" → **Liste** sekmesi | "Kayıt gerekmez, konum izni istemeyiz." |
 | 2 | Kütüphane kartı: "Doluluk verisi yok" + yoğunluk "Örnek demo verisi" | "Kütüphane seviyesi **simülasyon**; ölçüm değil." |
 | 3 | Liste: etiketler, "… saatine kadar boş (programa göre)", sonraki ders, kaynak | "Programda boş ≠ gerçekten boş." |
 | 4 | Bir kartı aç: bugünkü program, "Belgedeki yeri" | — |
 | 5 | Dizüstünde kaynak belgede aynı satırı göster | "Veri Gemini/kurallarla ayrıştırıldı, elle kontrol edildi." |
 | 6 | **Buradayım, uygun (check-in)** → B telefonunda kart 5 sn içinde "Öğrenci doğruladı" | "Bildirim anonim; uid istemciye hiç gitmez." |
-| 6b | Aynı ekranda 4 kriteri puanla → **Haritada gör** → bina → oda rozeti | "Ortalama 3 değerlendirmeden önce gösterilmez." |
+| 6b | Aynı ekranda 4 kriteri puanla ("+5 puan kazandın") → **Harita** sekmesi → panelde bina → oda rozeti | "Ortalama 3 değerlendirmeden önce gösterilmez." |
+| 6c | **Profil** sekmesi: puan, seviye, son katkılar; "SAÜ hesabıyla giriş yap" | "Giriş isteğe bağlı; puanlar yalnızca sana görünür, sıralamayı etkilemez." |
 | 7 | (İsteğe bağlı) Terminal: `npm run ingest -- <eski dönem PDF> ...` → işaretli kayıtlar | "Eski dönem belgesi; yayımlanmaz, yalnızca hat gösterimi." |
 
 Hangi verinin örnek, hangisinin gerçek olduğu sözlü olarak da söylenir.
@@ -51,4 +52,6 @@ Hangi verinin örnek, hangisinin gerçek olduğu sözlü olarak da söylenir.
 
 - "Gemini yanlış okursa?" → taslak çıktısındaki `needsReview` listesi ve kartta "Program verisi eksik" (Ö-204).
 - "Program boş ama oda kilitli?" → kartta "Erişim durumu doğrulanmadı" + "Kullanılamıyor" bildirimi.
-- "Kişisel veri?" → bildirim formundaki not: "ad, e-posta veya konum saklanmaz".
+- "Kişisel veri?" → Hakkında sayfasındaki gizlilik metni + Profil'deki "Hesabımı ve verilerimi sil".
+- Google girişi canlı projede doğrulanmadı (SAÜ öğrenci e-postasının Google Workspace olduğu teyit edilmedi);
+  testler Auth Emulator'ın sahte Google kimliğiyle yapıldı. Demoda giriş gösterilecekse önce canlıda denenmeli.

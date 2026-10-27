@@ -23,7 +23,7 @@ test("harita ana ekran, sekmeler sorguyu taşır, eski bağlantılar yönlendiri
   await expect(page.getByRole("heading", { level: 1, name: "Kampüs haritası" })).toBeVisible();
   const tabs = page.getByRole("navigation", { name: "Ana gezinme" });
   await expect(tabs.getByRole("link", { name: "Harita" })).toHaveAttribute("aria-current", "page");
-  await page.getByRole("link", { name: "90 dakika" }).click();
+  await page.getByRole("link", { name: "90 dk", exact: true }).click();
   await expect(page).toHaveURL(/\/\?d=90/);
   await tabs.getByRole("link", { name: "Liste" }).click();
   await expect(page).toHaveURL(/\/liste\?d=90/);
@@ -104,7 +104,7 @@ test("değerlendirme check-in ister, check-in başına bir kez; 3 değerlendirme
 
   const map = await newPhone(browser);
   await map.goto(`/?${Q}&b=demo-blok`);
-  await expect(map.locator('a[aria-label^="Ö-202"]')).toHaveAttribute("aria-label", /Ortalama puan 4\.0$/);
+  await expect(map.locator('a[aria-label^="Ö-202 "]')).toHaveAttribute("aria-label", /Ortalama puan 4\.0$/);
 });
 
 test("harita: işarete dokununca yer paneli açılır, hızlı check-in panelde ve listede görünür", async ({ browser }) => {
@@ -181,4 +181,23 @@ test("puan: check-in +5, profilde görünür; SAÜ dışı Google reddedilir, ö
 
   await p.getByRole("button", { name: "Çıkış yap" }).click();
   await expect(p.getByRole("heading", { name: "Katkıların bu cihazda anonim" })).toBeVisible();
+});
+
+test("hesap silme: puan ve geçmiş silinir, bildirim topluluk verisi olarak kalır", async ({ browser }) => {
+  const p = await newPhone(browser);
+  await p.goto(`/?${Q}&s=kampus-kafeterya`);
+  const panel = p.getByRole("dialog", { name: "Kampüs Kafeterya" });
+  await panel.getByRole("button", { name: "Buradayım, uygun (check-in)" }).click();
+  await expect(panel.getByText("+5 puan kazandın")).toBeVisible();
+
+  await p.goto(`/profil?${Q}`);
+  await expect(p.getByText(/^5\s*puan/)).toBeVisible();
+  await p.getByRole("button", { name: "Hesabımı sil" }).click();
+  await p.getByRole("button", { name: "Evet, kalıcı olarak sil" }).click();
+  await expect(p.getByText(/Hesabın ve kişisel verilerin silindi/)).toBeVisible();
+  await expect(p.getByText(/^0\s*puan/)).toBeVisible();
+  await expect(p.getByText(/Henüz katkın yok/)).toBeVisible();
+
+  await p.goto(`/?${Q}&s=kampus-kafeterya`);
+  await expect(p.getByRole("dialog", { name: "Kampüs Kafeterya" }).getByText("Öğrenci doğruladı")).toBeVisible();
 });

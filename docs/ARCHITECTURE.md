@@ -11,7 +11,7 @@ sürümleri kullanılır, uyumluluk kurulum anında resmî dokümanlardan kontro
 | Uygulama | Next.js (App Router) + TypeScript, modüler monolit | Arayüz ve sunucu uçları tek kod tabanında; gizli anahtar sunucuda kalır | Vite + Cloud Functions (iki ayrı dağıtım) | App Router öğrenme eğrisi; Server/Client sınırı |
 | Stil | Tailwind CSS | Hızlı, mobil öncelikli | shadcn/ui (yalnızca gerekirse) | Yok denecek kadar az |
 | Veritabanı | Cloud Firestore | Gerçek zamanlı dinleme, sıfır sunucu yönetimi | Supabase | Sorgu/indeks tasarımı |
-| Kimlik | Firebase Anonymous Auth | Kayıt yok; yine de hız sınırı için kullanıcı kimliği | SAÜ e-posta girişi (sonraya) | Anonim hesap çoğaltma |
+| Kimlik | Firebase Anonymous Auth + isteğe bağlı Google (anonim hesaba bağlanır) | Kayıt gerekmez; puanlar istenirse SAÜ öğrenci hesabına bağlanır | E-posta bağlantısı (SAÜ öğrenci e-postası Google değilse) | Anonim hesap çoğaltma |
 | Yazma güvenliği | Route Handler + Firebase Admin SDK + Zod | Tüm yazmalar tek noktada doğrulanır | İstemci yazma + Security Rules | Admin SDK kuralları atlar; doğrulama kodda olmalı |
 | AI | Gemini API (yapılandırılmış JSON çıktısı) | PDF'i doğrudan okur, şemaya uygun çıktı verir | Yalnızca deterministik ayrıştırma | Uydurma değer; mutlaka doğrulanır |
 | XLSX | ExcelJS (bakım ve lisans kurulumda kontrol edilir) | XLSX'te AI'ya gerek yok, deterministik | SheetJS | Birleştirilmiş hücreler |
@@ -199,7 +199,16 @@ Eski dönem PDF'leri yalnızca ayrıştırıcı testlerinde kullanılır, asla y
 
 ## 6. Güvenlik ve gizlilik
 
-- Kişisel veri yok: e-posta, kart numarası, konum saklanmaz. Bildirimde yalnızca anonim `uid` tutulur.
+- Giriş isteğe bağlıdır. Girişsiz kullanımda yalnızca anonim `uid` tutulur. Google ile giriş anonim hesaba
+  `linkWithPopup` ile bağlanır (uid korunur). Sunucu (`/api/profile/student`) bağlı Google sağlayıcısının e-postasının
+  `@ogr.sakarya.edu.tr` olduğunu Admin SDK ile doğrular (`src/server/student.ts`); değilse bağlantı geri alınır.
+  E-posta Firestore'a yazılmaz; yalnızca Firebase Auth kaydında bulunur ve profilde istemcide gösterilir.
+  Kart numarası ve konum saklanmaz.
+- Kişisel puanlar (`src/domain/points.ts`): `users/{uid}` (puan, günlük toplam, sayaçlar, `student`) ve `pointEvents`
+  (defter). Bildirim/değerlendirme ile aynı transaction'da yazılır; ikisi de istemciye kapalıdır, `/api/profile` yalnızca
+  sahibine döndürür. Puanlar sıralamayı ve güven etiketini etkilemez; herkese açık sıralama yoktur.
+- Hesap silme (`DELETE /api/account`): `users` belgesi ve `pointEvents` silinir, `spaceReports`/`spaceRatings` içindeki
+  uid `silinmis` yapılır (topluluk verisi kalır, kişiyle bağı kopar), Firebase Auth kaydı silinir.
 - `GEMINI_API_KEY` yalnızca geliştiricinin `.env.local` dosyasında ve betiklerde. Web uygulamasının ortamına konmaz.
 - `FIREBASE_SERVICE_ACCOUNT` yalnızca sunucuda. İstemcide sadece `NEXT_PUBLIC_FIREBASE_*` yapılandırması.
 - `firestore.rules`: herkes `terms`, `buildings`, `spaces`, `scheduleBlocks` okuyabilir; istemciden hiçbir koleksiyona yazma yok.
@@ -210,7 +219,8 @@ Eski dönem PDF'leri yalnızca ayrıştırıcı testlerinde kullanılır, asla y
 - Değerlendirme: yalnızca check-in sonrası, check-in başına 1 puan; `uid` başına saatte 10 değerlendirme.
   İstek anonim ID token'ı ile gelir, sunucuda doğrulanır.
 - App Check: sonraya bırakıldı (kurulum süresi; demo için hız sınırı yeterli).
-- KVKK uyumluluğu hakkında garanti verilmez; sunumda "kişisel veri toplamıyoruz" denir, fazlası değil.
+- KVKK uyumluluğu hakkında garanti verilmez. `/hakkinda` sayfasında aydınlatma metni taslağı vardır; hukuki inceleme yapılmadı.
+- Erişilebilirlik: her push'ta axe-core taraması (`tests/e2e/a11y.spec.ts`, WCAG 2.2 A/AA kuralları, tüm rotalar, açık/koyu tema).
 
 ## 7. Dağıtım ve ortamlar
 

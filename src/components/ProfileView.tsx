@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { DAILY_CAP, LEVELS, POINTS, type PointKind } from "@/domain/points";
-import { getWithSession, signInWithGoogle, signOutUser, useAuthUser } from "@/lib/session";
+import { deleteAccount, getWithSession, signInWithGoogle, signOutUser, useAuthUser } from "@/lib/session";
 
 interface ProfileResponse {
   student: boolean;
@@ -53,6 +53,20 @@ export function ProfileView() {
     setBusy(false);
     setNotice(res.ok ? "SAÜ öğrenci hesabınla giriş yaptın." : res.error);
     void load();
+  }
+
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  async function removeAccount() {
+    setBusy(true);
+    const res = await deleteAccount();
+    setBusy(false);
+    setConfirmDelete(false);
+    if (!res.ok) {
+      setNotice(res.error);
+      return;
+    }
+    setProfile(null);
+    setNotice("Hesabın ve kişisel verilerin silindi. Bildirimlerin anonim topluluk verisi olarak kaldı.");
   }
 
   async function signOut() {
@@ -184,6 +198,45 @@ export function ProfileView() {
                 </li>
               ))}
             </ul>
+          )}
+        </section>
+      )}
+
+      {profile && (
+        <section aria-labelledby="sil" className="space-y-2 rounded-xl border border-red-700 p-4 dark:border-red-400">
+          <h2 id="sil" className="text-lg font-semibold">
+            Hesabımı ve verilerimi sil
+          </h2>
+          <p className="text-sm">
+            Puanların, katkı geçmişin ve hesabın silinir. Yaptığın bildirim ve değerlendirmeler diğer öğrencilere yardımcı olmaya
+            devam eder ama artık seninle ilişkilendirilmez. Bu işlem geri alınamaz.
+          </p>
+          {confirmDelete ? (
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => void removeAccount()}
+                disabled={busy}
+                className="min-h-11 rounded-lg border-2 border-red-700 px-4 font-semibold text-red-800 disabled:opacity-50 dark:border-red-400 dark:text-red-300"
+              >
+                {busy ? "Siliniyor…" : "Evet, kalıcı olarak sil"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirmDelete(false)}
+                className="min-h-11 rounded-lg border border-zinc-400 px-4"
+              >
+                Vazgeç
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setConfirmDelete(true)}
+              className="min-h-11 rounded-lg border border-red-700 px-4 font-semibold text-red-800 dark:border-red-400 dark:text-red-300"
+            >
+              Hesabımı sil
+            </button>
           )}
         </section>
       )}

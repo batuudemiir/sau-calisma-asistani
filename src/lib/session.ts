@@ -117,3 +117,11 @@ export async function signInWithGoogle(): Promise<{ ok: true } | { ok: false; er
 export async function signOutUser() {
   await signOut(firebaseClient().auth);
 }
+
+/** Hesabı ve kişisel verileri siler (sunucuda), sonra bu cihazdaki oturumu kapatır. */
+export async function deleteAccount(): Promise<{ ok: true } | { ok: false; error: string }> {
+  const res = await withSession<{ deleted: boolean }>("/api/account", { method: "DELETE" });
+  if (!res.ok) return res;
+  await signOut(firebaseClient().auth).catch(() => {});
+  return { ok: true };
+}

@@ -24,6 +24,8 @@ export interface PointEventDTO {
   createdAtMs: number;
 }
 
+export const DELETED_UID = "silinmis";
+
 export interface Profile {
   user: UserPoints;
   /** Sunucuda doğrulanmış SAÜ öğrenci hesabına bağlı mı. E-posta saklanmaz. */
@@ -65,4 +67,9 @@ export interface WriteStore {
   profile(uid: string, limit: number): Promise<Profile>;
   /** Hesap sunucuda SAÜ öğrenci hesabı olarak doğrulandı. */
   markStudent(uid: string): Promise<void>;
+  /**
+   * KVKK silme: kullanıcı belgesi ve puan defteri silinir; bildirim ve değerlendirmeler topluluk verisi olarak
+   * kalır ama kişiyle bağı koparılır (uid DELETED_UID olur).
+   */
+  deleteAccountData(uid: string): Promise<void>;
 }

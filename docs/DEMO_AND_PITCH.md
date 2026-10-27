@@ -38,5 +38,7 @@ kütüphane doluluğu da tahmin değil ölçüm hâline gelir.
 - **Program boş diyor ama oda kilitli?** → Etiket "Programda boş", erişim "doğrulanmadı" yazıyor; öğrenci bildirimi düzeltiyor.
 - **Gemini yanlış okursa?** → Şema zorunlu, belirsiz alan boş kalır, kurallar işaretler, yayından önce elle kontrol. Uygunluğu AI değil kural motoru hesaplıyor.
 - **Bu dünyada var mı?** → Benzerleri var (BU EmptyClassroom, Bryant RoomFinder). Farkımız SAÜ'nün dağınık belgeleri, süre odaklı arama ve dürüst güven etiketleri.
-- **Kişisel veri?** → Toplamıyoruz; bildirimde yalnızca anonim oturum kimliği var. KVKK konusunda garanti vermiyoruz, kişisel veri işlemiyoruz.
+- **Kişisel veri?** → Giriş isteğe bağlı. Girişsiz kullanımda yalnızca anonim oturum kimliği var. Öğrenci girişinde
+  e-posta veritabanımıza yazılmaz (yalnızca Firebase Auth'ta); puanlar yalnızca kişiye görünür ve hesap tek dokunuşla
+  silinir. KVKK konusunda garanti vermiyoruz; aydınlatma metni taslağı Hakkında sayfasında.
 - **Kart/turnike verisi?** → Erişimimiz yok, varmış gibi göstermiyoruz. Pilot önerisi olarak anlatıyoruz.

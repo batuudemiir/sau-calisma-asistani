@@ -20,15 +20,20 @@ Programda boş görünen derslik, gerçekten boş olduğu doğrulanmış derslik
 algoritmada, arayüz metninde ve testlerde korunur. Bilinmeyen bilgi asla olumlu kabul edilmez.
 
 ## Kullanıcı akışı
-1. Ana sayfa: "Şimdi nerede çalışabilirsin?" ve süre seçimi (30/60/90/120). Kayıt yok, konum izni yok.
-2. Sonuç listesi: alan kartları, güven etiketine göre sıralı. Kütüphane kartı en üstte, kendi etiketiyle.
+1. Ana ekran kampüs haritasıdır (gerçek OSM konumları): üstte arama ve süre seçimi (30/60/90/120, varsayılan 60),
+   altta panel "Şu an N derslik uygun görünüyor" + ilk 3 sonuç. Kayıt gerekmez, konum izni istenmez.
+   Haritadaki her bilgi panelde ve Liste sekmesinde metin olarak da vardır.
+2. Liste sekmesi: alan kartları, güven etiketine göre sıralı; filtreler (Sessiz, Priz, Şu an açık, doğrulandı, tür).
+   Bilinmeyen filtreye girmez. Kütüphane kartı en üstte, kendi etiketiyle.
 3. Alan ayrıntısı: boş kalacağı süre, sonraki ders, kaynak belge ve dönemi, son bildirimler.
 4. Bildirim: "Buradayım, uygun (check-in)" / "Dolu" / "Kullanılamıyor" / "Bilgi güncel değil" — tek dokunuş.
    "Buradayım, uygun" aynı zamanda check-in'dir; ayrı bir check-in kaydı yoktur.
 5. Değerlendirme: check-in yapan öğrenci, 3 saat içinde o alanı sabit kriterlere 1-5 puanla değerlendirir
    (Sessizlik, Priz, İnternet, Işık). Serbest metin yok.
-6. Harita: el çizimi SVG kampüs → bina/kat şeması; her alanda durum etiketi (metin) ve ortalama puan.
-   "Şematik çizim, ölçekli değildir" notu.
+6. Harita: gerçek ölçekli SVG kampüs (sürükle/yakınlaştır) → bina paneli/kat şeması; her alanda durum etiketi (metin)
+   ve ortalama puan. Kat görünümü için "Şematik çizim, ölçekli değildir" notu.
+7. Profil (isteğe bağlı): SAÜ öğrenci hesabıyla (Google) giriş, kişisel puan ve seviye, son katkılar, hesap silme.
+   Puanlar yalnızca kişiye görünür; sonuçları etkilemez.
 
 ## MVP sınıflandırması
 
@@ -44,7 +49,8 @@ algoritmada, arayüz metninde ve testlerde korunur. Bilinmeyen bilgi asla olumlu
 | Zorunlu | Check-in sonrası değerlendirme (4 kriter, 1-5) | Öğrenci deneyimini alana bağlar; programda olmayan bilgi |
 | Zorunlu | SVG kampüs/bina şeması: durum + ortalama puan | Değerlendirmelerin harita üzerinde görünmesi; paket gerektirmez |
 | Zaman kalırsa | Kütüphane doluluk simülasyonu (gün içi desen) | "Gelecek KART entegrasyonu" anlatısı |
-| Sonraya | Google Maps kampüs haritası, SAÜ KART / turnike entegrasyonu, sensör, ML tahmin, yönetim paneli, profiller, oyunlaştırma | Veri erişimi yok veya 24 saatte değer üretmez |
+| Zorunlu (eklendi) | Harita ana ekran, arama/filtre, isteğe bağlı öğrenci girişi, kişisel puan ve profil | Bulunabilirlik ve katkıyı sürdürme |
+| Sonraya | Google Maps kampüs haritası, SAÜ KART / turnike entegrasyonu, sensör, ML tahmin, yönetim paneli, rozetler, herkese açık sıralama | Veri erişimi yok veya 24 saatte değer üretmez |
 
 ## Mevcut alternatiflerden farkı
 Benzer "boş derslik" uygulamaları dünyada var (örn. Boston University EmptyClassroom, Bryant RoomFinder).

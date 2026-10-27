@@ -25,16 +25,54 @@ export default function AboutPage() {
           <li>Programı bilinmeyen alanlar &quot;Bilinmiyor&quot; olarak gösterilir, asla &quot;boş&quot; değil.</li>
           <li>&quot;Örnek demo verisi&quot; etiketli bilgiler gösterim amaçlı yapay veridir.</li>
           <li>Bina konumları ve açılış saatleri: {OSM_ATTRIBUTION}.</li>
+          <li>Puanlar yalnızca sana görünür; sonuçların sırasını ve güven etiketlerini etkilemez.</li>
         </ul>
       </section>
 
-      <section aria-labelledby="gizlilik" className="space-y-2">
+      <section aria-labelledby="gizlilik" className="space-y-2 text-sm">
         <h2 id="gizlilik" className="text-lg font-semibold">
-          Gizlilik
+          Gizlilik ve kişisel veriler (aydınlatma metni taslağı)
         </h2>
-        <p className="text-sm">
-          Kayıt ve konum izni gerekmez. Bildirim ve değerlendirmeler anonim bir oturum kimliğiyle kaydedilir; ad, e-posta veya
-          konum toplanmaz.
+        <p>
+          Uygulama kayıt olmadan kullanılır. Konum izni istenmez. Haritadaki &quot;Buradayım&quot; bildirimi konumunu değil,
+          seçtiğin yeri kaydeder.
+        </p>
+        <ul className="list-disc space-y-1 pl-5">
+          <li>
+            <strong>Girişsiz:</strong> bildirim, değerlendirme ve puanların cihazına özel anonim bir oturum kimliğiyle saklanır.
+            Ad, e-posta veya konum saklanmaz.
+          </li>
+          <li>
+            <strong>SAÜ öğrenci hesabıyla giriş (isteğe bağlı):</strong> amaç, puanlarının cihaz değişse de korunması ve hesabın
+            öğrenci hesabı olduğunun doğrulanmasıdır. E-posta adresin kimlik doğrulama hizmetinde (Google Firebase Authentication)
+            tutulur; uygulamanın veritabanına yazılmaz ve diğer kullanıcılara gösterilmez.
+          </li>
+          <li>
+            <strong>Saklanan:</strong> oturum kimliği, bildirim türü ve zamanı, değerlendirme puanları, kişisel puan ve katkı
+            geçmişi. Bildirimler 30 dakika sonra durum hesabına katılmaz.
+          </li>
+          <li>
+            <strong>Hizmet sağlayıcı:</strong> veriler Google Firebase (Firestore, Authentication) üzerinde işlenir.
+          </li>
+          <li>
+            <strong>Silme hakkı:</strong> Profil → &quot;Hesabımı sil&quot; ile puanların, katkı geçmişin ve hesabın silinir.
+            Bildirim ve değerlendirmelerin topluluk verisi olarak kalır, seninle bağı koparılır.
+          </li>
+        </ul>
+        <p className="opacity-80">
+          Bu metin bir hackathon projesi için hazırlanmış taslaktır; hukuki inceleme yapılmamıştır ve KVKK uyumluluğu konusunda
+          garanti vermez.
+        </p>
+      </section>
+
+      <section aria-labelledby="erisilebilirlik" className="space-y-2 text-sm">
+        <h2 id="erisilebilirlik" className="text-lg font-semibold">
+          Erişilebilirlik
+        </h2>
+        <p>
+          Hedef WCAG 2.2 AA düzeyidir. Haritadaki her bilgi, Liste sekmesinde ve harita panelinde metin olarak da bulunur; renk
+          tek başına anlam taşımaz. Her sürümde otomatik erişilebilirlik taraması (axe) açık ve koyu temada çalışır. Otomatik
+          tarama tüm sorunları bulamaz; ekran okuyucuyla elle test henüz yapılmadı.
         </p>
       </section>
     </div>

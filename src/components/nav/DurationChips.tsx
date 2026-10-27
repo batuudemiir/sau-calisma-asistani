@@ -16,7 +16,6 @@ export function DurationChips({ basePath }: { basePath: string }) {
           key={x}
           href={`${basePath}?${carryQuery(params, { d: String(x) })}`}
           aria-current={x === d ? "page" : undefined}
-          aria-label={`${x} dakika`}
           className={`min-h-11 flex-1 rounded-lg border px-2 py-2 text-center text-sm font-semibold ${x === d ? "border-current bg-foreground text-background" : "border-zinc-400"}`}
         >
           {x} dk

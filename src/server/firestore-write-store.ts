@@ -5,7 +5,7 @@ import { CONFIRM_WINDOW_MIN, awardConfirmBonus, emptyUser, type Award, type User
 import { toLocalTime } from "@/domain/time";
 import { adminDb } from "./firebase-admin";
 import type { RecentWrite } from "./rate-limit";
-import type { WriteStore } from "./write-store";
+import { DELETED_UID, type WriteStore } from "./write-store";
 
 function readUser(data: FirebaseFirestore.DocumentData | undefined): UserPoints {
   const base = emptyUser();
@@ -188,6 +188,25 @@ export function firestoreWriteStore(db: Firestore = adminDb()): WriteStore {
           createdAtMs: d.get("createdAt").toMillis(),
         })),
       };
+    },
+
+    async deleteAccountData(uid) {
+      // 500'lük gruplar halinde (Firestore toplu yazma sınırı); yarıda kalırsa tekrar çağrılabilir
+      const PAGE = 400;
+      for (const col of ["pointEvents", "spaceReports", "spaceRatings"] as const) {
+        for (;;) {
+          const snap = await db.collection(col).where("uid", "==", uid).limit(PAGE).get();
+          if (snap.empty) break;
+          const batch = db.batch();
+          for (const d of snap.docs) {
+            if (col === "pointEvents") batch.delete(d.ref);
+            else batch.update(d.ref, { uid: DELETED_UID });
+          }
+          await batch.commit();
+          if (snap.size < PAGE) break;
+        }
+      }
+      await db.collection("users").doc(uid).delete();
     },
 
     async markStudent(uid) {

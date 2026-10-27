@@ -38,10 +38,12 @@ export function ratingText(r: { real: RatingSummary; simulated: RatingSummary })
   return s ? `★ ${s.value.toFixed(1)}${s.simulated ? "*" : ""}` : "★ –";
 }
 
+/** Erişilebilir ad, görünen metinle başlar (WCAG 2.5.3 "label in name"), ardından açık anlatım gelir. */
 export function ariaFor(code: string, s: MapSpaceDTO) {
+  const visible = `${code} ${SHORT[toneOf(s)]}${isSimStatus(s) ? "*" : ""} ${ratingText(s.rating)}`;
   const state = s.excludedBecause
     ? "seçilen süre için uygun değil"
     : `${statusTitle(s.status as Status)}${isSimStatus(s) ? " (örnek demo verisi)" : ""}`;
   const r = shownRating(s.rating);
-  return `${code}: ${state}. ${r ? `Ortalama puan ${r.value.toFixed(1)}${r.simulated ? ", örnek demo verisi" : ""}` : "Yeterli değerlendirme yok"}`;
+  return `${visible}. ${state}. ${r ? `Ortalama puan ${r.value.toFixed(1)}${r.simulated ? ", örnek demo verisi" : ""}` : "Yeterli değerlendirme yok"}`;
 }
