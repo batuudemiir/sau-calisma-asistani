@@ -1,3 +1,4 @@
+import type { Scores } from "../../src/domain/ratings";
 import type { Building, ScheduleBlock, Space, Term, Weekday } from "../../src/domain/types";
 
 // Demo verisi: gerçek bir binayı veya programı temsil etmez. Her kayıt isSimulated=true taşır ve
@@ -86,5 +87,23 @@ export function demoPlan() {
     isSimulated: true,
   };
 
-  return { building: DEMO_BUILDING, term: DEMO_TERM, library: DEMO_LIBRARY, spaces, blocks, source };
+  // Örnek puanlar: bazı odalarda 3+ (ortalama görünür), birinde 2 ("yetersiz" durumu görünür)
+  const S = (q: number, p: number, w: number, l: number) => ({ quiet: q, power: p, wifi: w, light: l }) as Scores;
+  const RATINGS: [string, Scores[]][] = [
+    ["Ö-102", [S(5, 3, 4, 4), S(4, 2, 4, 5), S(5, 3, 3, 4), S(4, 2, 4, 4)]],
+    ["Ö-103", [S(3, 5, 5, 3), S(2, 4, 5, 3), S(3, 5, 4, 4)]],
+    ["Ö-201", [S(4, 4, 4, 4), S(5, 5, 4, 4)]],
+    ["Merkez Kütüphane", [S(2, 4, 5, 5), S(3, 3, 5, 5), S(2, 4, 4, 5)]],
+  ];
+  const ratings = RATINGS.flatMap(([code, list]) =>
+    list.map((scores, i) => ({
+      spaceId: code === DEMO_LIBRARY.code ? DEMO_LIBRARY.id : `${DEMO_BUILDING.id}-${code}`,
+      uid: "ornek-veri",
+      checkinReportId: `ornek-${code}-${i}`,
+      scores,
+      isSimulated: true as const,
+    })),
+  );
+
+  return { building: DEMO_BUILDING, term: DEMO_TERM, library: DEMO_LIBRARY, spaces, blocks, source, ratings };
 }

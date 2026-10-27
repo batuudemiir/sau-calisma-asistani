@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { parseQuery } from "../../src/server/request";
-import { DEFAULT_LIBRARY, runSearch, spaceDetail } from "../../src/server/search-service";
+import { DEFAULT_LIBRARY, mapView, runSearch, spaceDetail } from "../../src/server/search-service";
 import { LIBRARY, TERM, block, hm, nowMsAt, report, space } from "../domain/fixtures";
 import { fakeSource, type FakeData } from "./fake-source";
 
@@ -66,6 +66,19 @@ describe("runSearch", () => {
     expect(res.results[0]).toMatchObject({ code: "A201", status: { code: "VERIFIED_FREE", minutesAgo: 2 } });
   });
 
+  it("puan özeti karta eklenir; simüle puanlar yalnızca demo modunda, gerçek ortalamaya karışmadan", async () => {
+    const r = (isSimulated: boolean, n: 1 | 2 | 3 | 4 | 5) => ({
+      spaceId: A201.id, uid: "u", checkinReportId: "c", createdAtMs: 0, isSimulated, scores: { quiet: n, power: n, wifi: n, light: n },
+    });
+    const d = data({ ratings: [r(false, 4), r(false, 4), r(false, 5), r(true, 1), r(true, 1), r(true, 1)] });
+    const off = await runSearch(fakeSource(d), opts);
+    expect(off.results[0].rating.real).toMatchObject({ count: 3, overall: 4.3 });
+    expect(off.results[0].rating.simulated.count).toBe(0);
+    const on = await runSearch(fakeSource(d), { ...opts, demoMode: true });
+    expect(on.results[0].rating.simulated).toMatchObject({ count: 3, overall: 1 });
+    expect(JSON.stringify(on)).not.toContain('"uid"');
+  });
+
   it("aktif dönem yoksa her oda UNKNOWN(STALE_SOURCE)", async () => {
     const res = await runSearch(fakeSource(data({ term: null })), opts);
     expect(res.results.every((r) => r.status.code === "UNKNOWN" && r.status.reason === "STALE_SOURCE")).toBe(true);
@@ -101,5 +114,19 @@ describe("parseQuery", () => {
     expect(p("d=30&at=2026-10-27T13:00").ok).toBe(false);
     expect(p("d=30&at=2026-10-27T13:00", true)).toEqual({ ok: true, durationMin: 30, nowMs: nowMsAt(13), reportNowMs: 1000, isDemoClock: true });
     expect(p("d=30&at=dün", true).ok).toBe(false);
+  });
+});
+
+describe("mapView", () => {
+  it("elenenler dahil her oda bina altında, kod sırasıyla; kütüphane ayrı", async () => {
+    const res = await mapView(fakeSource(data({ spaces: [A203, A202, A201, LIBRARY] })), opts);
+    expect(res.buildings).toHaveLength(1);
+    expect(res.buildings[0]).toMatchObject({ id: "isletme-a", name: "İşletme Fakültesi A Blok" });
+    expect(res.buildings[0].spaces.map((s) => [s.code, s.status.code, s.excludedBecause])).toEqual([
+      ["A201", "PROGRAM_FREE", null],
+      ["A202", "PROGRAM_FREE", "CLASS_CONFLICT"],
+      ["A203", "UNKNOWN", null],
+    ]);
+    expect(res.library.spaceId).toBe(LIBRARY.id);
   });
 });

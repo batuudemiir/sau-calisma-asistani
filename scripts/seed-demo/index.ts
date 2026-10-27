@@ -37,6 +37,9 @@ async function main() {
   for (const s of p.spaces) batch.set(db.collection("spaces").doc(s.id), s);
   batch.set(db.collection("scheduleSources").doc(DEMO_SOURCE_ID), p.source);
   p.blocks.forEach((b, i) => batch.set(db.collection("scheduleBlocks").doc(`${DEMO_SOURCE_ID}-${String(i).padStart(4, "0")}`), b));
+  p.ratings.forEach((r, i) =>
+    batch.set(db.collection("spaceRatings").doc(`${DEMO_SOURCE_ID}-puan-${i}`), { ...r, createdAt: Timestamp.now() }),
+  );
   batch.set(db.collection("simulations").doc("library"), {
     spaceId: p.library.id,
     level: "BUSY",
@@ -44,7 +47,7 @@ async function main() {
     isSimulated: true,
   });
   await batch.commit();
-  console.log(`Örnek veri yazıldı: ${p.spaces.length} oda, ${p.blocks.length} ders bloğu, kütüphane simülasyonu (BUSY).`);
+  console.log(`Örnek veri yazıldı: ${p.spaces.length} oda, ${p.blocks.length} ders bloğu, ${p.ratings.length} örnek puan, kütüphane simülasyonu (BUSY).`);
 }
 
 main().catch((e: unknown) => {

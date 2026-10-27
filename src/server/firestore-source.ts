@@ -1,6 +1,7 @@
 import "server-only";
 
 import { Timestamp, type Firestore } from "firebase-admin/firestore";
+import type { Rating } from "@/domain/ratings";
 import type { Building, LibrarySimulation, ScheduleBlock, Space, SpaceReport, Term } from "@/domain/types";
 import type { DataSource, SourceSummary } from "./data-source";
 import { adminDb } from "./firebase-admin";
@@ -57,6 +58,14 @@ export function firestoreSource(db: Firestore = adminDb()): DataSource {
       if (!doc.exists) return null;
       const s = doc.data()!;
       return { level: s.level, updatedAtMs: toMs(s.updatedAt), isSimulated: true } as LibrarySimulation;
+    },
+
+    async ratings() {
+      const snap = await db.collection("spaceRatings").get();
+      return snap.docs.map((d) => {
+        const r = d.data();
+        return { spaceId: r.spaceId, uid: r.uid, checkinReportId: r.checkinReportId, scores: r.scores, createdAtMs: toMs(r.createdAt), isSimulated: r.isSimulated === true } as Rating;
+      });
     },
   };
 }

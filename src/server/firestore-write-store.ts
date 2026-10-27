@@ -29,5 +29,36 @@ export function firestoreWriteStore(db: Firestore = adminDb()): WriteStore {
         return { ok: true as const, id: ref.id };
       });
     },
+
+    async addRating(rating, sinceMs, decide) {
+      return db.runTransaction(async (tx) => {
+        const since = Timestamp.fromMillis(sinceMs);
+        const [reportSnap, ratingSnap] = await Promise.all([
+          tx.get(db.collection("spaceReports").where("uid", "==", rating.uid).where("createdAt", ">=", since)),
+          tx.get(db.collection("spaceRatings").where("uid", "==", rating.uid).where("createdAt", ">=", since)),
+        ]);
+        const checkins = reportSnap.docs
+          .filter((d) => d.get("type") === "AVAILABLE")
+          .map((d) => ({ id: d.id, spaceId: d.get("spaceId"), uid: rating.uid, createdAtMs: d.get("createdAt").toMillis() }));
+        const ratings = ratingSnap.docs.map((d) => ({
+          uid: rating.uid,
+          spaceId: d.get("spaceId"),
+          checkinReportId: d.get("checkinReportId"),
+          createdAtMs: d.get("createdAt").toMillis(),
+        }));
+        const decision = decide({ checkins, ratings });
+        if (!decision.ok) return decision;
+        const ref = db.collection("spaceRatings").doc();
+        tx.create(ref, {
+          spaceId: rating.spaceId,
+          uid: rating.uid,
+          checkinReportId: decision.checkinId,
+          scores: rating.scores,
+          createdAt: Timestamp.fromMillis(rating.createdAtMs),
+          isSimulated: false,
+        });
+        return { ...decision, id: ref.id };
+      });
+    },
   };
 }

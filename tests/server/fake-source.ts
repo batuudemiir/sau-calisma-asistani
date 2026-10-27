@@ -1,3 +1,4 @@
+import type { Rating } from "../../src/domain/ratings";
 import type { DataSource, SourceSummary } from "../../src/server/data-source";
 import type { Building, LibrarySimulation, ScheduleBlock, Space, SpaceReport, Term } from "../../src/domain/types";
 
@@ -9,6 +10,7 @@ export interface FakeData {
   blocks: ScheduleBlock[];
   reports: SpaceReport[];
   simulation: LibrarySimulation | null;
+  ratings?: Rating[];
 }
 
 export function fakeSource(data: FakeData): DataSource {
@@ -22,5 +24,6 @@ export function fakeSource(data: FakeData): DataSource {
     reportsSince: async (since, spaceId) =>
       data.reports.filter((r) => r.createdAtMs >= since && (!spaceId || r.spaceId === spaceId)),
     librarySimulation: async () => data.simulation,
+    ratings: async () => data.ratings ?? [],
   };
 }

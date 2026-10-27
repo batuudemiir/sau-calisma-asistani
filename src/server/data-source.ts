@@ -1,3 +1,4 @@
+import type { Rating } from "@/domain/ratings";
 import type { Building, LibrarySimulation, ScheduleBlock, Space, SpaceReport, Term } from "@/domain/types";
 
 /** Yayımlanmış bir program kaynağının arayüzde gösterilen özeti. */
@@ -18,4 +19,6 @@ export interface DataSource {
   blocks(termId: string, weekday: number): Promise<ScheduleBlock[]>;
   reportsSince(sinceMs: number, spaceId?: string): Promise<SpaceReport[]>;
   librarySimulation(): Promise<LibrarySimulation | null>;
+  /** Tüm değerlendirmeler (veri küçük; tek bina). uid içerir, yanıta konmaz. */
+  ratings(): Promise<Rating[]>;
 }

@@ -13,6 +13,9 @@ function memoryStore(spaces: string[]) {
       reports.push(r);
       return { ok: true, id: String(reports.length) };
     },
+    addRating: async () => {
+      throw new Error("kullanılmıyor");
+    },
   };
   return { store, reports };
 }

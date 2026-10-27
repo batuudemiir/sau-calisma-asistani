@@ -20,3 +20,6 @@ export const DEFAULT_HOURS: BuildingHours = { openMinute: OPEN_MINUTE, closeMinu
 export function isDuration(n: number): n is Duration {
   return (DURATIONS as readonly number[]).includes(n);
 }
+
+export const RATING_WINDOW_MIN = 180; // check-in'den sonra değerlendirme süresi
+export const MIN_RATINGS_TO_SHOW = 3; // altında ortalama gösterilmez

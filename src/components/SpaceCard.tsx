@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ACCESS_UNVERIFIED_LABEL } from "@/domain/types";
 import { time } from "@/lib/labels";
 import type { ResultDTO } from "@/server/search-service";
+import { RatingChip } from "./Ratings";
 import { SimulatedBadge, StatusBadge } from "./StatusBadge";
 
 export function SpaceCard({ r, href }: { r: ResultDTO; href: string }) {
@@ -19,6 +20,9 @@ export function SpaceCard({ r, href }: { r: ResultDTO; href: string }) {
           <StatusBadge status={r.status} />
         </div>
         <SpaceFacts r={r} />
+        <div className="mt-2">
+          <RatingChip rating={r.rating} />
+        </div>
       </Link>
     </li>
   );

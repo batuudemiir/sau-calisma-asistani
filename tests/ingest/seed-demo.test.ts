@@ -14,5 +14,8 @@ describe("seed-demo planı", () => {
         if (a !== b && a.spaceId === b.spaceId && a.weekday === b.weekday)
           expect(a.startMinute < b.endMinute && b.startMinute < a.endMinute).toBe(false);
     expect(p.spaces.filter((s) => s.dataQuality === "INCOMPLETE")).toHaveLength(1);
+    expect(p.ratings.every((r) => r.isSimulated)).toBe(true);
+    const ids = new Set([...p.spaces.map((s) => s.id), p.library.id]);
+    expect(p.ratings.every((r) => ids.has(r.spaceId))).toBe(true);
   });
 });

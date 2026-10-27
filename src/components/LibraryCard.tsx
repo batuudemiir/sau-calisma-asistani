@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { LIBRARY_LEVEL_LABELS, ago } from "@/lib/labels";
 import type { LibraryDTO } from "@/server/search-service";
+import { RatingChip } from "./Ratings";
 import { SimulatedBadge, StatusBadge } from "./StatusBadge";
 
 export function LibraryCard({ lib, href, nowMs }: { lib: LibraryDTO; href: string; nowMs: number }) {
@@ -22,6 +23,9 @@ export function LibraryCard({ lib, href, nowMs }: { lib: LibraryDTO; href: strin
             <SimulatedBadge />
           </p>
         )}
+        <div className="mt-2">
+          <RatingChip rating={lib.rating} />
+        </div>
       </Link>
     </section>
   );
