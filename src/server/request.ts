@@ -14,7 +14,7 @@ const QuerySchema = z.object({
 });
 
 export type ParsedQuery =
-  | { ok: true; durationMin: number; nowMs: number; isDemoClock: boolean }
+  | { ok: true; durationMin: number; nowMs: number; reportNowMs: number; isDemoClock: boolean }
   | { ok: false; error: string };
 
 export function parseQuery(params: URLSearchParams, demoMode: boolean, realNowMs: number): ParsedQuery {
@@ -24,5 +24,5 @@ export function parseQuery(params: URLSearchParams, demoMode: boolean, realNowMs
   if (at && !demoMode) return { ok: false, error: "Demo saati yalnızca demo modunda kullanılabilir" };
   const nowMs = at ? istanbulLocalToMs(at) : realNowMs;
   if (Number.isNaN(nowMs)) return { ok: false, error: "Geçersiz demo saati" };
-  return { ok: true, durationMin: d, nowMs, isDemoClock: Boolean(at) };
+  return { ok: true, durationMin: d, nowMs, reportNowMs: realNowMs, isDemoClock: Boolean(at) };
 }

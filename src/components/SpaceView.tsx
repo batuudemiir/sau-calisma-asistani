@@ -5,6 +5,7 @@ import { useParams, useSearchParams } from "next/navigation";
 import { LIBRARY_LEVEL_LABELS, REPORT_LABELS, WEEKDAY_NAMES, ago, time } from "@/lib/labels";
 import { carryQuery, useApi } from "@/lib/use-api";
 import type { SpaceDetailResponse } from "@/server/search-service";
+import { ReportButtons } from "./ReportButtons";
 import { POLL_MS } from "./ResultsView";
 import { SpaceFacts } from "./SpaceCard";
 import { SimulatedBadge, StatusBadge } from "./StatusBadge";
@@ -96,6 +97,8 @@ export function SpaceView() {
               )}
             </section>
           )}
+
+          <ReportButtons spaceId={s.spaceId} onReported={() => void reload()} />
 
           <section aria-labelledby="reports-title" className="space-y-2">
             <h2 id="reports-title" className="text-lg font-bold">

@@ -7,7 +7,10 @@ import type { AccessStatus, LibrarySimulation, NextClass, ReportType, Space, Spa
 import type { DataSource, SourceSummary } from "./data-source";
 
 export interface SearchOptions {
+  /** Ders programı saati (demo saati olabilir). */
   nowMs: number;
+  /** Bildirimlerin değerlendirildiği gerçek saat; verilmezse nowMs. Demo saati bildirimleri kaydırmaz. */
+  reportNowMs?: number;
   durationMin: number;
   demoMode: boolean;
   isDemoClock?: boolean;
@@ -42,6 +45,7 @@ export interface LibraryDTO {
 }
 
 export interface SearchResponse {
+  /** nowMs: gerçek saat ("x dk önce" hesapları için); dateISO/minute/weekday: program saati. */
   now: { dateISO: string; minute: number; weekday: number; isDemoClock: boolean; nowMs: number };
   durationMin: number;
   termLabel: string | null;
@@ -60,6 +64,8 @@ export const DEFAULT_LIBRARY: Space = {
   isSimulated: false,
 };
 
+const reportNow = (opts: SearchOptions) => opts.reportNowMs ?? opts.nowMs;
+
 async function load(ds: DataSource, opts: SearchOptions) {
   const now = toLocalTime(opts.nowMs);
   const term = await ds.activeTerm();
@@ -68,7 +74,7 @@ async function load(ds: DataSource, opts: SearchOptions) {
     ds.buildings(),
     term ? ds.publishedSources(term.id) : Promise.resolve([] as SourceSummary[]),
     term ? ds.blocks(term.id, now.weekday) : Promise.resolve([]),
-    ds.reportsSince(opts.nowMs - REPORT_TTL_MIN * 60_000),
+    ds.reportsSince(reportNow(opts) - REPORT_TTL_MIN * 60_000),
     opts.demoMode ? ds.librarySimulation() : Promise.resolve(null),
   ]);
   const buildingName = new Map(buildings.map((b) => [b.id, b.name]));
@@ -83,7 +89,7 @@ export async function runSearch(ds: DataSource, opts: SearchOptions): Promise<Se
   const d = await load(ds, opts);
   const out = searchSpaces({
     now: d.now,
-    nowMs: opts.nowMs,
+    nowMs: reportNow(opts),
     durationMin: opts.durationMin,
     term: d.term,
     spaces: d.spaces,
@@ -94,7 +100,7 @@ export async function runSearch(ds: DataSource, opts: SearchOptions): Promise<Se
   });
 
   return {
-    now: { ...d.now, isDemoClock: opts.isDemoClock ?? false, nowMs: opts.nowMs },
+    now: { ...d.now, isDemoClock: opts.isDemoClock ?? false, nowMs: reportNow(opts) },
     durationMin: opts.durationMin,
     termLabel: d.term?.label ?? null,
     library: {
@@ -146,7 +152,7 @@ export async function spaceDetail(ds: DataSource, spaceId: string, opts: SearchO
   let excludedBecause: SpaceDetailResponse["space"]["excludedBecause"] = null;
 
   if (isLibrary) {
-    status = evaluateTrust({ base: LIBRARY_BASE, reports, nowMs: opts.nowMs });
+    status = evaluateTrust({ base: LIBRARY_BASE, reports, nowMs: reportNow(opts) });
   } else {
     const program = checkProgram({
       now: d.now,
@@ -160,16 +166,16 @@ export async function spaceDetail(ds: DataSource, spaceId: string, opts: SearchO
     else if (program.kind === "EXCLUDED") {
       // Ayrıntı sayfasında elenmiş oda da gösterilir; etiket "bilinmiyor" değil, neden açıkça yazılır.
       excludedBecause = program.why;
-      status = evaluateTrust({ base: CLASSROOM_BASE, reports, nowMs: opts.nowMs });
+      status = evaluateTrust({ base: CLASSROOM_BASE, reports, nowMs: reportNow(opts) });
     } else {
-      status = evaluateTrust({ base: CLASSROOM_BASE, reports, nowMs: opts.nowMs });
+      status = evaluateTrust({ base: CLASSROOM_BASE, reports, nowMs: reportNow(opts) });
       freeUntil = program.freeUntil;
       nextClass = program.nextClass;
     }
   }
 
   return {
-    now: { ...d.now, isDemoClock: opts.isDemoClock ?? false, nowMs: opts.nowMs },
+    now: { ...d.now, isDemoClock: opts.isDemoClock ?? false, nowMs: reportNow(opts) },
     durationMin: opts.durationMin,
     space: {
       spaceId: space.id,
@@ -187,7 +193,7 @@ export async function spaceDetail(ds: DataSource, spaceId: string, opts: SearchO
     today: today.map(({ startMinute, endMinute, courseCode, courseName, sourceRef }) => ({ startMinute, endMinute, courseCode, courseName, sourceRef })),
     recentReports: reports
       .sort((a, b) => b.createdAtMs - a.createdAtMs)
-      .map((r) => ({ type: r.type, minutesAgo: Math.floor((opts.nowMs - r.createdAtMs) / 60_000) })),
+      .map((r) => ({ type: r.type, minutesAgo: Math.floor((reportNow(opts) - r.createdAtMs) / 60_000) })),
     simulation: isLibrary ? d.simulation : null,
   };
 }

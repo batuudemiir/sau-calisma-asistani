@@ -31,7 +31,7 @@ flowchart LR
     API --> DAL[Veri erişimi<br/>src/server/repo]
     DAL --> FS[(Firestore<br/>yayımlanmış veri)]
     UI -->|POST /api/reports| API
-    UI -.->|onSnapshot: bildirimler| FS
+    UI -.->|4 sn'de bir yenileme| API
   end
   subgraph Veri_hazirlama[Veri hazırlama akışı - yerel]
     SRC[Resmî kaynak<br/>PDF / XLSX] --> ING[scripts/ingest<br/>ExcelJS veya Gemini]
@@ -193,9 +193,9 @@ Eski dönem PDF'leri yalnızca ayrıştırıcı testlerinde kullanılır, asla y
 - Kişisel veri yok: e-posta, kart numarası, konum saklanmaz. Bildirimde yalnızca anonim `uid` tutulur.
 - `GEMINI_API_KEY` yalnızca geliştiricinin `.env.local` dosyasında ve betiklerde. Web uygulamasının ortamına konmaz.
 - `FIREBASE_SERVICE_ACCOUNT` yalnızca sunucuda. İstemcide sadece `NEXT_PUBLIC_FIREBASE_*` yapılandırması.
-- `firestore.rules`: herkes `terms`, `buildings`, `spaces`, `scheduleBlocks`, `spaceReports` okuyabilir; istemciden hiçbir koleksiyona yazma yok.
-  Açık not (Aşama 6'da karar): `spaceReports`/`spaceRatings` anonim `uid` içerir; istemciye doğrudan açmak yerine
-  API üzerinden uid'siz okunması veya uid'nin hash'lenmesi değerlendirilecek.
+- `firestore.rules`: herkes `terms`, `buildings`, `spaces`, `scheduleBlocks` okuyabilir; istemciden hiçbir koleksiyona yazma yok.
+  `spaceReports`/`spaceRatings` anonim `uid` içerdiği için istemciye kapalıdır; arayüz bunları API üzerinden uid'siz okur.
+  Canlı güncelleme `onSnapshot` yerine 4 saniyelik API yenilemesiyle yapılır (Aşama 6 Plan B; kabul kriteri ≤5 sn).
   Admin SDK kuralları atladığı için tüm yazma doğrulaması `src/server` içinde yapılır.
 - Bildirim kötüye kullanımı: aynı `uid` + oda için 10 dakikada 1 bildirim; `uid` başına saatte 20 bildirim; Zod ile tip kontrolü.
 - Değerlendirme: yalnızca check-in sonrası, check-in başına 1 puan; `uid` başına saatte 10 değerlendirme.
