@@ -5,15 +5,19 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { MISSING_LOCATIONS, OSM_ATTRIBUTION, osmBuilding, osmUrl, type PlaceCategory } from "@/data/campus";
 import { LIBRARY_LEVEL_LABELS, WEEKDAY_NAMES, statusTitle, time } from "@/lib/labels";
+import { applyFilters, parseFilters } from "@/lib/filters";
 import { carryQuery, durationParam, useApi } from "@/lib/use-api";
 import type { MapResponse, PlaceDTO, ResultDTO } from "@/server/search-service";
 import { DurationChips } from "../nav/DurationChips";
+import { FilterChips } from "../nav/FilterChips";
+import { ShareButton } from "../ShareButton";
 import { openingHoursText } from "../PlaceCard";
 import { RatingChip } from "../Ratings";
 import { ReportButtons } from "../ReportButtons";
 import { POLL_MS } from "../ResultsView";
 import { SimulatedBadge, StatusBadge } from "../StatusBadge";
 import { BuildingMap } from "./BuildingMap";
+import { SearchBox } from "./SearchBox";
 import { CampusMap, GUIDE, type MapSelection } from "./CampusMap";
 import { FILL, SHORT, isSimStatus, shownRating, type Tone } from "./map-style";
 
@@ -76,6 +80,7 @@ export function MapHome() {
               </p>
             )}
           </div>
+          {data && <SearchBox data={data} query={query} onSelect={select} />}
           <DurationChips basePath="/" />
         </header>
 
@@ -130,6 +135,7 @@ export function MapHome() {
           {data && place && !building && (
             <Panel title={place.name} onClose={close}>
               <PlaceSummary place={place} nowMs={data.now.nowMs} />
+              <ShareButton title={place.name} />
               <ReportButtons spaceId={place.spaceId} onReported={() => void reload()} />
               <Link
                 href={`/yer/${encodeURIComponent(place.spaceId)}?${query}`}
@@ -235,6 +241,9 @@ function Overview({
 }) {
   const n = data.results.length;
   const more = expanded ? "" : "hidden lg:block";
+  const filters = parseFilters(useSearchParams().get("f"));
+  const results = applyFilters(data.results, filters);
+  const places = applyFilters(data.places, filters);
   const noLocation = data.buildings.filter((b) => !b.osm || !osmBuilding(b.osm));
   return (
     <div className="space-y-3">
@@ -242,14 +251,22 @@ function Overview({
         <h2 id="sheet-title" ref={titleRef} tabIndex={-1} className="text-lg font-bold outline-none">
           {n > 0 ? `Şu an ${n} derslik uygun görünüyor` : "Programda uygun görünen derslik yok"}
         </h2>
-        <p className="text-sm opacity-80">{d} dakika boyunca · çalışma yerleri aşağıda</p>
+        <p className="text-sm opacity-80">
+          {d} dakika boyunca · çalışma yerleri aşağıda
+          {filters.length > 0 && ` · filtre: ${filters.length} etkin, ${results.length} derslik uyuyor`}
+        </p>
+      </div>
+      <div className={more}>
+        <FilterChips />
       </div>
       <ul className="space-y-2" aria-label="Uygun görünen derslikler">
-        {(expanded ? data.results : data.results.slice(0, 3)).map((r) => (
+        {(expanded ? results : results.slice(0, 3)).map((r) => (
           <ResultRow key={r.spaceId} r={r} query={query} />
         ))}
       </ul>
-      {!expanded && n > 3 && <p className="text-sm lg:hidden">ve {n - 3} derslik daha — paneli büyüt.</p>}
+      {!expanded && results.length > 3 && (
+        <p className="text-sm lg:hidden">ve {results.length - 3} derslik daha — paneli büyüt.</p>
+      )}
 
       <div className={`space-y-4 ${more}`}>
         <Link href={`/liste?${query}`} className="inline-flex min-h-11 items-center text-sm font-semibold underline">
@@ -260,7 +277,8 @@ function Overview({
             Çalışma yerleri
           </h3>
           <ul className="space-y-1">
-            {data.places.map((p) => (
+            {places.length === 0 && <li className="text-sm">Filtreye uyan çalışma yeri yok.</li>}
+            {places.map((p) => (
               <li key={p.spaceId}>
                 <a
                   href={`/?${query}&s=${encodeURIComponent(p.spaceId)}`}

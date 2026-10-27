@@ -128,3 +128,25 @@ test("harita: işarete dokununca yer paneli açılır, hızlı check-in panelde 
   await expect(a.getByRole("dialog")).toHaveCount(0);
   await expect(a).not.toHaveURL(/s=tas-kafe/);
 });
+
+test("arama Türkçe karakter katlar, filtre puansızı dışarıda bırakır ve sekmeler arasında taşınır", async ({ page }) => {
+  await page.goto(`/?${Q}`);
+  await page.getByRole("searchbox", { name: "Oda, bina veya yer ara" }).fill("o102");
+  await page.getByRole("list", { name: "Arama sonuçları" }).getByRole("link", { name: /Ö-102/ }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Ö-102" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Bu yeri paylaş" })).toBeVisible();
+
+  await page.goto(`/?${Q}`);
+  await page.getByRole("searchbox", { name: "Oda, bina veya yer ara" }).fill("kutuphane");
+  await page.getByRole("button", { name: /^Kütüphane Ek Bina/ }).click();
+  await expect(page.getByRole("dialog", { name: "Kütüphane Ek Bina" })).toBeVisible();
+
+  await page.goto(`/liste?${Q}`);
+  await expect(page.getByRole("listitem").filter({ hasText: "Ö-204" })).toHaveCount(1);
+  await page.getByRole("button", { name: "Sessiz" }).click();
+  await expect(page).toHaveURL(/f=quiet/);
+  await expect(page.getByRole("button", { name: "Sessiz" })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("listitem").filter({ hasText: "Ö-204" })).toHaveCount(0);
+  await page.getByRole("navigation", { name: "Ana gezinme" }).getByRole("link", { name: "Harita" }).click();
+  await expect(page).toHaveURL(/f=quiet/);
+});

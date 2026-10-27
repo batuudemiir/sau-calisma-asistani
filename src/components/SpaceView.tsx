@@ -1,5 +1,6 @@
 "use client";
 
+import { ShareButton } from "./ShareButton";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { LIBRARY_LEVEL_LABELS, REPORT_LABELS, WEEKDAY_NAMES, ago, time } from "@/lib/labels";
@@ -70,6 +71,9 @@ export function SpaceView() {
             ) : (
               <StatusBadge status={s.status} isLibrary={isLibrary} />
             )}
+            <div>
+              <ShareButton title={s.code} />
+            </div>
           </header>
 
           <div className="space-y-5 lg:grid lg:grid-cols-2 lg:items-start lg:gap-10 lg:space-y-0">

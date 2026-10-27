@@ -43,12 +43,14 @@ export function useApi<T>(url: string, pollMs?: number) {
   return { ...state, reload: load };
 }
 
-/** Sayfalar arası taşınan sorgu: süre ve (yalnızca demo modunda) demo saati. */
+/** Sayfalar arası taşınan sorgu: süre, filtreler ve (yalnızca demo modunda) demo saati. */
 export function carryQuery(params: URLSearchParams, extra: Record<string, string> = {}) {
   const q = new URLSearchParams();
   q.set("d", String(durationParam(params)));
   const at = params.get("at");
   if (at) q.set("at", at);
+  const f = params.get("f");
+  if (f) q.set("f", f);
   for (const [k, v] of Object.entries(extra)) q.set(k, v);
   return q.toString();
 }
