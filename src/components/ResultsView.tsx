@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { DURATIONS } from "@/domain/config";
 import { WEEKDAY_NAMES, time } from "@/lib/labels";
 import { carryQuery, durationParam, useApi } from "@/lib/use-api";
 import type { SearchResponse } from "@/server/search-service";
+import { DurationChips } from "./nav/DurationChips";
 import { PlaceCard } from "./PlaceCard";
 import { SpaceCard } from "./SpaceCard";
 
@@ -18,24 +18,10 @@ export function ResultsView() {
   const d = durationParam(params);
 
   return (
-    <main className="mx-auto w-full max-w-md flex-1 space-y-5 px-4 py-6 lg:max-w-6xl lg:px-8 lg:py-10">
+    <div className="mx-auto w-full max-w-md flex-1 space-y-5 px-4 py-6 lg:max-w-6xl lg:px-8 lg:py-10">
       <header className="space-y-3">
-        <Link href="/" className="inline-flex min-h-11 items-center text-sm underline">
-          ← Başa dön
-        </Link>
         <h1 className="text-2xl font-bold">{d} dakika çalışabileceğin yerler</h1>
-        <nav aria-label="Süreyi değiştir" className="flex gap-2 lg:max-w-xl">
-          {DURATIONS.map((x) => (
-            <Link
-              key={x}
-              href={`/results?${carryQuery(params, { d: String(x) })}`}
-              aria-current={x === d ? "page" : undefined}
-              className={`min-h-11 flex-1 rounded-lg border px-2 py-2 text-center text-sm font-semibold ${x === d ? "border-current bg-foreground text-background" : "border-zinc-400"}`}
-            >
-              {x} dk
-            </Link>
-          ))}
-        </nav>
+        <DurationChips basePath="/liste" />
         {data && (
           <p className="text-sm opacity-80">
             {WEEKDAY_NAMES[data.now.weekday]} {time(data.now.minute)}
@@ -43,7 +29,7 @@ export function ResultsView() {
             {data.now.isDemoClock && <strong className="ml-1">(demo saati)</strong>}
           </p>
         )}
-        <Link href={`/map?${query}`} className="inline-flex min-h-11 items-center text-sm font-semibold underline">
+        <Link href={`/?${query}`} className="inline-flex min-h-11 items-center text-sm font-semibold underline">
           Haritada gör →
         </Link>
       </header>
@@ -67,7 +53,7 @@ export function ResultsView() {
             </h2>
             <PlaceCard
               place={data.places[0]}
-              href={`/spaces/${encodeURIComponent(data.places[0].spaceId)}?${query}`}
+              href={`/yer/${encodeURIComponent(data.places[0].spaceId)}?${query}`}
               nowMs={data.now.nowMs}
             />
             {data.places.length > 1 && (
@@ -80,7 +66,7 @@ export function ResultsView() {
                     <li key={p.spaceId}>
                       <PlaceCard
                         place={p}
-                        href={`/spaces/${encodeURIComponent(p.spaceId)}?${query}`}
+                        href={`/yer/${encodeURIComponent(p.spaceId)}?${query}`}
                         nowMs={data.now.nowMs}
                         compact
                       />
@@ -100,7 +86,7 @@ export function ResultsView() {
             ) : (
               <ul className="space-y-3 xl:grid xl:grid-cols-2 xl:gap-3 xl:space-y-0" aria-label="Uygun görünen alanlar">
                 {data.results.map((r) => (
-                  <SpaceCard key={r.spaceId} r={r} href={`/spaces/${encodeURIComponent(r.spaceId)}?${query}`} />
+                  <SpaceCard key={r.spaceId} r={r} href={`/yer/${encodeURIComponent(r.spaceId)}?${query}`} />
                 ))}
               </ul>
             )}
@@ -111,6 +97,6 @@ export function ResultsView() {
           </div>
         </div>
       )}
-    </main>
+    </div>
   );
 }

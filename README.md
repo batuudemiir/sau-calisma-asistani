@@ -61,7 +61,7 @@ npm run demo:local      # emulator'ları açar, örnek veriyi yükler, next dev 
 ```
 
 Sonra http://localhost:3000 adresini aç (dev modunda ilk API isteği derleme yüzünden 10-20 sn sürebilir). Gece geliştirme yaparken bina kapalı görünür; demo modunda program saati
-`?at=` ile verilebilir: http://localhost:3000/results?d=60&at=2026-10-27T13:00
+`?at=` ile verilebilir: http://localhost:3000/liste?d=60&at=2026-10-27T13:00
 (demo saati yalnızca ders programını kaydırır; bildirimler gerçek saatle değerlendirilir).
 
 ## Komutlar

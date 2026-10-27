@@ -39,8 +39,8 @@ export function SpaceView() {
   const isLibrary = s?.kind === "LIBRARY" || s?.kind === "STUDY_AREA";
 
   return (
-    <main className="mx-auto w-full max-w-md flex-1 space-y-5 px-4 py-6 lg:max-w-5xl lg:px-8 lg:py-10">
-      <Link href={`/results?${query}`} className="inline-flex min-h-11 items-center text-sm underline">
+    <div className="mx-auto w-full max-w-md flex-1 space-y-5 px-4 py-6 lg:max-w-5xl lg:px-8 lg:py-10">
+      <Link href={`/liste?${query}`} className="inline-flex min-h-11 items-center text-sm underline">
         ← Sonuçlara dön
       </Link>
 
@@ -146,7 +146,7 @@ export function SpaceView() {
           </div>
         </>
       )}
-    </main>
+    </div>
   );
 }
 

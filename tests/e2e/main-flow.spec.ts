@@ -2,7 +2,7 @@ import { expect, test, type Browser, type Page } from "@playwright/test";
 
 // Örnek veri (scripts/seed-demo) Salı 13.00 için: Ö-102/Ö-103/Ö-201/Ö-202 programda boş, Ö-204 veri eksik.
 const Q = "d=60&at=2026-10-27T13:00";
-const room = (code: string) => `/spaces/demo-blok-${encodeURIComponent(`Ö-${code}`)}?${Q}`;
+const room = (code: string) => `/yer/demo-blok-${encodeURIComponent(`Ö-${code}`)}?${Q}`;
 const CRITERIA = ["Sessizlik", "Priz", "İnternet", "Işık"];
 
 async function newPhone(browser: Browser): Promise<Page> {
@@ -18,13 +18,37 @@ async function rate(page: Page, score: number) {
 const formMessage = (page: Page) => page.locator("form p[aria-live=polite]");
 const reportMessage = (page: Page) => page.locator("section p[aria-live=polite]");
 
-test("ana sayfadan süre seçilir, sonuçlar etiket ve kaynakla listelenir", async ({ page }) => {
-  await page.goto("/");
-  await expect(page.getByRole("heading", { name: "Şimdi nerede çalışabilirsin?" })).toBeVisible();
-  await page.getByRole("link", { name: "60 dakika" }).click();
-  await expect(page).toHaveURL(/\/results\?d=60/);
+test("harita ana ekran, sekmeler sorguyu taşır, eski bağlantılar yönlendirilir", async ({ page }) => {
+  await page.goto(`/?${Q}`);
+  await expect(page.getByRole("heading", { level: 1, name: "Kampüs haritası" })).toBeVisible();
+  const tabs = page.getByRole("navigation", { name: "Ana gezinme" });
+  await expect(tabs.getByRole("link", { name: "Harita" })).toHaveAttribute("aria-current", "page");
+  await page.getByRole("link", { name: "90 dakika" }).click();
+  await expect(page).toHaveURL(/\/\?d=90/);
+  await tabs.getByRole("link", { name: "Liste" }).click();
+  await expect(page).toHaveURL(/\/liste\?d=90/);
+  await expect(page.getByRole("heading", { level: 1, name: "90 dakika çalışabileceğin yerler" })).toBeVisible();
+  await tabs.getByRole("link", { name: "Profil" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Profil" })).toBeVisible();
+  await page.getByRole("link", { name: /Hakkında/ }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Hakkında" })).toBeVisible();
 
   await page.goto(`/results?${Q}`);
+  await expect(page).toHaveURL(/\/liste\?d=60&at=2026-10-27T13(:|%3A)00$/);
+  await page.goto(`/spaces/demo-blok-${encodeURIComponent("Ö-102")}?${Q}`);
+  await expect(page).toHaveURL(/\/yer\/demo-blok-/);
+  await expect(page.getByRole("heading", { level: 1, name: "Ö-102" })).toBeVisible();
+  await page.goto(`/map?${Q}`);
+  await expect(page).toHaveURL(/127\.0\.0\.1:3000\/\?d=60&at=2026-10-27T13(:|%3A)00$/);
+  await expect(page.getByRole("heading", { level: 1, name: "Kampüs haritası" })).toBeVisible();
+
+  // İçeriğe atla: klavyede ilk odak
+  await page.keyboard.press("Tab");
+  await expect(page.getByRole("link", { name: "İçeriğe atla" })).toBeFocused();
+});
+
+test("liste: sonuçlar etiket ve kaynakla listelenir", async ({ page }) => {
+  await page.goto(`/liste?${Q}`);
   const card = page.getByRole("listitem").filter({ hasText: "Ö-102" });
   await expect(card.getByText("Programda boş")).toBeVisible();
   await expect(card.getByText("17.00 saatine kadar boş (programa göre)")).toBeVisible();
@@ -43,7 +67,7 @@ test("ana sayfadan süre seçilir, sonuçlar etiket ve kaynakla listelenir", asy
 test("check-in diğer cihazda 5 sn içinde görünür, aynı odaya ikinci bildirim hız sınırına takılır (T18)", async ({ browser }) => {
   const a = await newPhone(browser);
   const b = await newPhone(browser);
-  await b.goto(`/results?${Q}`);
+  await b.goto(`/liste?${Q}`);
   await expect(b.getByRole("listitem").filter({ hasText: "Ö-103" }).getByText("Programda boş")).toBeVisible();
 
   await a.goto(room("103"));
@@ -77,6 +101,6 @@ test("değerlendirme check-in ister, check-in başına bir kez; 3 değerlendirme
   }
 
   const map = await newPhone(browser);
-  await map.goto(`/map?${Q}&b=demo-blok`);
+  await map.goto(`/?${Q}&b=demo-blok`);
   await expect(map.locator('a[aria-label^="Ö-202"]')).toHaveAttribute("aria-label", /Ortalama puan 4\.0$/);
 });

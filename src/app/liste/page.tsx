@@ -1,5 +1,8 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { ResultsView } from "@/components/ResultsView";
+
+export const metadata: Metadata = { title: "Liste" };
 
 export default function ResultsPage() {
   return (

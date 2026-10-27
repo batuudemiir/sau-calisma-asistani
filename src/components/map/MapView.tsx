@@ -19,6 +19,7 @@ import { floorRows, projector, toPath } from "@/lib/map-geometry";
 import { carryQuery, durationParam, useApi } from "@/lib/use-api";
 import type { MapResponse, MapSpaceDTO } from "@/server/search-service";
 import { POLL_MS } from "../ResultsView";
+import { DurationChips } from "../nav/DurationChips";
 import { SimulatedBadge } from "../StatusBadge";
 
 type Tone = StatusCode | "EXCLUDED";
@@ -76,21 +77,14 @@ export function MapView() {
     data?.places.some((p) => shownRating(p.rating)?.simulated || isSimStatus(p));
 
   return (
-    <main className="mx-auto w-full max-w-md flex-1 space-y-4 px-4 py-6 lg:max-w-6xl lg:px-8 lg:py-10">
-      <nav className="flex justify-between text-sm">
-        {building ? (
-          <Link href={`/map?${query}`} className="inline-flex min-h-11 items-center underline">
-            ← Kampüs
-          </Link>
-        ) : (
-          <Link href={`/results?${query}`} className="inline-flex min-h-11 items-center underline">
-            ← Liste görünümü
-          </Link>
-        )}
-        <Link href={`/results?${query}`} className="inline-flex min-h-11 items-center underline">
-          Liste
+    <div className="mx-auto w-full max-w-md flex-1 space-y-4 px-4 py-6 lg:max-w-6xl lg:px-8 lg:py-10">
+      {building ? (
+        <Link href={`/?${query}`} className="inline-flex min-h-11 items-center text-sm underline">
+          ← Kampüs
         </Link>
-      </nav>
+      ) : (
+        <DurationChips basePath="/" />
+      )}
       <h1 className="text-2xl font-bold">{building ? building.name : "Kampüs haritası"}</h1>
       {data && (
         <p className="text-sm opacity-80">
@@ -153,7 +147,7 @@ export function MapView() {
           </p>
         </>
       )}
-    </main>
+    </div>
   );
 }
 
@@ -248,7 +242,7 @@ function CampusMap({ data, query }: { data: MapResponse; query: string }) {
             return (
               <a
                 key={b.id}
-                href={`/map?${query}&b=${encodeURIComponent(b.id)}`}
+                href={`/?${query}&b=${encodeURIComponent(b.id)}`}
                 aria-label={`${b.name}: ${free} uygun görünen oda. Odaları gör.`}
               >
                 <path d={shape(ob.outline)} className={FILL.PROGRAM_FREE} strokeWidth="2" />
@@ -266,7 +260,7 @@ function CampusMap({ data, query }: { data: MapResponse; query: string }) {
               return (
                 <a
                   key={p.spaceId}
-                  href={`/spaces/${encodeURIComponent(p.spaceId)}?${query}`}
+                  href={`/yer/${encodeURIComponent(p.spaceId)}?${query}`}
                   aria-label={`${p.name}: ${statusTitle(p.status, true)}`}
                 >
                   <path d={shape(ob.outline)} className={FILL[p.status.code]} strokeWidth="1.5" />
@@ -293,7 +287,7 @@ function CampusMap({ data, query }: { data: MapResponse; query: string }) {
             {data.places.map((p) => (
               <li key={p.spaceId}>
                 <a
-                  href={`/spaces/${encodeURIComponent(p.spaceId)}?${query}`}
+                  href={`/yer/${encodeURIComponent(p.spaceId)}?${query}`}
                   className="inline-flex min-h-11 items-center gap-2 underline"
                 >
                   {p.kind === "LIBRARY" ? "K" : "C"} · {p.name} — {statusTitle(p.status, true)}
@@ -314,7 +308,7 @@ function CampusMap({ data, query }: { data: MapResponse; query: string }) {
                 .map((b) => (
                   <li key={b.id}>
                     <a
-                      href={`/map?${query}&b=${encodeURIComponent(b.id)}`}
+                      href={`/?${query}&b=${encodeURIComponent(b.id)}`}
                       className="inline-flex min-h-11 items-center underline"
                     >
                       {b.name} — odaları gör
@@ -376,7 +370,7 @@ function BuildingMap({ spaces, query }: { spaces: MapSpaceDTO[]; query: string }
               const y = y0 + 18;
               const tone = toneOf(s);
               return (
-                <a key={s.spaceId} href={`/spaces/${encodeURIComponent(s.spaceId)}?${query}`} aria-label={ariaFor(s.code, s)}>
+                <a key={s.spaceId} href={`/yer/${encodeURIComponent(s.spaceId)}?${query}`} aria-label={ariaFor(s.code, s)}>
                   <rect
                     x={x}
                     y={y}
