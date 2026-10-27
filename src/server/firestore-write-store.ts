@@ -14,6 +14,8 @@ function readUser(data: FirebaseFirestore.DocumentData | undefined): UserPoints 
     points: data.points ?? 0,
     dayKey: data.dayKey ?? "",
     dayPoints: data.dayPoints ?? 0,
+    monthKey: data.monthKey ?? "",
+    monthPoints: data.monthPoints ?? 0,
     counts: { ...base.counts, ...data.counts },
     checkinAt: data.checkinAt ?? {},
   };
@@ -80,6 +82,7 @@ export function firestoreWriteStore(db: Firestore = adminDb()): WriteStore {
             type: d.get("type"),
             createdAtMs: d.get("createdAt").toMillis(),
             isSimulated: d.get("isSimulated") === true,
+            qr: d.get("proof") === "QR",
           })),
         );
         // Doğrulama bonusu diğer kullanıcının bildirimi başına bir kez (defter belgesinin kimliği bunu garanti eder)
@@ -97,6 +100,7 @@ export function firestoreWriteStore(db: Firestore = adminDb()): WriteStore {
           uid: report.uid,
           createdAt: Timestamp.fromMillis(report.createdAtMs),
           isSimulated: false,
+          proof: report.qr ? "QR" : null,
         });
         if (!result) return { ok: true as const, id: ref.id };
 
@@ -124,7 +128,12 @@ export function firestoreWriteStore(db: Firestore = adminDb()): WriteStore {
             report.createdAtMs,
           );
         }
-        return { ok: true as const, id: ref.id, points: result.awards.reduce((n, a) => n + a.points, 0) };
+        return {
+          ok: true as const,
+          id: ref.id,
+          points: result.awards.reduce((n, a) => n + a.points, 0),
+          qrLimited: result.qrLimited,
+        };
       });
     },
 
@@ -193,13 +202,13 @@ export function firestoreWriteStore(db: Firestore = adminDb()): WriteStore {
     async deleteAccountData(uid) {
       // 500'lük gruplar halinde (Firestore toplu yazma sınırı); yarıda kalırsa tekrar çağrılabilir
       const PAGE = 400;
-      for (const col of ["pointEvents", "spaceReports", "spaceRatings"] as const) {
+      for (const col of ["pointEvents", "rewardClaims", "spaceReports", "spaceRatings"] as const) {
         for (;;) {
           const snap = await db.collection(col).where("uid", "==", uid).limit(PAGE).get();
           if (snap.empty) break;
           const batch = db.batch();
           for (const d of snap.docs) {
-            if (col === "pointEvents") batch.delete(d.ref);
+            if (col === "pointEvents" || col === "rewardClaims") batch.delete(d.ref);
             else batch.update(d.ref, { uid: DELETED_UID });
           }
           await batch.commit();
@@ -207,6 +216,73 @@ export function firestoreWriteStore(db: Firestore = adminDb()): WriteStore {
         }
       }
       await db.collection("users").doc(uid).delete();
+    },
+
+    async rewards() {
+      const snap = await db.collection("rewards").get();
+      return snap.docs.map((d) => ({
+        id: d.id,
+        title: d.get("title"),
+        partner: d.get("partner"),
+        description: d.get("description") ?? "",
+        threshold: d.get("threshold"),
+        stockPerMonth: d.get("stockPerMonth"),
+        isSimulated: d.get("isSimulated") === true,
+      }));
+    },
+
+    async rewardState(uid, monthKey, rewardIds) {
+      const [userSnap, claims, stocks] = await Promise.all([
+        db.collection("users").doc(uid).get(),
+        db.collection("rewardClaims").where("uid", "==", uid).where("monthKey", "==", monthKey).get(),
+        rewardIds.length ? db.getAll(...rewardIds.map((id) => db.collection("rewardStock").doc(`${id}_${monthKey}`))) : [],
+      ]);
+      return {
+        user: readUser(userSnap.data()),
+        student: userSnap.get("student") === true,
+        claimed: Object.fromEntries(claims.docs.map((d) => [d.get("rewardId"), d.get("code")])),
+        claimedCount: Object.fromEntries(stocks.map((s, i) => [rewardIds[i], s.exists ? s.get("claimed") : 0])),
+      };
+    },
+
+    async claimReward(uid, rewardId, monthKey, makeCode, decide) {
+      return db.runTransaction(async (tx) => {
+        const rewardRef = db.collection("rewards").doc(rewardId);
+        const stockRef = db.collection("rewardStock").doc(`${rewardId}_${monthKey}`);
+        // Belge kimliği kullanıcı başına ayda bir hakkı garanti eder
+        const claimRef = db.collection("rewardClaims").doc(`${rewardId}_${monthKey}_${uid}`);
+        const userRef = db.collection("users").doc(uid);
+        const [rewardSnap, stockSnap, claimSnap, userSnap] = await Promise.all([
+          tx.get(rewardRef),
+          tx.get(stockRef),
+          tx.get(claimRef),
+          tx.get(userRef),
+        ]);
+        if (!rewardSnap.exists) return { ok: false as const, block: "NOT_FOUND" as const };
+        const reward = {
+          id: rewardSnap.id,
+          title: rewardSnap.get("title"),
+          partner: rewardSnap.get("partner"),
+          description: rewardSnap.get("description") ?? "",
+          threshold: rewardSnap.get("threshold"),
+          stockPerMonth: rewardSnap.get("stockPerMonth"),
+          isSimulated: rewardSnap.get("isSimulated") === true,
+        };
+        const claimedCount = stockSnap.exists ? (stockSnap.get("claimed") as number) : 0;
+        const block = decide({
+          reward,
+          user: readUser(userSnap.data()),
+          student: userSnap.get("student") === true,
+          alreadyClaimed: claimSnap.exists,
+          claimedCount,
+        });
+        if (block) return { ok: false as const, block };
+        const at = Timestamp.now();
+        const code = makeCode(reward);
+        tx.create(claimRef, { uid, rewardId, monthKey, code, createdAt: at, isSimulated: reward.isSimulated });
+        tx.set(stockRef, { rewardId, monthKey, claimed: claimedCount + 1, isSimulated: reward.isSimulated }, { merge: true });
+        return { ok: true as const, code };
+      });
     },
 
     async markStudent(uid) {

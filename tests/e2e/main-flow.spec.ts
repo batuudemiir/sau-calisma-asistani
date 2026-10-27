@@ -165,7 +165,7 @@ test("puan: check-in +5, profilde görünür; SAÜ dışı Google reddedilir, ö
   await p.getByRole("navigation", { name: "Ana gezinme" }).getByRole("link", { name: "Profil" }).click();
   await expect(p.getByRole("heading", { name: "Katkıların bu cihazda anonim" })).toBeVisible();
   await expect(p.getByTestId("level")).toHaveText("Yeni");
-  await expect(p.getByText(/^5\s*puan/)).toBeVisible();
+  await expect(p.getByTestId("points")).toHaveText("5");
   await expect(p.getByRole("listitem").filter({ hasText: "Check-in · Kantin" })).toContainText("+5");
 
   await p.evaluate(() => (window.__fakeGoogleEmail = "biri@gmail.com"));
@@ -177,7 +177,7 @@ test("puan: check-in +5, profilde görünür; SAÜ dışı Google reddedilir, ö
   await p.getByRole("button", { name: "SAÜ hesabıyla giriş yap (Google)" }).click();
   await expect(p.getByRole("heading", { name: "SAÜ öğrenci hesabı" })).toBeVisible();
   await expect(p.getByText("b221210001@ogr.sakarya.edu.tr")).toBeVisible();
-  await expect(p.getByText(/^5\s*puan/)).toBeVisible(); // girişten önceki puan korunur
+  await expect(p.getByTestId("points")).toHaveText("5"); // girişten önceki puan korunur
 
   await p.getByRole("button", { name: "Çıkış yap" }).click();
   await expect(p.getByRole("heading", { name: "Katkıların bu cihazda anonim" })).toBeVisible();
@@ -191,11 +191,11 @@ test("hesap silme: puan ve geçmiş silinir, bildirim topluluk verisi olarak kal
   await expect(panel.getByText("+5 puan kazandın")).toBeVisible();
 
   await p.goto(`/profil?${Q}`);
-  await expect(p.getByText(/^5\s*puan/)).toBeVisible();
+  await expect(p.getByTestId("points")).toHaveText("5");
   await p.getByRole("button", { name: "Hesabımı sil" }).click();
   await p.getByRole("button", { name: "Evet, kalıcı olarak sil" }).click();
   await expect(p.getByText(/Hesabın ve kişisel verilerin silindi/)).toBeVisible();
-  await expect(p.getByText(/^0\s*puan/)).toBeVisible();
+  await expect(p.getByTestId("points")).toHaveText("0");
   await expect(p.getByText(/Henüz katkın yok/)).toBeVisible();
 
   await p.goto(`/?${Q}&s=kampus-kafeterya`);

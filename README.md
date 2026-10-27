@@ -19,17 +19,21 @@ bilinmeyen bilgi asla "boş" kabul edilmez.
 - **Gerçek kampüs haritası:** OpenStreetMap'ten 181 binanın gerçek konum ve sınırları (SVG, harita paketi yok); kat görünümünde her odada durum ve puan
 - **Çalışma yerleri:** Merkez Kütüphane, Kütüphane Ek Bina ve kampüsteki 4 kafe/kantin — açılış saati (kaynaklıysa), bildirim ve puanla
 - **Kütüphane kartı:** bildirim tabanlı; demo modunda "Örnek demo verisi" etiketli gün içi doluluk deseni
+- **Çalışma asistanı:** haritanın sağ altındaki yuvarlak düğme. Kural tabanlı öneri motoru (`src/domain/assistant.ts`), yapay zekâ API'si yok: süre, ihtiyaç (sessiz/priz/internet/ışık), yer türü ve isteğe bağlı konumla (yalnızca cihazda) en iyi 3 yeri gerekçeleri ve bilinmeyenleriyle önerir
+- **QR ile check-in:** her derslik için sunucu anahtarıyla imzalı QR (`npm run qr`); okutunca doğrulanmış check-in (+10 puan) ve geri bildirim. Aynı QR kısa sürede çok hesaptan kullanılırsa bonus verilmez
+- **Aylık ödüller:** ay içinde puan eşiğine ulaşan SAÜ öğrencisi stok bitene kadar ödül alır (çekiliş değil). Sponsor olmadığından ödüller "Örnek demo verisi"; kuponlar `ORNEK-` ile başlar ve geçersizdir
 - **Veri hazırlama hattı:** XLSX → deterministik ayrıştırma, PDF → Gemini (yapılandırılmış JSON), elle derlenmiş CSV (Plan B), Zod + kalite kuralları, insan kontrolü, yayın/geri dönüş
 
 ## Durum (dürüst özet)
 
 | Konu | Durum |
 |---|---|
-| Uygunluk/güven/sıralama/değerlendirme kuralları | 112 birim testi geçiyor (T1-T27 dahil) |
+| Uygunluk/güven/sıralama/değerlendirme/puan/asistan/ödül kuralları | 157 birim testi geçiyor (T1-T27 dahil) |
 | Kampüs konumları | OSM'den 181 bina; 43 adlı. İşletme, Siyasal, İletişim, Sağlık Bilimleri fakültelerinin binası OSM'de adlı değil |
 | SABİS ders programı | **Erişilemedi** (ağ politikası); içe aktarıcı erişim açılınca yazılacak |
-| Uçtan uca akış (arama, ayrıntı, check-in, puan, harita) | `npm run test:e2e` ile 3 Playwright senaryosu geçiyor (emulator + örnek veri); check-in diğer cihazda ≤5 sn |
-| Erişilebilirlik | axe (WCAG 2.0/2.1/2.2 AA) açık ve koyu temada 5 sayfada ihlal bulmadı; SVG metin kontrastı elle kontrol edildi |
+| Uçtan uca akış | `npm run test:e2e`: 29 Playwright testi (harita, liste, arama/filtre, check-in, puan, Google girişi, hesap silme, asistan, QR, ödül + axe) emulator + örnek veriyle geçiyor |
+| Erişilebilirlik | axe (WCAG 2.2 A/AA kuralları) açık ve koyu temada 8 sayfa + asistan panelinde ihlal bulmadı; ekran okuyucuyla elle test yapılmadı |
+| Google girişi, QR, ödüller | Emulator'da test edildi; **canlı Firebase projesinde doğrulanmadı**. Ödül sponsoru yok |
 | Gerçek SAÜ ders programı | **Yok.** Geliştirme ortamından sakarya.edu.tr erişilemedi; belge eklenip `ingest` ile işlenmeli |
 | Gemini ile PDF ayrıştırma | Kod ve yanıt doğrulama testli; **gerçek API çağrısı doğrulanmadı** (anahtar yok). Model `GEMINI_MODEL` ile seçilir |
 | Firebase App Hosting dağıtımı | `apphosting.yaml` hazır; **canlı ortamda doğrulanmadı** |
@@ -76,6 +80,7 @@ Sonra http://localhost:3000 adresini aç (dev modunda ilk API isteği derleme y�
 | `npm run seed-campus` | Kampüs kataloğu: çalışma yerleri + bina konumları (gerçek veri, OSM) |
 | `npm run seed-demo [-- --clear \| --only-library]` | Örnek veri yazar / yalnızca `isSimulated` kayıtları siler / yalnızca kütüphane örneği (`DEMO_MODE=true` gerekir) |
 | `npm run demo-report -- <oda> <uygun\|dolu\|kullanilamiyor\|guncel_degil> [--ago dk]` | Demo için etiketli yapay bildirim (`DEMO_MODE=true` gerekir) |
+| `npm run qr -- --base <adres> [--building <id>] [--emulator]` | Derslik kapıları için basılabilir QR sayfası (`data/qr/`, depoya girmez; `QR_SECRET` gerekir) |
 | `npm run ingest -- <dosya> ...` | Kaynak belgeyi taslak JSON'a çevirir (`data/drafts/`) |
 | `npm run publish-schedule -- <taslak> ...` | İncelenmiş taslağı Firestore'a yayımlar; `--rollback <sourceId>` |
 

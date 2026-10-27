@@ -1,5 +1,6 @@
 import type { Award, OtherReport, PointKind, ReportAward, UserPoints } from "@/domain/points";
 import type { Checkin, Rating, Scores } from "@/domain/ratings";
+import type { ClaimBlock, Reward } from "@/domain/rewards";
 import type { ReportType } from "@/domain/types";
 import type { RateDecision, RecentWrite } from "./rate-limit";
 
@@ -8,10 +9,12 @@ export interface NewReport {
   type: ReportType;
   uid: string;
   createdAtMs: number;
+  /** Sunucuda doğrulanmış sınıf QR'ı ile geldi. */
+  qr?: boolean;
 }
 
 /** points: bu katkıyla kazanılan toplam puan (bonus dahil). */
-export type WriteResult = RateDecision & { id?: string; points?: number };
+export type WriteResult = RateDecision & { id?: string; points?: number; qrLimited?: boolean };
 
 /** Puan hesabı (saf, src/domain/points): mevcut kullanıcı durumu + aynı yere son bildirimler → yeni durum. */
 export type ReportAwardFn = (user: UserPoints, recentOnSpace: OtherReport[]) => ReportAward;
@@ -25,6 +28,17 @@ export interface PointEventDTO {
 }
 
 export const DELETED_UID = "silinmis";
+
+export interface RewardState {
+  user: UserPoints;
+  student: boolean;
+  /** Bu ay alınan kuponlar: ödül kimliği → kod. */
+  claimed: Record<string, string>;
+  /** Bu ay her ödülden verilen kupon sayısı. */
+  claimedCount: Record<string, number>;
+}
+
+export type ClaimResult = { ok: true; code: string } | { ok: false; block: ClaimBlock | "NOT_FOUND" };
 
 export interface Profile {
   user: UserPoints;
@@ -72,4 +86,20 @@ export interface WriteStore {
    * kalır ama kişiyle bağı koparılır (uid DELETED_UID olur).
    */
   deleteAccountData(uid: string): Promise<void>;
+  rewards(): Promise<Reward[]>;
+  rewardState(uid: string, monthKey: string, rewardIds: readonly string[]): Promise<RewardState>;
+  /** Atomik: stok, aylık hak ve puan kontrolü + kupon yazımı aynı transaction'da. */
+  claimReward(
+    uid: string,
+    rewardId: string,
+    monthKey: string,
+    makeCode: (reward: Reward) => string,
+    decide: (state: {
+      reward: Reward;
+      user: UserPoints;
+      student: boolean;
+      alreadyClaimed: boolean;
+      claimedCount: number;
+    }) => ClaimBlock | null,
+  ): Promise<ClaimResult>;
 }

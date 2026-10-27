@@ -24,3 +24,8 @@ env:
   - variable: DEMO_MODE
     value: "true"
     availability: [RUNTIME]
+  # Sınıf QR kodlarının imza anahtarı (gizli). Oluştur: firebase apphosting:secrets:set QR_SECRET
+  # Değişirse basılı QR'lar geçersiz olur. DOĞRULANMADI: canlı backend'de denenmedi.
+  - variable: QR_SECRET
+    secret: QR_SECRET
+    availability: [RUNTIME]

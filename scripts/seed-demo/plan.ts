@@ -1,3 +1,4 @@
+import type { Reward } from "../../src/domain/rewards";
 import type { Scores } from "../../src/domain/ratings";
 import type { Building, ScheduleBlock, Space, Term, Weekday } from "../../src/domain/types";
 
@@ -5,6 +6,37 @@ import type { Building, ScheduleBlock, Space, Term, Weekday } from "../../src/do
 // arayüzde "Örnek demo verisi" etiketiyle görünür. Oda kodları gerçek dersliklerle karışmasın diye "Ö-" önekli.
 
 export const DEMO_BUILDING: Building = { id: "demo-blok", name: "Örnek Blok", campus: "Esentepe", isSimulated: true };
+/** Örnek ödüller: sponsor yok; "Örnek demo verisi" etiketiyle gösterilir, kuponları geçersizdir (ORNEK-). */
+export const DEMO_REWARDS: Reward[] = [
+  {
+    id: "ornek-cay",
+    title: "Kampüs kafesinde çay",
+    partner: "Örnek sponsor (henüz anlaşma yok)",
+    description: "Demo için düşük eşikli örnek ödül.",
+    threshold: 10,
+    stockPerMonth: 50,
+    isSimulated: true,
+  },
+  {
+    id: "ornek-kahve",
+    title: "Kampüs kafesinde kahve",
+    partner: "Örnek sponsor (henüz anlaşma yok)",
+    description: "Ay içinde 100 puana ulaşan öğrenciye bir kahve.",
+    threshold: 100,
+    stockPerMonth: 20,
+    isSimulated: true,
+  },
+  {
+    id: "ornek-kitap",
+    title: "Kitap hediye çeki",
+    partner: "Örnek sponsor (henüz anlaşma yok)",
+    description: "Ay içinde 250 puana ulaşan öğrenciye kitap çeki.",
+    threshold: 250,
+    stockPerMonth: 5,
+    isSimulated: true,
+  },
+];
+
 export const DEMO_SOURCE_ID = "ornek-demo-2026-guz";
 
 export const DEMO_TERM: Term = {

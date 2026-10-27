@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   CHECKIN_POINT_COOLDOWN_MIN,
   DAILY_CAP,
+  QR_ABUSE_MAX_ACCOUNTS,
+  QR_ABUSE_WINDOW_MIN,
   awardConfirmBonus,
   awardRating,
   awardReport,
@@ -94,5 +96,33 @@ describe("puanlar", () => {
     expect(levelOf(50).name).toBe("Kampüs Gezgini");
     expect(levelOf(499)).toMatchObject({ name: "Çalışma Rehberi", next: { remaining: 1 } });
     expect(levelOf(900)).toMatchObject({ name: "Kampüs Uzmanı", next: null });
+  });
+
+  it("QR ile check-in +10; aynı yer bekleme süresi QR için de geçerli", () => {
+    const a = awardReport(emptyUser(), input({ qr: true }));
+    expect(a.awards).toEqual([{ kind: "QR_CHECKIN", points: 10 }]);
+    expect(awardReport(a.user, input({ qr: true, nowMs: T0 + 30 * MIN })).awards).toEqual([{ kind: "QR_CHECKIN", points: 0 }]);
+  });
+
+  it(`aynı QR ${QR_ABUSE_WINDOW_MIN} dk içinde ${QR_ABUSE_MAX_ACCOUNTS} başka hesaptan kullanıldıysa QR bonusu yok, normal check-in`, () => {
+    const used = (n: number) =>
+      Array.from({ length: n }, (_, i) => other({ id: `q${i}`, uid: `u${i}`, qr: true, createdAtMs: T0 - 5 * MIN }));
+    expect(awardReport(emptyUser(), input({ qr: true, recentOnSpace: used(QR_ABUSE_MAX_ACCOUNTS - 1) })).qrLimited).toBe(false);
+    const limited = awardReport(emptyUser(), input({ qr: true, recentOnSpace: used(QR_ABUSE_MAX_ACCOUNTS) }));
+    expect(limited.qrLimited).toBe(true);
+    expect(limited.awards[0]).toEqual({ kind: "CHECKIN", points: 5 });
+    // Pencere dışındaki QR kullanımları sayılmaz
+    const old = used(QR_ABUSE_MAX_ACCOUNTS).map((r) => ({ ...r, createdAtMs: T0 - 11 * MIN }));
+    expect(awardReport(emptyUser(), input({ qr: true, recentOnSpace: old })).qrLimited).toBe(false);
+  });
+
+  it("aylık puan: ay değişince sıfırlanır, toplam puan sürer", () => {
+    const oct = awardReport(emptyUser(), input({ dayKey: "2026-10-31" }));
+    expect(oct.user.monthKey).toBe("2026-10");
+    expect(oct.user.monthPoints).toBe(5);
+    const nov = awardReport(oct.user, input({ spaceId: "oda-2", dayKey: "2026-11-01" }));
+    expect(nov.user.monthKey).toBe("2026-11");
+    expect(nov.user.monthPoints).toBe(5);
+    expect(nov.user.points).toBe(10);
   });
 });

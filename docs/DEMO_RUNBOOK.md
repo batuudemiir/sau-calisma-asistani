@@ -34,10 +34,21 @@ Amaç: Canlı demonun (3-5 dk) adım adım provası. `DEMO_AND_PITCH.md` neyin a
 | 5 | Dizüstünde kaynak belgede aynı satırı göster | "Veri Gemini/kurallarla ayrıştırıldı, elle kontrol edildi." |
 | 6 | **Buradayım, uygun (check-in)** → B telefonunda kart 5 sn içinde "Öğrenci doğruladı" | "Bildirim anonim; uid istemciye hiç gitmez." |
 | 6b | Aynı ekranda 4 kriteri puanla ("+5 puan kazandın") → **Harita** sekmesi → panelde bina → oda rozeti | "Ortalama 3 değerlendirmeden önce gösterilmez." |
+| 6a | Haritada sağ alttaki **Asistan** → "Çalışacak yer bul" → 60 dk → Priz → Fark etmez → konum | "Yapay zekâ API'si yok; kural motoru. Bilmediğini 'bilgi yok' diye söylüyor. Konum telefondan çıkmıyor." |
+| 6d | Basılı QR'ı (veya ekrandaki QR'ı) B telefonuyla okut → "QR ile check-in" (+10) → geri bildirim | "QR fotoğrafı paylaşılabilir; kesin kanıt değil, kısa sürede çok hesap kullanırsa bonus kesilir." |
+| 6e | Profil → **Aylık ödüller**: çay (örnek, 10 puan) → giriş → "ödülü al" → `ORNEK-` kupon | "Çekiliş değil, eşik + stok. Sponsor yok; ödüller örnek, kupon geçersiz." |
 | 6c | **Profil** sekmesi: puan, seviye, son katkılar; "SAÜ hesabıyla giriş yap" | "Giriş isteğe bağlı; puanlar yalnızca sana görünür, sıralamayı etkilemez." |
 | 7 | (İsteğe bağlı) Terminal: `npm run ingest -- <eski dönem PDF> ...` → işaretli kayıtlar | "Eski dönem belgesi; yayımlanmaz, yalnızca hat gösterimi." |
 
 Hangi verinin örnek, hangisinin gerçek olduğu sözlü olarak da söylenir.
+
+## QR kodlarını hazırlama
+
+- Canlı: `QR_SECRET` App Hosting'de secret olarak tanımlı olmalı (`apphosting.yaml`), `.env.local`'da aynı değer:
+  `npm run qr -- --base https://<uygulama-adresi> --building demo-blok` → `data/qr/qr-demo-blok.html` yazdır.
+- Yerel demo (`npm run demo:local` açıkken, ayrı terminal): `npm run qr -- --base http://<dizüstü-ip>:3000 --emulator`
+  (anahtar `.env.development`'tan gelir). Telefonun dizüstüne erişebildiği doğrulanmadı.
+- `data/qr/` gizli imzalı bağlantılar içerir; depoya eklenmez (`.gitignore`).
 
 ## Bilinen tuzaklar
 

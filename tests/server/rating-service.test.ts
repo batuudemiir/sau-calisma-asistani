@@ -19,6 +19,13 @@ function memoryStore(checkins: Checkin[]) {
     },
     markStudent: async () => {},
     deleteAccountData: async () => {},
+    rewards: async () => [],
+    rewardState: async () => {
+      throw new Error("kullanılmıyor");
+    },
+    claimReward: async () => {
+      throw new Error("kullanılmıyor");
+    },
     addRating: async (r, since, decide) => {
       const d = decide({
         checkins: checkins.filter((c) => c.uid === r.uid && c.createdAtMs >= since),

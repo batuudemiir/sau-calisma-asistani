@@ -207,7 +207,16 @@ Eski dönem PDF'leri yalnızca ayrıştırıcı testlerinde kullanılır, asla y
 - Kişisel puanlar (`src/domain/points.ts`): `users/{uid}` (puan, günlük toplam, sayaçlar, `student`) ve `pointEvents`
   (defter). Bildirim/değerlendirme ile aynı transaction'da yazılır; ikisi de istemciye kapalıdır, `/api/profile` yalnızca
   sahibine döndürür. Puanlar sıralamayı ve güven etiketini etkilemez; herkese açık sıralama yoktur.
-- Hesap silme (`DELETE /api/account`): `users` belgesi ve `pointEvents` silinir, `spaceReports`/`spaceRatings` içindeki
+- Asistan (`src/domain/assistant.ts`): saf TS kural motoru; web uygulaması hiçbir yapay zekâ API'sini çağırmaz.
+  Kullanıcı konumu `navigator.geolocation` ile yalnızca tarayıcıda alınır, mesafe cihazda hesaplanır, hiçbir yere gönderilmez.
+- Sınıf QR'ı (`src/server/qr.ts`): HMAC-SHA256(`QR_SECRET`, alan kimliği), 22 karakter. Anahtar yalnızca sunucuda ve
+  baskı betiğinde (`npm run qr`); istemci paketine girmez. Bildirim `proof: "QR"` ile kaydedilir. Aynı yerde 10 dk içinde
+  8 farklı hesap QR kullandıysa sonrakiler normal check-in sayılır (`points.qrOverused`). QR kesin kanıt değildir.
+- Ödüller (`src/domain/rewards.ts`, `src/server/reward-service.ts`): `rewards` (katalog), `rewardStock/{ödül}_{ay}`
+  (verilen sayısı), `rewardClaims/{ödül}_{ay}_{uid}` (kupon; belge kimliği ayda bir hakkı garanti eder). Kontrol ve yazım
+  tek transaction'da. Aylık puan `users.monthPoints` (Europe/Istanbul ayı). Örnek ödüller yalnızca DEMO_MODE'da görünür,
+  kuponları `ORNEK-` ile başlar. Hepsi istemciye kapalı.
+- Hesap silme (`DELETE /api/account`): `rewardClaims` da silinir; `users` belgesi ve `pointEvents` silinir, `spaceReports`/`spaceRatings` içindeki
   uid `silinmis` yapılır (topluluk verisi kalır, kişiyle bağı kopar), Firebase Auth kaydı silinir.
 - `GEMINI_API_KEY` yalnızca geliştiricinin `.env.local` dosyasında ve betiklerde. Web uygulamasının ortamına konmaz.
 - `FIREBASE_SERVICE_ACCOUNT` yalnızca sunucuda. İstemcide sadece `NEXT_PUBLIC_FIREBASE_*` yapılandırması.

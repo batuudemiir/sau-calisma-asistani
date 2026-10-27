@@ -16,6 +16,7 @@ import { RatingChip } from "../Ratings";
 import { ReportButtons } from "../ReportButtons";
 import { POLL_MS } from "../ResultsView";
 import { SimulatedBadge, StatusBadge } from "../StatusBadge";
+import { Assistant } from "../assistant/Assistant";
 import { BuildingMap } from "./BuildingMap";
 import { SearchBox } from "./SearchBox";
 import { CampusMap, GUIDE, type MapSelection } from "./CampusMap";
@@ -97,7 +98,15 @@ export function MapHome() {
             </button>
           </div>
         )}
-        {data && <CampusMap data={data} query={query} selected={selected} onSelect={select} />}
+        {data && <CampusMap data={data} query={query} selected={selected} onSelect={select} controlsHidden={state !== "peek"} />}
+        <Assistant
+          data={data}
+          duration={d}
+          onDuration={(x) => router.replace(`/?${carryQuery(params, { d: String(x) })}`, { scroll: false })}
+          onSelect={select}
+          query={query}
+          buttonHidden={state !== "peek"}
+        />
       </div>
 
       <section
@@ -157,7 +166,9 @@ export function MapHome() {
 /** Seçili bina/yer paneli: açılınca başlığa odaklanır, Esc ile kapanır. */
 function Panel({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
   const heading = useRef<HTMLHeadingElement>(null);
-  useEffect(() => heading.current?.focus(), [title]);
+  useEffect(() => {
+    heading.current?.focus();
+  }, [title]);
   return (
     <div
       role="dialog"
@@ -216,7 +227,7 @@ function ResultRow({ r, query }: { r: ResultDTO; query: string }) {
         </span>
         <span className="text-right text-sm">
           {statusTitle(r.status)}
-          {r.freeUntil !== null && <span className="block text-xs opacity-80">{time(r.freeUntil)}&apos;a kadar</span>}
+          {r.freeUntil !== null && <span className="block text-xs opacity-80">{time(r.freeUntil)} saatine kadar</span>}
           {r.isSimulated && <span className="sr-only"> (örnek demo verisi)</span>}
         </span>
       </Link>

@@ -41,11 +41,14 @@ export function CampusMap({
   query,
   selected,
   onSelect,
+  controlsHidden = false,
 }: {
   data: MapResponse;
   query: string;
   selected: MapSelection;
   onSelect: (sel: MapSelection, trigger: Element) => void;
+  /** Telefonda alt panel büyükken denetimler panelin altında kalmasın diye gizlenir. */
+  controlsHidden?: boolean;
 }) {
   const svgRef = useRef<SVGSVGElement>(null);
   const center = useMemo(() => centerBox(data), [data]);
@@ -166,7 +169,7 @@ export function CampusMap({
       </svg>
 
       <div
-        className="absolute right-2 bottom-[17rem] flex flex-col gap-2 lg:bottom-4"
+        className={`absolute right-2 bottom-[21.5rem] flex flex-col gap-2 lg:bottom-20 lg:flex ${controlsHidden ? "max-lg:hidden" : ""}`}
         role="group"
         aria-label="Harita denetimleri"
       >

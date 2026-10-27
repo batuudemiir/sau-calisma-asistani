@@ -25,6 +25,7 @@ export default defineConfig({
       NEXT_PUBLIC_FIREBASE_APP_ID: "demo-app",
       NEXT_PUBLIC_USE_EMULATOR: "true",
       DEMO_MODE: "true",
+      QR_SECRET: "e2e-qr-anahtari",
     },
   },
 });

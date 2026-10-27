@@ -51,3 +51,6 @@ next-env.d.ts
 # playwright
 /test-results/
 /playwright-report/
+
+# Basılabilir QR sayfaları gizli imzalı bağlantılar içerir
+/data/qr/

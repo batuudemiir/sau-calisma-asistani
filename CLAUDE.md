@@ -31,4 +31,5 @@ GDG on Campus SAÜ Hackathon, 27-28 Ekim 2026. Teslim: 28 Ekim 13.00.
 - `npm test` — Vitest
 - `npm run ingest -- <dosya>` — kaynak belgeyi taslak JSON'a çevirir (`data/drafts/`)
 - `npm run publish-schedule -- <taslak>` — onaylanmış taslağı Firestore'a yükler
-- `npm run seed-demo` — demo binası, odalar ve etiketli simülasyon verisi
+- `npm run seed-demo` — demo binası, odalar, örnek ödüller ve etiketli simülasyon verisi
+- `npm run qr -- --base <adres>` — derslik kapıları için basılabilir QR sayfası (`QR_SECRET` gerekir)

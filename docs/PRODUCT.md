@@ -33,6 +33,13 @@ algoritmada, arayüz metninde ve testlerde korunur. Bilinmeyen bilgi asla olumlu
 6. Harita: gerçek ölçekli SVG kampüs (sürükle/yakınlaştır) → bina paneli/kat şeması; her alanda durum etiketi (metin)
    ve ortalama puan. Kat görünümü için "Şematik çizim, ölçekli değildir" notu.
 7. Profil (isteğe bağlı): SAÜ öğrenci hesabıyla (Google) giriş, kişisel puan ve seviye, son katkılar, hesap silme.
+8. Asistan: haritanın sağ altında yuvarlak düğme. Sorularla ilerler (kaç dakika, neye ihtiyacın var, nerede,
+   konumunu kullanayım mı) ve en iyi 3 yeri gerekçesiyle önerir. Kural tabanlıdır, yapay zekâ API'si çağırmaz;
+   bilmediğini "bilgi yok" diye söyler. Konum yalnızca cihazda kullanılır, sunucuya gitmez.
+9. QR ile check-in: derslik kapısındaki QR okutulur → doğrulanmış check-in (+10 puan) → geri bildirim (değerlendirme).
+   Basılı QR'ın fotoğrafı paylaşılabildiği için kesin kanıt değildir; kısa sürede çok hesaptan kullanılan QR bonus vermez.
+10. Aylık ödüller: ay içinde eşiğe ulaşan doğrulanmış SAÜ öğrencisi, stok bitene kadar her ödülden ayda bir kez
+    alır. Çekiliş değildir (çekiliş Milli Piyango İdaresi izni gerektirir). Sponsor bulunana kadar ödüller örnek demo verisidir.
    Puanlar yalnızca kişiye görünür; sonuçları etkilemez.
 
 ## MVP sınıflandırması

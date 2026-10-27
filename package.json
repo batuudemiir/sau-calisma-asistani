@@ -17,7 +17,8 @@
     "demo:local": "firebase emulators:exec --only firestore,auth --project demo-sau-calisma --ui \"npm run seed-campus && DEMO_MODE=true npm run seed-demo && next dev\"",
     "test:e2e": "playwright test",
     "demo-report": "tsx --env-file-if-exists=.env.local scripts/demo-report/index.ts",
-    "seed-campus": "tsx --env-file-if-exists=.env.local scripts/seed-campus/index.ts"
+    "seed-campus": "tsx --env-file-if-exists=.env.local scripts/seed-campus/index.ts",
+    "qr": "tsx --env-file-if-exists=.env.development --env-file-if-exists=.env.local scripts/qr/index.ts"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.14.0",
@@ -25,12 +26,14 @@
     "@playwright/test": "^1.63.0",
     "@tailwindcss/turbopack": "^4",
     "@types/node": "^22",
+    "@types/qrcode": "1.5.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.4.3",
     "exceljs": "^4.4.0",
     "firebase-tools": "^15.34.1",
+    "qrcode": "1.5.4",
     "tailwindcss": "^4",
     "tsx": "^4.23.15",
     "typescript": "^5",

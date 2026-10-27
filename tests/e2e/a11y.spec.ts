@@ -11,6 +11,7 @@ const ROUTES = [
   { name: "ayrıntı", path: `/yer/demo-blok-${encodeURIComponent("Ö-102")}?${Q}`, ready: "Ö-102" },
   { name: "profil", path: `/profil?${Q}`, ready: "Puanların" },
   { name: "hakkında", path: "/hakkinda", ready: "Hakkında" },
+  { name: "QR", path: `/qr/${encodeURIComponent("demo-blok-Ö-102")}/gecersiz-kod`, ready: "Ö-102" },
 ];
 
 for (const scheme of ["light", "dark"] as const) {
@@ -29,3 +30,13 @@ for (const scheme of ["light", "dark"] as const) {
     });
   }
 }
+
+test("axe: asistan paneli açık", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto(`/?${Q}`);
+  await page.getByRole("button", { name: "Asistan" }).click();
+  await page.getByRole("button", { name: "Çalışacak yer bul" }).click();
+  await page.getByRole("button", { name: "60 dakika" }).click();
+  const result = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]).analyze();
+  expect(result.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(" ")).join(", ")}`)).toEqual([]);
+});

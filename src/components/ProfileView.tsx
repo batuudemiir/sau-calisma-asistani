@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { DAILY_CAP, LEVELS, POINTS, type PointKind } from "@/domain/points";
+import { RewardsSection } from "./RewardsSection";
 import { deleteAccount, getWithSession, signInWithGoogle, signOutUser, useAuthUser } from "@/lib/session";
 
 interface ProfileResponse {
@@ -16,6 +17,7 @@ interface ProfileResponse {
 
 const KIND_LABEL: Record<PointKind, string> = {
   CHECKIN: "Check-in",
+  QR_CHECKIN: "QR ile check-in",
   REPORT: "Bildirim",
   RATING: "Değerlendirme",
   CONFIRM_BONUS: "Doğrulama bonusu",
@@ -141,8 +143,10 @@ export function ProfileView() {
             Puanların
           </h2>
           <p>
-            <span className="text-3xl font-bold">{profile.points}</span> puan ·{" "}
-            <strong data-testid="level">{profile.level.name}</strong>
+            <span className="text-3xl font-bold" data-testid="points">
+              {profile.points}
+            </span>{" "}
+            puan · <strong data-testid="level">{profile.level.name}</strong>
           </p>
           {next ? (
             <div className="space-y-1">
@@ -178,6 +182,8 @@ export function ProfileView() {
           </details>
         </section>
       )}
+
+      {profile && <RewardsSection version={`${uid}-${profile.student}-${profile.points}`} />}
 
       {profile && (
         <section aria-labelledby="gecmis" className="space-y-2">
