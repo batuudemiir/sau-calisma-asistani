@@ -14,7 +14,7 @@ export interface SourceDoc {
   termId: string;
   department: string;
   url: string;
-  format: "PDF" | "XLSX";
+  format: "PDF" | "XLSX" | "CSV";
   fetchedAt: string;
   sha256: string;
   parseMethod: "GEMINI" | "DETERMINISTIC" | "MANUAL";

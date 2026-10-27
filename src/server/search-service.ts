@@ -23,6 +23,7 @@ export interface SourceDTO {
   termLabel: string;
   url: string;
   isSimulated: boolean;
+  isManual: boolean;
 }
 
 export interface ResultDTO {
@@ -88,7 +89,9 @@ async function load(ds: DataSource, opts: SearchOptions) {
   const buildingName = new Map(buildings.map((b) => [b.id, b.name]));
   const sourceOf = (spaceId: string) => sources.find((s) => s.spaceIds.includes(spaceId)) ?? null;
   const toSourceDTO = (s: SourceSummary | null): SourceDTO | null =>
-    s && term ? { department: s.department, termLabel: term.label, url: s.url, isSimulated: s.isSimulated } : null;
+    s && term
+      ? { department: s.department, termLabel: term.label, url: s.url, isSimulated: s.isSimulated, isManual: s.parseMethod === "MANUAL" }
+      : null;
   const library = spaces.find((s) => s.kind === "LIBRARY") ?? DEFAULT_LIBRARY;
   // Demo modu kapalıyken simüle puanlar hiç gösterilmez
   const visibleRatings = opts.demoMode ? ratings : ratings.filter((r) => !r.isSimulated);

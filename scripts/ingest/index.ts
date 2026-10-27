@@ -1,5 +1,5 @@
 // Kullanım:
-//   npm run ingest -- <dosya.xlsx|dosya.pdf> --term 2026-guz --term-label "2026-2027 Güz" \
+//   npm run ingest -- <dosya.xlsx|dosya.pdf|dosya.csv> --term 2026-guz --term-label "2026-2027 Güz" \
 //     --department İşletme --building isletme-a --rooms data/sources/rooms-isletme-a.json \
 //     --url <kaynak adresi> [--document-term "2026-2027 Güz"] [--version 1]
 // Çıktı: data/drafts/<sourceId>.json ve özet. Firestore'a hiçbir şey yazmaz.
@@ -9,6 +9,7 @@ import { basename, extname, join } from "node:path";
 import { parseArgs } from "node:util";
 import { z } from "zod";
 import { buildDraft, sha256 } from "./build";
+import { parseCsv } from "./csv";
 import { parsePdfWithGemini } from "./gemini";
 import { reviewSample, summarize } from "./validate";
 import { parseXlsx } from "./xlsx";
@@ -57,8 +58,8 @@ async function main() {
   let rows;
   let documentTerm = values["document-term"] ?? null;
   let sourceText: string | null = null;
-  let parseMethod: "GEMINI" | "DETERMINISTIC";
-  let format: "PDF" | "XLSX";
+  let parseMethod: "GEMINI" | "DETERMINISTIC" | "MANUAL";
+  let format: "PDF" | "XLSX" | "CSV";
 
   if (ext === ".xlsx") {
     const parsed = await parseXlsx(data);
@@ -67,6 +68,13 @@ async function main() {
     sourceText = parsed.documentText;
     parseMethod = "DETERMINISTIC";
     format = "XLSX";
+  } else if (ext === ".csv") {
+    // Plan B: ekibin elle derlediği program; arayüzde "elle derlenmiş" etiketiyle görünür
+    const parsed = parseCsv(new TextDecoder().decode(data), basename(file));
+    rows = parsed.rows.map((raw) => ({ raw }));
+    sourceText = parsed.documentText;
+    parseMethod = "MANUAL";
+    format = "CSV";
   } else if (ext === ".pdf") {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) throw new Error("GEMINI_API_KEY tanımlı değil (.env.local)");

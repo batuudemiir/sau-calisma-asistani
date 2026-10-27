@@ -1,0 +1,4 @@
+# Plan B: elle derlenmiş program şablonu. Her satır bir ders oturumu. # ile başlayan satırlar yok sayılır.
+# Gün: Pazartesi..Pazar · Saat: 13:00-14:50 · Derslik: kapıdaki kod (ör. A204)
+# Yalnızca kendi ders programında veya kapıdaki çizelgede GÖRDÜĞÜN bilgiyi yaz; tahmin etme.
+Gün,Saat,Ders Kodu,Ders Adı,Derslik

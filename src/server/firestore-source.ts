@@ -29,7 +29,14 @@ export function firestoreSource(db: Firestore = adminDb()): DataSource {
       const snap = await db.collection("scheduleSources").where("termId", "==", termId).where("status", "==", "PUBLISHED").get();
       return snap.docs.map((d) => {
         const s = d.data();
-        return { id: d.id, department: s.department, url: s.url, spaceIds: s.spaceIds ?? [], isSimulated: s.isSimulated === true } satisfies SourceSummary;
+        return {
+          id: d.id,
+          department: s.department,
+          url: s.url,
+          spaceIds: s.spaceIds ?? [],
+          isSimulated: s.isSimulated === true,
+          parseMethod: s.parseMethod ?? "DETERMINISTIC",
+        } satisfies SourceSummary;
       });
     },
 

@@ -16,13 +16,13 @@ bilinmeyen bilgi asla "boş" kabul edilmez.
 - **Değerlendirme:** check-in sonrası 3 saat içinde Sessizlik / Priz / İnternet / Işık için 1-5 puan; 3 değerlendirmeden önce ortalama gösterilmez
 - **SVG kampüs/bina haritası:** her odada durum metni ve ortalama puan (harita paketi yok, şematik çizim)
 - **Kütüphane kartı:** bildirim tabanlı; demo modunda "Örnek demo verisi" etiketli gün içi doluluk deseni
-- **Veri hazırlama hattı:** XLSX → deterministik ayrıştırma, PDF → Gemini (yapılandırılmış JSON), Zod + kalite kuralları, insan kontrolü, yayın/geri dönüş
+- **Veri hazırlama hattı:** XLSX → deterministik ayrıştırma, PDF → Gemini (yapılandırılmış JSON), elle derlenmiş CSV (Plan B), Zod + kalite kuralları, insan kontrolü, yayın/geri dönüş
 
 ## Durum (dürüst özet)
 
 | Konu | Durum |
 |---|---|
-| Uygunluk/güven/sıralama/değerlendirme kuralları | 91 birim testi geçiyor (T1-T23 dahil) |
+| Uygunluk/güven/sıralama/değerlendirme kuralları | 95 birim testi geçiyor (T1-T23 dahil) |
 | Uçtan uca akış (arama, ayrıntı, check-in, puan, harita) | `npm run test:e2e` ile 3 Playwright senaryosu geçiyor (emulator + örnek veri); check-in diğer cihazda ≤5 sn |
 | Erişilebilirlik | axe (WCAG 2.0/2.1/2.2 AA) açık ve koyu temada 5 sayfada ihlal bulmadı; SVG metin kontrastı elle kontrol edildi |
 | Gerçek SAÜ ders programı | **Yok.** Geliştirme ortamından sakarya.edu.tr erişilemedi; belge eklenip `ingest` ile işlenmeli |
@@ -88,6 +88,12 @@ Sonra http://localhost:3000 adresini aç (dev modunda ilk API isteği derleme y�
 3. Listeyi kaynak belgeyle **elle** karşılaştır.
 4. Yayımla: `npm run publish-schedule -- data/drafts/<id>.json --reviewed-by <ad> --building-name "İşletme Fakültesi A Blok"`
    (`needsReview` kayıtlar yayımlanmaz; bu kayıtların odası "Program verisi eksik" görünür.)
+
+### Plan B: belge bulunamazsa elle derlenmiş program
+
+`data/sources/elle-giris-sablonu.csv` dosyasını kopyalayıp yalnızca **görülen** bilgilerle doldurun (kendi ders
+programınız, kapıdaki çizelge). Ayrıştırma `.xlsx` ile aynı komutla yapılır: `npm run ingest -- data/sources/elle.csv ...`
+Bu kaynaklar `parseMethod=MANUAL` olarak yayımlanır ve kartta "ekip tarafından elle derlenmiş" yazar.
 
 ## Dağıtım (Plan A: Firebase App Hosting)
 

@@ -43,6 +43,7 @@ export function SpaceFacts({ r }: { r: ResultDTO }) {
       {r.source && (
         <li className="opacity-80">
           Kaynak: {r.source.department} · {r.source.termLabel} programı
+          {r.source.isManual && !r.source.isSimulated && " (ekip tarafından elle derlenmiş)"}
         </li>
       )}
       {r.accessStatus !== "OPEN" && <li className="opacity-80">{ACCESS_UNVERIFIED_LABEL}</li>}

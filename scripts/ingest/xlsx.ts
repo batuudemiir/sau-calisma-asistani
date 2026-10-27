@@ -4,7 +4,7 @@ import type { RawRow } from "./schema";
 // Deterministik XLSX ayrıştırma. Sütun adları eşleme tablosuyla normalize edilir, birleştirilmiş hücreler
 // üst-sol değerle doldurulur, her sayfa ayrı işlenir.
 
-type Field = "day" | "time" | "start" | "end" | "courseCode" | "courseName" | "room";
+export type Field = "day" | "time" | "start" | "end" | "courseCode" | "courseName" | "room";
 
 const fold = (s: string) =>
   s
@@ -28,7 +28,7 @@ export const COLUMN_ALIASES: Record<Field, string[]> = {
   room: ["derslik", "sinif", "salon", "mekan", "oda", "yer"],
 };
 
-function headerField(text: string): Field | null {
+export function headerField(text: string): Field | null {
   const f = fold(text);
   for (const [field, aliases] of Object.entries(COLUMN_ALIASES) as [Field, string[]][]) {
     if (aliases.includes(f)) return field;

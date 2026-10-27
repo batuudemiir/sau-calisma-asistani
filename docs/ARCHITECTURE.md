@@ -116,7 +116,7 @@ Tek aktif dönem. Dönem değişince eski dönemin `isActive=false` olur; motor 
 ```json
 {
   "id": "isletme-2026-guz-v1", "termId": "2026-guz", "department": "İşletme",
-  "url": "https://...", "format": "PDF",           // PDF | XLSX
+  "url": "https://...", "format": "PDF",           // PDF | XLSX | CSV (CSV = elle derlenmiş, Plan B)
   "fetchedAt": "2026-10-27T18:30:00+03:00", "sha256": "…",
   "parseMethod": "GEMINI",                          // GEMINI | DETERMINISTIC | MANUAL
   "status": "PUBLISHED",                            // PUBLISHED | SUPERSEDED
@@ -175,6 +175,8 @@ Yalnızca `DEMO_MODE=true` iken yazılır ve okunur.
      (Uygulanmadı: PDF metin çıkarımı için paket eklenmedi; PDF şimdilik doğrudan Gemini'ye gider ve
      `COURSE_NOT_IN_TEXT` kuralı yalnızca XLSX'te çalışır.)
    - Düzensiz PDF → Gemini'ye belge + JSON şeması gönderilir.
+   - Plan B: ekibin elle derlediği CSV (`data/sources/elle-giris-sablonu.csv`) → `parseMethod=MANUAL`;
+     aynı kalite kurallarından geçer, arayüzde "ekip tarafından elle derlenmiş" yazar.
 3. Gemini kuralları: çıktı şeması zorunlu; her satır için `sourceRef` (sayfa/satır) ister; okuyamadığı alan `null` döner ve
    `needsReview=true` olur. İstem: "Belgede açıkça yazmayan hiçbir değeri üretme."
 4. Doğrulama (Zod + kurallar), her ihlal kaydı `needsReview=true` yapar:

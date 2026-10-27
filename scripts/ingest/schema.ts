@@ -46,7 +46,7 @@ export const DraftSourceSchema = z.object({
   department: z.string().min(1),
   buildingId: z.string().regex(/^[a-z0-9-]+$/),
   url: z.string(),
-  format: z.enum(["PDF", "XLSX"]),
+  format: z.enum(["PDF", "XLSX", "CSV"]),
   fetchedAt: z.string(),
   sha256: z.string().regex(/^[a-f0-9]{64}$/),
   parseMethod: z.enum(["GEMINI", "DETERMINISTIC", "MANUAL"]),

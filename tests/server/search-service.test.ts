@@ -14,7 +14,7 @@ function data(over: Partial<FakeData> = {}): FakeData {
     spaces: [A201, A202, A203],
     buildings: [{ id: "isletme-a", name: "İşletme Fakültesi A Blok", campus: "Esentepe", isSimulated: false }],
     sources: [
-      { id: "isletme-2026-guz-v1", termId: TERM.id, department: "İşletme", url: "https://x.invalid/p.xlsx", spaceIds: [A201.id, A202.id], isSimulated: false },
+      { id: "isletme-2026-guz-v1", termId: TERM.id, department: "İşletme", url: "https://x.invalid/p.xlsx", spaceIds: [A201.id, A202.id], isSimulated: false, parseMethod: "DETERMINISTIC" },
     ],
     blocks: [block(A201, hm(14, 10), hm(16)), block(A202, hm(13, 30), hm(15))],
     reports: [],
@@ -36,7 +36,7 @@ describe("runSearch", () => {
     expect(res.results[0]).toMatchObject({
       buildingName: "İşletme Fakültesi A Blok",
       nextClass: { courseCode: "UTC425", startMinute: hm(14, 10) },
-      source: { department: "İşletme", termLabel: "2026-2027 Güz" },
+      source: { department: "İşletme", termLabel: "2026-2027 Güz", isManual: false },
     });
     expect(res.results[1].source).toBeNull();
   });
