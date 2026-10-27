@@ -75,6 +75,14 @@ dışa aktarımı kullanılır; (2) resmî kampüs haritası PDF'i (`tanitim.sak
   erişim açılınca bölüm/derslik bazlı programları çeken bir içe aktarıcı `scripts/ingest/` altına eklenecek ve
   mevcut kalite kuralları + insan kontrolü + yayın hattından geçecek. Derslikler katalogdaki bina kimliklerine bağlanır
   (`--building bilisim-fakultesi` vb.), böylece haritada gerçek konumunda görünür.
+- Arama motoru üzerinden bulunanlar (27 Ekim 2026, site doğrudan erişilemedi):
+  - `dersprogram.sabis.sakarya.edu.tr` dizinde yalnızca ana sayfa olarak var ("Sabis Ders Programları"); bölüm
+    programları dizinlenmemiş. Birim programlarının `…/Program/Birim/<birimId>` kalıbında olduğu bölüm duyurularından anlaşılıyor (doğrulanmadı).
+  - Derslik kataloğu `mekan.sabis.sakarya.edu.tr/Mekan/Detay/<id>`: dizinde iki kayıt —
+    [Mühendislik M3 Blok, Derslik 3203, 2. kat](https://mekan.sabis.sakarya.edu.tr/Mekan/Detay/2442) ve
+    [Hukuk Fakültesi, Derslik AMFİ 2](https://mekan.sabis.sakarya.edu.tr/Mekan/Detay/3225).
+  - Bazı bölümler programı "Derslikli" Excel olarak da yayımlıyor (ör. `Isletme_..._Ders_Programi_Derslikli.xls`);
+    bunlar mevcut XLSX içe aktarıcıyla işlenebilir (`.xls` önce `.xlsx`'e çevrilmeli).
 - O zamana kadar: kişisel programlar (`--coverage PARTIAL`) veya kapı çizelgeleri (`--coverage FULL`) CSV ile girilebilir.
 
 ## Arama sonuçlarından kullanılan kaynaklar
