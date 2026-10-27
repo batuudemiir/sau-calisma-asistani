@@ -71,7 +71,7 @@ Kurallar:
 │  └─ lib/                    istemci Firebase başlatma, saat/biçim yardımcıları
 ├─ scripts/
 │  ├─ ingest/                 PDF/XLSX → taslak JSON (Gemini burada)
-│  ├─ publish.ts              onaylı taslak → Firestore
+│  ├─ publish/                onaylı taslak → Firestore (plan.ts saf, firestore.ts yazma, --rollback)
 │  └─ seed-demo.ts            demo binası + etiketli simülasyon
 ├─ data/
 │  ├─ sources/                indirilen kaynak dosyalar (gitignore değil, küçük)
@@ -171,6 +171,8 @@ Yalnızca `DEMO_MODE=true` iken yazılır ve okunur.
 2. Biçime göre ayrıştırma:
    - XLSX → ExcelJS ile deterministik. Birleştirilmiş hücreler üst-sol değerle doldurulur; sütun adları eşleme tablosuyla normalize edilir; her sayfa ayrı işlenir.
    - Metin tabanlı ve düzenli PDF → önce metin çıkarımı denenir; düzen tutarlıysa deterministik.
+     (Uygulanmadı: PDF metin çıkarımı için paket eklenmedi; PDF şimdilik doğrudan Gemini'ye gider ve
+     `COURSE_NOT_IN_TEXT` kuralı yalnızca XLSX'te çalışır.)
    - Düzensiz PDF → Gemini'ye belge + JSON şeması gönderilir.
 3. Gemini kuralları: çıktı şeması zorunlu; her satır için `sourceRef` (sayfa/satır) ister; okuyamadığı alan `null` döner ve
    `needsReview=true` olur. İstem: "Belgede açıkça yazmayan hiçbir değeri üretme."
@@ -180,6 +182,8 @@ Yalnızca `DEMO_MODE=true` iken yazılır ve okunur.
    - model çıktısındaki ders kodu belgenin metninde geçmiyor (metin çıkarılabiliyorsa karşılaştırılır)
 5. İnsan kontrolü: `needsReview` kayıtlar ve rastgele 10 kayıt kaynak belgeyle elle karşılaştırılır.
 6. Yayın: yalnızca `needsReview=false` kayıtlar yüklenir; kaynak `PUBLISHED`, önceki sürüm `SUPERSEDED`.
+   İşaretli kaydı olan oda `dataQuality=INCOMPLETE` yayımlanır (programı eksik olduğu için `UNKNOWN` görünür).
+   Belgede dönem okunamazsa `--document-term` ile elle girilir; girilmezse tüm kayıtlar `TERM_MISMATCH` ile işaretlenir.
 
 Eski dönem PDF'leri yalnızca ayrıştırıcı testlerinde kullanılır, asla yayımlanmaz.
 
