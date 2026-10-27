@@ -12,7 +12,8 @@ Somut oda, saat ve sayı değerleri yayımlanan gerçek veriye göre son saatte 
 | 3 | 60 dakika seçer; liste gelir | Gerçek yayımlanmış ders programı |
 | 4 | Bir derslik kartını açar: "Programda boş · 15.00'e kadar · Sonraki ders 15.10 · Kaynak: <bölüm> 2026-2027 Güz programı" | Gerçek |
 | 5 | Jüriye kaynak belgeyi açıp aynı satırı gösterir | Gerçek belge |
-| 6 | "Buradayım, uygun" bildirir; ikinci telefonda kart "Öğrenci doğruladı" olur | Gerçek bildirim (demo binası) |
+| 6 | "Buradayım, uygun" ile check-in yapar; ikinci telefonda kart "Öğrenci doğruladı" olur | Gerçek bildirim (demo binası) |
+| 6b | Alanı 4 kriterle puanlar; haritada (SVG şema) o odanın ortalama puanı görünür | Gerçek değerlendirme; demo öncesi eklenen örnekler "Örnek demo verisi" etiketli |
 | 7 | (İsteğe bağlı) Terminalde bir PDF'in Gemini ile taslak JSON'a dönüşmesi ve işaretlenen kayıt | Gerçek hat |
 
 Hangi adımın gerçek, hangisinin simülasyon olduğu sunumda sözlü olarak da söylenir.

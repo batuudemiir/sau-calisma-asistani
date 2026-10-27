@@ -23,7 +23,12 @@ algoritmada, arayüz metninde ve testlerde korunur. Bilinmeyen bilgi asla olumlu
 1. Ana sayfa: "Şimdi nerede çalışabilirsin?" ve süre seçimi (30/60/90/120). Kayıt yok, konum izni yok.
 2. Sonuç listesi: alan kartları, güven etiketine göre sıralı. Kütüphane kartı en üstte, kendi etiketiyle.
 3. Alan ayrıntısı: boş kalacağı süre, sonraki ders, kaynak belge ve dönemi, son bildirimler.
-4. Bildirim: "Buradayım, uygun" / "Dolu" / "Kullanılamıyor" / "Bilgi güncel değil" — tek dokunuş.
+4. Bildirim: "Buradayım, uygun (check-in)" / "Dolu" / "Kullanılamıyor" / "Bilgi güncel değil" — tek dokunuş.
+   "Buradayım, uygun" aynı zamanda check-in'dir; ayrı bir check-in kaydı yoktur.
+5. Değerlendirme: check-in yapan öğrenci, 3 saat içinde o alanı sabit kriterlere 1-5 puanla değerlendirir
+   (Sessizlik, Priz, İnternet, Işık). Serbest metin yok.
+6. Harita: el çizimi SVG kampüs → bina/kat şeması; her alanda durum etiketi (metin) ve ortalama puan.
+   "Şematik çizim, ölçekli değildir" notu.
 
 ## MVP sınıflandırması
 
@@ -36,7 +41,8 @@ algoritmada, arayüz metninde ve testlerde korunur. Bilinmeyen bilgi asla olumlu
 | Zorunlu | Kullanıcı bildirimi (anonim oturum, hız sınırı) | Programdaki boşluğu gerçekliğe bağlar |
 | Zorunlu | Kütüphane kartı: bildirim tabanlı veya etiketli simülasyon | Demo hikâyesinin başlangıcı |
 | Zorunlu | Gemini ile belge ayrıştırma hattı (en az bir gerçek belge) | Google teknolojisinin anlamlı kullanımı |
-| Zaman kalırsa | Basit bina/kat görünümü (SVG) | UX/UI puanı; liste değeri zaten kanıtlar |
+| Zorunlu | Check-in sonrası değerlendirme (4 kriter, 1-5) | Öğrenci deneyimini alana bağlar; programda olmayan bilgi |
+| Zorunlu | SVG kampüs/bina şeması: durum + ortalama puan | Değerlendirmelerin harita üzerinde görünmesi; paket gerektirmez |
 | Zaman kalırsa | Kütüphane doluluk simülasyonu (gün içi desen) | "Gelecek KART entegrasyonu" anlatısı |
 | Sonraya | Google Maps kampüs haritası, SAÜ KART / turnike entegrasyonu, sensör, ML tahmin, yönetim paneli, profiller, oyunlaştırma | Veri erişimi yok veya 24 saatte değer üretmez |
 
@@ -54,3 +60,5 @@ kaynak belgeyle elle kontrol edildiğinde hatasız; bildirim yapıldığında et
   başka bir bölüm seçilir (bkz. MVP planı, Aşama 0).
 - Odaların öğrenci kullanımına açık olup olmadığı bilinmiyor; her kartta "Erişim durumu doğrulanmadı" yazar.
 - Sınav, tatil, iptal ve program dışı etkinlik verisi yok; bu durum arayüzde belirtilir.
+- Puanlar uygunluk etiketini ve sıralamayı etkilemez. 3'ten az değerlendirme varsa ortalama gösterilmez.
+- Harita yerleşimi ekip tarafından çizilir; kaynak veri gibi sunulmaz.

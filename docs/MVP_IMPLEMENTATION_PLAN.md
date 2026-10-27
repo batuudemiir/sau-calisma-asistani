@@ -16,8 +16,9 @@ Aşama 1 ile Aşama 2 paralel yürür (farklı kişiler).
 | 4 | 20.30-23.00 | Arayüz: süre seçimi, sonuç listesi, kart (etiket, freeUntil, sonraki ders, kaynak) | `/` ve `/results` | Seed verisiyle T3 durumu ekranda doğru | Ayrıntı sayfası yerine kart içi açılır alan |
 | 5 | 00.30-02.30 | `/api/search` Firestore'a bağlı; gerçek veriyle uçtan uca arama | Canlı arama | Demo binasında 3 farklı saat için sonuçlar kaynakla tutarlı | Seed verisine dön, gerçek veriyi sonra bağla |
 | 6 | 02.30-04.00 | Anonim oturum, `/api/reports` (Zod, hız sınırı T18), kartta canlı güncelleme | Bildirim akışı | Bildirim sonrası etiket ≤5 sn'de değişiyor; T18 geçiyor | `onSnapshot` yerine bildirim sonrası yeniden sorgu |
-| 7 | 04.30-07.00 | Kütüphane kartı: bildirim tabanlı + `DEMO_MODE` simülasyonu, "Örnek demo verisi" etiketi; boş/hata/yükleniyor durumları | Tamamlanmış ana akış | Simülasyon kapalıyken "Doluluk verisi yok" yazıyor | Simülasyonu atla, yalnızca bildirim |
-| 8 | 07.00-10.00 | Zaman kalırsa: SVG kat görünümü veya Playwright e2e; görsel cila, erişilebilirlik (kontrast, dokunma alanı) | — | Ana akış bozulmadı, testler yeşil | Atla |
+| 6b | 04.00-05.30 | Değerlendirme: `ratings` domain + T19-T23, `/api/ratings`, ayrıntı sayfasında puanlama; SVG kampüs/bina şeması (`/map`) durum + ortalama puanla | Check-in → puan → haritada görünme | T19-T23 geçiyor; 3. değerlendirmeden sonra haritada ortalama görünüyor | Harita yetişmezse puan yalnızca kart ve ayrıntı sayfasında |
+| 7 | 05.30-07.30 | Kütüphane kartı: bildirim tabanlı + `DEMO_MODE` simülasyonu, "Örnek demo verisi" etiketi; boş/hata/yükleniyor durumları | Tamamlanmış ana akış | Simülasyon kapalıyken "Doluluk verisi yok" yazıyor | Simülasyonu atla, yalnızca bildirim |
+| 8 | 07.30-10.00 | Zaman kalırsa: Playwright e2e; görsel cila, erişilebilirlik (kontrast, dokunma alanı) | — | Ana akış bozulmadı, testler yeşil | Atla |
 | 9 | 11.30-12.30 | README (amaç, teknolojiler, kurulum, ekip), demo verisi sabitleme, sunum | Teslim dosyaları | README'deki adımlarla temiz klonda çalışıyor | — |
 | 10 | 12.30-13.00 | Demo provası (tam 3-5 dk), son commit, teslim | Teslim | Prova zamanında bitti | — |
 

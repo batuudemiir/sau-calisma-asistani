@@ -55,13 +55,16 @@ Kurallar:
 ├─ CLAUDE.md
 ├─ docs/                      ürün ve teknik belgeler
 ├─ src/
+│  ├─ data/map-layout.ts      SVG şema koordinatları (ekip çizimi)
 │  ├─ app/                    sayfalar ve API uçları (iş kuralı yok)
 │  │  ├─ page.tsx             süre seçimi
 │  │  ├─ results/page.tsx     sonuç listesi
-│  │  ├─ spaces/[id]/page.tsx alan ayrıntısı + bildirim
+│  │  ├─ spaces/[id]/page.tsx alan ayrıntısı + bildirim + değerlendirme
+│  │  ├─ map/page.tsx         SVG kampüs/bina şeması
 │  │  └─ api/
 │  │     ├─ search/route.ts   GET: uygunluk sonuçları
-│  │     └─ reports/route.ts  POST: bildirim (Zod + hız sınırı)
+│  │     ├─ reports/route.ts  POST: bildirim / check-in (Zod + hız sınırı)
+│  │     └─ ratings/route.ts  POST: değerlendirme (Zod + check-in kontrolü + hız sınırı)
 │  ├─ components/             sunum bileşenleri (Firestore veya kural kodu yok)
 │  ├─ domain/                 saf TS: tipler, uygunluk, güven, sıralama (Firebase importu yasak)
 │  ├─ server/                 Admin SDK, repo fonksiyonları, hız sınırı (istemciye girmez: "server-only")
@@ -104,6 +107,7 @@ Tek aktif dönem. Dönem değişince eski dönemin `isActive=false` olur; motor 
   "id": "isletme-a-A204", "buildingId": "isletme-a", "code": "A204",
   "kind": "CLASSROOM",              // CLASSROOM | LIBRARY | STUDY_AREA
   "accessStatus": "UNKNOWN",        // OPEN | RESTRICTED | UNKNOWN
+  "dataQuality": "OK",              // OK | INCOMPLETE (varsayılan OK)
   "isSimulated": false
 }
 ```
@@ -138,8 +142,20 @@ Veri küçük (tek bina, ~100 blok) olduğu için motor bir günün tüm bloklar
 ```json
 { "spaceId": "isletme-a-A204", "type": "AVAILABLE", "uid": "<anon uid>", "createdAt": "<Timestamp>", "isSimulated": false }
 ```
-`type`: AVAILABLE | BUSY | UNUSABLE | OUTDATED. Sorgu: `spaceId == S AND createdAt >= now-60dk`, `createdAt` azalan.
+`type`: AVAILABLE | BUSY | UNUSABLE | OUTDATED. `AVAILABLE` aynı zamanda check-in'dir.
+Sorgu: `spaceId == S AND createdAt >= now-REPORT_TTL_MIN` (30 dk), `createdAt` azalan.
 Saklama: 7 gün (demo sonrası temizlik betiği; hackathon içinde silme yok).
+
+### `spaceRatings/{ratingId}`
+```json
+{
+  "spaceId": "isletme-a-A204", "uid": "<anon uid>", "checkinReportId": "<spaceReports id>",
+  "scores": { "quiet": 4, "power": 2, "wifi": 5, "light": 3 },   // her biri 1-5 tam sayı
+  "createdAt": "<Timestamp>", "isSimulated": false
+}
+```
+Yazma koşulu `src/domain/ratings.ts` `canRate` ile (bkz. AVAILABILITY_RULES §4). Sorgu: `spaceId == S`.
+Serbest metin alanı yoktur.
 
 ### `simulations/library`
 ```json
@@ -173,8 +189,11 @@ Eski dönem PDF'leri yalnızca ayrıştırıcı testlerinde kullanılır, asla y
 - `GEMINI_API_KEY` yalnızca geliştiricinin `.env.local` dosyasında ve betiklerde. Web uygulamasının ortamına konmaz.
 - `FIREBASE_SERVICE_ACCOUNT` yalnızca sunucuda. İstemcide sadece `NEXT_PUBLIC_FIREBASE_*` yapılandırması.
 - `firestore.rules`: herkes `terms`, `buildings`, `spaces`, `scheduleBlocks`, `spaceReports` okuyabilir; istemciden hiçbir koleksiyona yazma yok.
+  Açık not (Aşama 6'da karar): `spaceReports`/`spaceRatings` anonim `uid` içerir; istemciye doğrudan açmak yerine
+  API üzerinden uid'siz okunması veya uid'nin hash'lenmesi değerlendirilecek.
   Admin SDK kuralları atladığı için tüm yazma doğrulaması `src/server` içinde yapılır.
 - Bildirim kötüye kullanımı: aynı `uid` + oda için 10 dakikada 1 bildirim; `uid` başına saatte 20 bildirim; Zod ile tip kontrolü.
+- Değerlendirme: yalnızca check-in sonrası, check-in başına 1 puan; `uid` başına saatte 10 değerlendirme.
   İstek anonim ID token'ı ile gelir, sunucuda doğrulanır.
 - App Check: sonraya bırakıldı (kurulum süresi; demo için hız sınırı yeterli).
 - KVKK uyumluluğu hakkında garanti verilmez; sunumda "kişisel veri toplamıyoruz" denir, fazlası değil.
