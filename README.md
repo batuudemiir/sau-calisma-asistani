@@ -46,23 +46,15 @@ ardından Firebase Emulator + Playwright ile uçtan uca testler. Gizli anahtar g
 
 ## Yerel çalıştırma (Emulator + örnek veri)
 
-Gereksinimler: Node 22+, Java 21 (Firestore emulator için).
+Gereksinimler: Node 22+, Java 21 (Firestore emulator için; macOS'ta Homebrew yoksa https://adoptium.net → Temurin 21 `.pkg`).
 
 ```bash
 npm install
-cp .env.example .env.local
 ```
 
-`.env.local` içinde yerel değerler:
-
-```
-NEXT_PUBLIC_FIREBASE_API_KEY=demo-key
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=demo-sau-calisma.firebaseapp.com
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=demo-sau-calisma
-NEXT_PUBLIC_FIREBASE_APP_ID=demo-app
-NEXT_PUBLIC_USE_EMULATOR=true
-DEMO_MODE=true
-```
+Yerel demo için `.env.local` **gerekmez**: emulator değerleri repodaki `.env.development` dosyasında (sahte, gizli değil).
+`.env.example`'dan boş bir `.env.local` kopyaladıysan sil (`rm .env.local`); boş değerler varsayılanların önüne geçer.
+Gerçek bir Firebase projesine bağlanırken `.env.local` oluşturulur ve oradaki değerler önceliklidir.
 
 ```bash
 npm run demo:local      # emulator'ları açar, örnek veriyi yükler, next dev başlatır

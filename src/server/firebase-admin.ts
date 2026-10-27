@@ -12,7 +12,8 @@ function adminApp(): App {
   const raw = process.env.FIREBASE_SERVICE_ACCOUNT;
   if (raw) return initializeApp({ credential: cert(JSON.parse(raw)) });
 
-  const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+  // GCLOUD_PROJECT: `firebase emulators:exec` tarafından tanımlanır (.env.local olmadan da çalışsın)
+  const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || process.env.GCLOUD_PROJECT;
   if (process.env.FIRESTORE_EMULATOR_HOST && projectId) return initializeApp({ projectId });
 
   // Firebase App Hosting / Cloud Run: varsayılan uygulama kimliği (servis hesabı JSON'u gerekmez)

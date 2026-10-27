@@ -42,6 +42,8 @@ next-env.d.ts
 
 # örnek ortam dosyası commit edilir
 !.env.example
+# next dev için sahte emulator değerleri (gizli değil)
+!.env.development
 
 # firebase emulator
 *-debug.log

@@ -14,7 +14,7 @@
     "publish-schedule": "tsx --env-file-if-exists=.env.local scripts/publish/index.ts",
     "emulators": "firebase emulators:start --only firestore,auth",
     "seed-demo": "tsx --env-file-if-exists=.env.local scripts/seed-demo/index.ts",
-    "demo:local": "firebase emulators:exec --only firestore,auth --project demo-sau-calisma --ui \"npm run seed-campus && npm run seed-demo && next dev\"",
+    "demo:local": "firebase emulators:exec --only firestore,auth --project demo-sau-calisma --ui \"npm run seed-campus && DEMO_MODE=true npm run seed-demo && next dev\"",
     "test:e2e": "playwright test",
     "demo-report": "tsx --env-file-if-exists=.env.local scripts/demo-report/index.ts",
     "seed-campus": "tsx --env-file-if-exists=.env.local scripts/seed-campus/index.ts"
