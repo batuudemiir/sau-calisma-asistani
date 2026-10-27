@@ -96,6 +96,8 @@ export type LibraryLevel = "LOW" | "MEDIUM" | "BUSY";
 
 export interface LibrarySimulation {
   level: LibraryLevel;
+  /** DAILY: seviye kayıttan değil, örnek gün içi desenden (program saatine göre) hesaplanır. */
+  pattern?: "DAILY";
   updatedAtMs: number;
   isSimulated: true;
 }

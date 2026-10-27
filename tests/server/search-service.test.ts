@@ -53,6 +53,12 @@ describe("runSearch", () => {
     expect((await runSearch(fakeSource(d), { ...opts, demoMode: true })).library).toMatchObject({ spaceId: LIBRARY.id, simulation });
   });
 
+  it("DAILY desenli simülasyon program saatine göre seviye verir", async () => {
+    const d = data({ spaces: [A201, LIBRARY], simulation: { level: "LOW", pattern: "DAILY", updatedAtMs: 0, isSimulated: true } });
+    const res = await runSearch(fakeSource(d), { ...opts, demoMode: true });
+    expect(res.library.simulation).toMatchObject({ level: "BUSY", isSimulated: true });
+  });
+
   it("bildirim etiketi değiştirir", async () => {
     const res = await runSearch(fakeSource(data({ reports: [report(A201, "AVAILABLE", 2, opts.nowMs)] })), opts);
     expect(res.results[0].status).toMatchObject({ code: "VERIFIED_FREE", minutesAgo: 2 });

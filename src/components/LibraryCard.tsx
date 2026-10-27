@@ -18,7 +18,9 @@ export function LibraryCard({ lib, href, nowMs }: { lib: LibraryDTO; href: strin
           <p className="mt-3 flex flex-wrap items-center gap-2 text-sm">
             <span>
               Yoğunluk: <strong>{LIBRARY_LEVEL_LABELS[lib.simulation.level]}</strong> ·{" "}
-              {ago(Math.max(0, Math.floor((nowMs - lib.simulation.updatedAtMs) / 60_000)))}
+              {lib.simulation.pattern === "DAILY"
+                ? "gün içi örnek desen"
+                : ago(Math.max(0, Math.floor((nowMs - lib.simulation.updatedAtMs) / 60_000)))}
             </span>
             <SimulatedBadge />
           </p>

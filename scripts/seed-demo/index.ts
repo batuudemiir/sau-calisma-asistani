@@ -42,12 +42,13 @@ async function main() {
   );
   batch.set(db.collection("simulations").doc("library"), {
     spaceId: p.library.id,
-    level: "BUSY",
+    level: "BUSY", // pattern=DAILY iken okunurken gün içi örnek desenle değiştirilir
+    pattern: "DAILY",
     updatedAt: Timestamp.now(),
     isSimulated: true,
   });
   await batch.commit();
-  console.log(`Örnek veri yazıldı: ${p.spaces.length} oda, ${p.blocks.length} ders bloğu, ${p.ratings.length} örnek puan, kütüphane simülasyonu (BUSY).`);
+  console.log(`Örnek veri yazıldı: ${p.spaces.length} oda, ${p.blocks.length} ders bloğu, ${p.ratings.length} örnek puan, kütüphane simülasyonu (gün içi örnek desen).`);
 }
 
 main().catch((e: unknown) => {

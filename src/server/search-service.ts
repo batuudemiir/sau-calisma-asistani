@@ -1,4 +1,5 @@
 import { REPORT_TTL_MIN } from "@/domain/config";
+import { simulatedLibraryLevel } from "@/domain/library-simulation";
 import { checkProgram } from "@/domain/availability";
 import { searchSpaces } from "@/domain/search";
 import { toLocalTime } from "@/domain/time";
@@ -72,7 +73,7 @@ const reportNow = (opts: SearchOptions) => opts.reportNowMs ?? opts.nowMs;
 async function load(ds: DataSource, opts: SearchOptions) {
   const now = toLocalTime(opts.nowMs);
   const term = await ds.activeTerm();
-  const [spaces, buildings, sources, blocks, reports, simulation, ratings] = await Promise.all([
+  const [spaces, buildings, sources, blocks, reports, storedSimulation, ratings] = await Promise.all([
     ds.spaces(),
     ds.buildings(),
     term ? ds.publishedSources(term.id) : Promise.resolve([] as SourceSummary[]),
@@ -81,6 +82,9 @@ async function load(ds: DataSource, opts: SearchOptions) {
     opts.demoMode ? ds.librarySimulation() : Promise.resolve(null),
     ds.ratings(),
   ]);
+  const simulation = storedSimulation?.pattern === "DAILY"
+    ? { ...storedSimulation, level: simulatedLibraryLevel(now.minute), updatedAtMs: reportNow(opts) }
+    : storedSimulation;
   const buildingName = new Map(buildings.map((b) => [b.id, b.name]));
   const sourceOf = (spaceId: string) => sources.find((s) => s.spaceIds.includes(spaceId)) ?? null;
   const toSourceDTO = (s: SourceSummary | null): SourceDTO | null =>

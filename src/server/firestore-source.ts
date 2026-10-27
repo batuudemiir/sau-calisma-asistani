@@ -57,7 +57,7 @@ export function firestoreSource(db: Firestore = adminDb()): DataSource {
       const doc = await db.collection("simulations").doc("library").get();
       if (!doc.exists) return null;
       const s = doc.data()!;
-      return { level: s.level, updatedAtMs: toMs(s.updatedAt), isSimulated: true } as LibrarySimulation;
+      return { level: s.level, pattern: s.pattern === "DAILY" ? "DAILY" : undefined, updatedAtMs: toMs(s.updatedAt), isSimulated: true } as LibrarySimulation;
     },
 
     async ratings() {
