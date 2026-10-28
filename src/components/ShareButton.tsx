@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { buttonClass } from "./ui/Button";
 
 /** Bu sayfanın bağlantısını paylaşır (Web Share API); yoksa panoya kopyalar. */
 export function ShareButton({ title }: { title: string }) {
@@ -24,11 +25,7 @@ export function ShareButton({ title }: { title: string }) {
 
   return (
     <span className="inline-flex items-center gap-2">
-      <button
-        type="button"
-        onClick={() => void share()}
-        className="min-h-11 rounded-lg border border-zinc-400 px-3 text-sm font-semibold"
-      >
+      <button type="button" onClick={() => void share()} className={buttonClass("secondary", "md")}>
         Bu yeri paylaş
       </button>
       <span aria-live="polite" className="text-sm">

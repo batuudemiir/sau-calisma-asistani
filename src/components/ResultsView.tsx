@@ -25,11 +25,11 @@ export function ResultsView() {
   return (
     <div className="mx-auto w-full max-w-md flex-1 space-y-5 px-4 py-6 lg:max-w-6xl lg:px-8 lg:py-10">
       <header className="space-y-3">
-        <h1 className="text-2xl font-bold">{d} dakika çalışabileceğin yerler</h1>
+        <h1 className="text-[28px] leading-8 font-bold">{d} dakika nerede çalışalım?</h1>
         <DurationChips basePath="/liste" />
         <FilterChips />
         {data && (
-          <p className="text-sm opacity-80">
+          <p className="text-sm text-fg-2">
             {WEEKDAY_NAMES[data.now.weekday]} {time(data.now.minute)}
             {data.termLabel ? ` · ${data.termLabel}` : ""}
             {data.now.isDemoClock && <strong className="ml-1">(demo saati)</strong>}
@@ -42,7 +42,7 @@ export function ResultsView() {
 
       {loading && !data && <p role="status">Yükleniyor…</p>}
       {error && (
-        <div role="alert" className="rounded-lg border border-red-700 p-3 text-sm">
+        <div role="alert" className="rounded-md border border-danger p-3 text-sm">
           {error}.{" "}
           <button type="button" onClick={() => void reload()} className="font-semibold underline">
             Tekrar dene
@@ -82,7 +82,7 @@ export function ResultsView() {
                   nowMs={data.now.nowMs}
                 />
                 {data.places.length > 1 && (
-                  <details className="rounded-xl border border-zinc-300 p-3 dark:border-zinc-700">
+                  <details className="rounded-lg border border-line bg-card p-3">
                     <summary className="min-h-11 cursor-pointer content-center font-semibold">
                       Diğer çalışma yerleri ({data.places.length - 1}) — kütüphane ek bina, kafeler
                     </summary>
@@ -104,14 +104,14 @@ export function ResultsView() {
             )}
           </section>
           <div className="space-y-4">
-            <h2 className="text-lg font-bold lg:text-xl">Derslikler</h2>
+            <h2 className="text-[22px] leading-7 font-bold">Derslikler</h2>
             {data.results.length > 0 && results.length === 0 ? (
-              <p className="rounded-lg border border-zinc-400 p-4">
+              <p className="rounded-md border border-line-strong p-4">
                 Filtreye uyan derslik yok. Yeterli değerlendirmesi olmayan yerler &quot;Sessiz&quot; ve &quot;Priz var&quot;
                 filtrelerine girmez.
               </p>
             ) : results.length === 0 ? (
-              <p className="rounded-lg border border-zinc-400 p-4">
+              <p className="rounded-md border border-line-strong p-4">
                 Bu süre için programda uygun görünen derslik yok. Daha kısa bir süre deneyebilirsin.
                 {data.now.minute + d > 1320 && " Bina kapanış saatine (22.00) yakın olabilir."}
               </p>
@@ -122,9 +122,9 @@ export function ResultsView() {
                 ))}
               </ul>
             )}
-            <p className="text-xs opacity-70">
+            <p className="text-xs text-fg-3">
               Sınav, tatil, ders iptali ve program dışı etkinlik bilgisi yok. Programda boş görünen derslik gerçekten boş
-              olmayabilir; gördüğünü bildirerek diğer öğrencilere yardım edebilirsin.
+              olmayabilir; gördüğünü bildir, birlikte bilelim.
             </p>
           </div>
         </div>

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Wordmark } from "@/components/brand/Wordmark";
 import { OSM_ATTRIBUTION } from "@/data/campus";
 
 export const metadata: Metadata = { title: "Hakkında" };
@@ -6,14 +7,15 @@ export const metadata: Metadata = { title: "Hakkında" };
 export default function AboutPage() {
   return (
     <div className="mx-auto w-full max-w-md flex-1 space-y-6 px-4 py-6 lg:max-w-3xl lg:px-8 lg:py-10">
-      <h1 className="text-2xl font-bold">Hakkında</h1>
+      <Wordmark size={22} variant="sign" />
+      <h1 className="text-[28px] leading-8 font-bold">Hakkında</h1>
       <p>
-        SAÜ Çalışma Asistanı, seçtiğin süre boyunca uygun görünen çalışma alanlarını bilginin kaynağı ve güven etiketiyle
-        listeler. GDG on Campus SAÜ Hackathon projesidir; Sakarya Üniversitesi&apos;nin resmî uygulaması değildir.
+        neredeçalışalım, seçtiğin süre boyunca uygun görünen çalışma alanlarını bilginin kaynağı ve güven etiketiyle listeler. GDG
+        on Campus SAÜ Hackathon projesidir; Sakarya Üniversitesi&apos;nin resmî uygulaması değildir.
       </p>
 
       <section aria-labelledby="kaynaklar" className="space-y-2">
-        <h2 id="kaynaklar" className="text-lg font-semibold">
+        <h2 id="kaynaklar" className="text-xl font-bold">
           Bilgi nereden geliyor?
         </h2>
         <ul className="list-disc space-y-1 pl-5 text-sm">
@@ -30,7 +32,7 @@ export default function AboutPage() {
       </section>
 
       <section aria-labelledby="gizlilik" className="space-y-2 text-sm">
-        <h2 id="gizlilik" className="text-lg font-semibold">
+        <h2 id="gizlilik" className="text-xl font-bold">
           Gizlilik ve kişisel veriler (aydınlatma metni taslağı)
         </h2>
         <p>
@@ -59,14 +61,14 @@ export default function AboutPage() {
             Bildirim ve değerlendirmelerin topluluk verisi olarak kalır, seninle bağı koparılır.
           </li>
         </ul>
-        <p className="opacity-80">
+        <p className="text-fg-2">
           Bu metin bir hackathon projesi için hazırlanmış taslaktır; hukuki inceleme yapılmamıştır ve KVKK uyumluluğu konusunda
           garanti vermez.
         </p>
       </section>
 
       <section aria-labelledby="erisilebilirlik" className="space-y-2 text-sm">
-        <h2 id="erisilebilirlik" className="text-lg font-semibold">
+        <h2 id="erisilebilirlik" className="text-xl font-bold">
           Erişilebilirlik
         </h2>
         <p>

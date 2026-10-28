@@ -27,7 +27,7 @@ test("harita ana ekran, sekmeler sorguyu taşır, eski bağlantılar yönlendiri
   await expect(page).toHaveURL(/\/\?d=90/);
   await tabs.getByRole("link", { name: "Liste" }).click();
   await expect(page).toHaveURL(/\/liste\?d=90/);
-  await expect(page.getByRole("heading", { level: 1, name: "90 dakika çalışabileceğin yerler" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "90 dakika nerede çalışalım?" })).toBeVisible();
   await tabs.getByRole("link", { name: "Profil" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Profil" })).toBeVisible();
   await page.getByRole("link", { name: /Hakkında/ }).click();
@@ -72,7 +72,7 @@ test("check-in diğer cihazda 5 sn içinde görünür, aynı odaya ikinci bildir
 
   await a.goto(room("103"));
   await a.getByRole("button", { name: "Buradayım, uygun (check-in)" }).click();
-  await expect(reportMessage(a)).toHaveText("Check-in yapıldı, teşekkürler!");
+  await expect(reportMessage(a)).toHaveText("Check-in yapıldı. Teşekkürler, birlikte daha iyi biliyoruz.");
 
   await expect(b.getByRole("listitem").filter({ hasText: "Ö-103" }).getByText("Öğrenci doğruladı")).toBeVisible({
     timeout: 5_000,
@@ -92,7 +92,7 @@ test("değerlendirme check-in ister, check-in başına bir kez; 3 değerlendirme
       await expect(formMessage(p)).toHaveText("Değerlendirme için önce bu alanda check-in yapmalısın"); // T19
     }
     await p.getByRole("button", { name: "Buradayım, uygun (check-in)" }).click();
-    await expect(reportMessage(p)).toHaveText("Check-in yapıldı, teşekkürler!");
+    await expect(reportMessage(p)).toHaveText("Check-in yapıldı. Teşekkürler, birlikte daha iyi biliyoruz.");
     await rate(p, s);
     await expect(formMessage(p)).toHaveText("Değerlendirmen kaydedildi, teşekkürler!");
     if (i === 0) {
@@ -116,7 +116,7 @@ test("harita: işarete dokununca yer paneli açılır, hızlı check-in panelde 
   const panel = a.getByRole("dialog", { name: "Taş Kafe" });
   await expect(panel.getByRole("heading", { name: "Taş Kafe" })).toBeFocused();
   await panel.getByRole("button", { name: "Buradayım, uygun (check-in)" }).click();
-  await expect(panel.getByText("Check-in yapıldı, teşekkürler!")).toBeVisible();
+  await expect(panel.getByText("Check-in yapıldı. Teşekkürler, birlikte daha iyi biliyoruz.")).toBeVisible();
   await expect(panel.getByText("Öğrenci doğruladı")).toBeVisible({ timeout: 5_000 });
 
   const b = await newPhone(browser);

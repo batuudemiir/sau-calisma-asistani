@@ -5,6 +5,8 @@ import { MIN_RATINGS_TO_SHOW } from "@/domain/config";
 import { CRITERIA, CRITERION_LABELS, type Criterion, type RatingSummary } from "@/domain/ratings";
 import { postWithSession } from "@/lib/session";
 import { SimulatedBadge } from "./StatusBadge";
+import { Button } from "./ui/Button";
+import { PointsEarned } from "./ui/PointsEarned";
 
 type Pair = { real: RatingSummary; simulated: RatingSummary };
 
@@ -15,7 +17,8 @@ export function RatingChip({ rating }: { rating: Pair }) {
   return (
     <span className="inline-flex items-center gap-2 text-sm">
       <span>
-        <span aria-hidden="true">★</span> {show.overall!.toFixed(1)}/5 ({show.count} değerlendirme)
+        <span aria-hidden="true">★</span> <span className="font-mono font-semibold">{show.overall!.toFixed(1)}/5</span> (
+        {show.count} değerlendirme)
       </span>
       {show === rating.simulated && <SimulatedBadge />}
     </span>
@@ -25,12 +28,12 @@ export function RatingChip({ rating }: { rating: Pair }) {
 export function RatingSummaryView({ rating }: { rating: Pair }) {
   return (
     <section aria-labelledby="rating-title" className="space-y-2">
-      <h2 id="rating-title" className="text-lg font-bold">
+      <h2 id="rating-title" className="text-xl font-bold">
         Öğrenci değerlendirmeleri
       </h2>
       <SummaryBlock s={rating.real} />
       {rating.simulated.count > 0 && (
-        <div className="space-y-1 rounded-lg border border-dashed border-amber-700 p-2 dark:border-amber-400">
+        <div className="space-y-1 rounded-md border border-dashed border-simulated-border p-2">
           <SimulatedBadge />
           <SummaryBlock s={rating.simulated} />
         </div>
@@ -52,17 +55,17 @@ function SummaryBlock({ s }: { s: RatingSummary }) {
       {CRITERIA.map((c) => (
         <div key={c} className="contents">
           <dt>{CRITERION_LABELS[c]}</dt>
-          <dd aria-hidden="true" className="h-2 rounded-full bg-zinc-200 dark:bg-zinc-700">
-            <div className="h-2 rounded-full bg-foreground" style={{ width: `${(s.averages![c] / 5) * 100}%` }} />
+          <dd aria-hidden="true" className="h-2 rounded-full bg-zinc-200 dark:bg-zinc-800">
+            <div className="h-2 rounded-full bg-fg-1" style={{ width: `${(s.averages![c] / 5) * 100}%` }} />
           </dd>
-          <dd>{s.averages![c].toFixed(1)}/5</dd>
+          <dd className="font-mono">{s.averages![c].toFixed(1)}/5</dd>
         </div>
       ))}
       <div className="contents font-semibold">
         <dt>Genel</dt>
         <dd />
         <dd>
-          {s.overall!.toFixed(1)}/5 · {s.count} değerlendirme
+          <span className="font-mono">{s.overall!.toFixed(1)}/5</span> · {s.count} değerlendirme
         </dd>
       </div>
     </dl>
@@ -96,10 +99,10 @@ export function RatingForm({ spaceId, onRated }: { spaceId: string; onRated: () 
 
   return (
     <form onSubmit={submit} className="space-y-3" aria-labelledby="rate-title">
-      <h2 id="rate-title" className="text-lg font-bold">
-        Burayı değerlendir
+      <h2 id="rate-title" className="text-xl font-bold">
+        Burayı değerlendirelim
       </h2>
-      <p className="text-xs opacity-70">Check-in yaptıktan sonraki 3 saat içinde, her check-in için bir kez.</p>
+      <p className="text-xs text-fg-3">Check-in yaptıktan sonraki 3 saat içinde, her check-in için bir kez.</p>
       {CRITERIA.map((c) => (
         <fieldset key={c} className="space-y-1">
           <legend className="text-sm font-semibold">{CRITERION_LABELS[c]}</legend>
@@ -114,7 +117,7 @@ export function RatingForm({ spaceId, onRated }: { spaceId: string; onRated: () 
                   onChange={() => setScores((s) => ({ ...s, [c]: n }))}
                   className="peer sr-only"
                 />
-                <span className="flex min-h-11 cursor-pointer items-center justify-center rounded-lg border border-zinc-400 font-semibold peer-checked:border-current peer-checked:bg-foreground peer-checked:text-background peer-focus-visible:outline-3 peer-focus-visible:outline-offset-2">
+                <span className="flex min-h-11 cursor-pointer items-center justify-center rounded-md border border-line-strong bg-card font-mono font-semibold peer-checked:border-ink-900 peer-checked:bg-ink-900 peer-checked:text-lime-500 peer-focus-visible:outline-3 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[var(--focus-ring)] dark:peer-checked:border-lime-500">
                   {n}
                 </span>
               </label>
@@ -122,17 +125,13 @@ export function RatingForm({ spaceId, onRated }: { spaceId: string; onRated: () 
           </div>
         </fieldset>
       ))}
-      <button
-        type="submit"
-        disabled={!complete || sending}
-        className="min-h-12 w-full rounded-lg border-2 border-current font-semibold disabled:opacity-50"
-      >
-        {sending ? "Gönderiliyor…" : complete ? "Değerlendirmeyi gönder" : "Dört kriteri de puanla"}
-      </button>
-      <p aria-live="polite" className={`text-sm ${message?.kind === "error" ? "font-semibold text-red-800 dark:text-red-300" : ""}`}>
+      <Button type="submit" size="lg" block variant={complete ? "primary" : "outline"} disabled={!complete || sending}>
+        {sending ? "Gönderiliyor…" : complete ? "Değerlendirmeyi gönder" : "Dört kriteri de puanlayalım"}
+      </Button>
+      <p aria-live="polite" className={`text-sm ${message?.kind === "error" ? "font-semibold text-danger-fg" : ""}`}>
         {message?.text}
       </p>
-      {earned !== null && earned > 0 && <p className="text-sm font-semibold">+{earned} puan kazandın</p>}
+      {earned !== null && earned > 0 && <PointsEarned points={earned} />}
     </form>
   );
 }

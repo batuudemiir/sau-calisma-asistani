@@ -7,7 +7,7 @@ const ROUTES = [
   { name: "harita", path: `/?${Q}`, ready: /derslik/ },
   { name: "bina paneli", path: `/?${Q}&b=demo-blok`, ready: "Örnek Blok" },
   { name: "yer paneli", path: `/?${Q}&s=kutuphane-merkez`, ready: /Süleyman Demirel/ },
-  { name: "liste", path: `/liste?${Q}`, ready: /çalışabileceğin yerler/ },
+  { name: "liste", path: `/liste?${Q}`, ready: /nerede çalışalım/ },
   { name: "ayrıntı", path: `/yer/demo-blok-${encodeURIComponent("Ö-102")}?${Q}`, ready: "Ö-102" },
   { name: "profil", path: `/profil?${Q}`, ready: "Puanların" },
   { name: "hakkında", path: "/hakkinda", ready: "Hakkında" },

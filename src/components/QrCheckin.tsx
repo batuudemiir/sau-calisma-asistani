@@ -7,6 +7,8 @@ import { postWithSession } from "@/lib/session";
 import { useApi } from "@/lib/use-api";
 import type { SpaceDetailResponse } from "@/server/search-service";
 import { RatingForm } from "./Ratings";
+import { PointsEarned } from "./ui/PointsEarned";
+import { buttonClass } from "./ui/Button";
 
 function safeDecode(s: string) {
   try {
@@ -42,14 +44,14 @@ export function QrCheckin() {
   return (
     <div className="mx-auto w-full max-w-md flex-1 space-y-5 px-4 py-6 lg:py-10">
       <header className="space-y-1">
-        <p className="text-sm opacity-80">QR ile check-in</p>
-        <h1 className="text-3xl font-bold">{name}</h1>
-        {data && data.space.kind === "CLASSROOM" && <p className="opacity-80">{data.space.buildingName}</p>}
+        <p className="text-sm text-fg-2">QR ile check-in</p>
+        <h1 className="text-[40px] leading-[44px] font-bold">{name}</h1>
+        {data && data.space.kind === "CLASSROOM" && <p className="text-fg-2">{data.space.buildingName}</p>}
       </header>
 
       {!done && (
         <section aria-labelledby="qr-title" className="space-y-3">
-          <h2 id="qr-title" className="text-lg font-bold">
+          <h2 id="qr-title" className="text-xl font-bold">
             Şu an burada mısın?
           </h2>
           <p className="text-sm">
@@ -60,11 +62,11 @@ export function QrCheckin() {
             type="button"
             onClick={() => void checkin()}
             disabled={sending}
-            className="min-h-12 w-full rounded-lg border-2 border-green-700 px-3 py-2 font-semibold disabled:opacity-50 dark:border-green-400"
+            className={`${buttonClass("primary", "lg", true)} shadow-[inset_0_-4px_0_#d9ff3f]`}
           >
             {sending ? "Gönderiliyor…" : "Buradayım, uygun (QR ile check-in)"}
           </button>
-          <p aria-live="polite" className="text-sm font-semibold text-red-800 dark:text-red-300">
+          <p aria-live="polite" className="text-sm font-semibold text-danger-fg">
             {error}
           </p>
         </section>
@@ -72,10 +74,10 @@ export function QrCheckin() {
 
       {done && (
         <section aria-labelledby="qr-done" className="space-y-2">
-          <h2 id="qr-done" className="text-lg font-bold" aria-live="polite">
+          <h2 id="qr-done" className="text-xl font-bold" aria-live="polite">
             QR ile check-in yapıldı, teşekkürler!
           </h2>
-          {done.points > 0 && <p className="font-semibold">+{done.points} puan kazandın</p>}
+          {done.points > 0 && <PointsEarned points={done.points} />}
           {done.points === 0 && <p className="text-sm">Bu yer için puanı yakın zamanda almıştın veya günlük sınıra ulaştın.</p>}
           {done.qrLimited && (
             <p className="text-sm">
@@ -86,7 +88,7 @@ export function QrCheckin() {
       )}
 
       {done && !rated && (
-        <div className="rounded-xl border border-zinc-300 p-4 dark:border-zinc-700">
+        <div className="rounded-lg border border-line bg-card p-4">
           <RatingForm spaceId={spaceId} onRated={() => setRated(true)} />
         </div>
       )}

@@ -15,11 +15,11 @@ export const SHORT: Record<Tone, string> = {
 };
 
 export const FILL: Record<Tone, string> = {
-  VERIFIED_FREE: "fill-green-100 stroke-green-700 dark:fill-green-950 dark:stroke-green-400",
-  PROGRAM_FREE: "fill-sky-100 stroke-sky-700 dark:fill-sky-950 dark:stroke-sky-400",
-  UNKNOWN: "fill-zinc-100 stroke-zinc-600 dark:fill-zinc-800 dark:stroke-zinc-400",
-  REPORTED_BUSY: "fill-red-100 stroke-red-700 dark:fill-red-950 dark:stroke-red-400",
-  EXCLUDED: "fill-zinc-200 stroke-zinc-500 dark:fill-zinc-900 dark:stroke-zinc-600",
+  VERIFIED_FREE: "fill-status-verified-bg stroke-status-verified-border",
+  PROGRAM_FREE: "fill-status-program-bg stroke-status-program-border",
+  UNKNOWN: "fill-status-unknown-bg stroke-status-unknown-border",
+  REPORTED_BUSY: "fill-status-busy-bg stroke-status-busy-border",
+  EXCLUDED: "fill-status-excluded-bg stroke-status-excluded-border",
 };
 
 export const toneOf = (s: MapSpaceDTO): Tone => (s.excludedBecause ? "EXCLUDED" : s.status.code);

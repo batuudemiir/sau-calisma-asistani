@@ -6,6 +6,7 @@ import { projector, toPath } from "@/lib/map-geometry";
 import { boxAround, type Box } from "@/lib/pan-zoom";
 import { statusTitle } from "@/lib/labels";
 import type { MapResponse } from "@/server/search-service";
+import { MapControls } from "./MapControls";
 import { FILL } from "./map-style";
 import { usePanZoom } from "./usePanZoom";
 
@@ -29,6 +30,14 @@ function centerBox(data: MapResponse): Box {
     .map(project);
   return centers.length ? boxAround(centers, 30) : BOUNDS;
 }
+
+/** Çalışma yeri işaretinin kenarı: durum rengi (renk tek başına anlam taşımaz; aria-label durumu yazar). */
+const STROKE: Record<string, string> = {
+  VERIFIED_FREE: "stroke-status-verified-border",
+  PROGRAM_FREE: "stroke-status-program-border",
+  UNKNOWN: "stroke-status-unknown-border",
+  REPORTED_BUSY: "stroke-status-busy-border",
+};
 
 export type MapSelection = { b?: string; s?: string };
 
@@ -64,28 +73,27 @@ export function CampusMap({
     onSelect(sel, e.currentTarget);
   };
 
-  const btn = "flex size-11 items-center justify-center rounded-lg border border-zinc-400 bg-background text-lg font-bold shadow";
   return (
     <div className="relative h-full w-full">
       <svg
         ref={svgRef}
         viewBox={pz.viewBox}
         preserveAspectRatio="xMidYMid meet"
-        className="h-full w-full touch-none bg-zinc-100 select-none dark:bg-zinc-950"
+        className="h-full w-full touch-none bg-map select-none"
         role="group"
         aria-label="Esentepe kampüsü, gerçek bina konumları. Sürükleyerek kaydır, iki parmakla yakınlaştır."
         {...pz.handlers}
       >
         <path
           d={shape(CAMPUS.boundary)}
-          className="fill-zinc-50 stroke-zinc-400 dark:fill-zinc-900 dark:stroke-zinc-600"
+          className="fill-map-campus stroke-map-boundary"
           strokeDasharray="4 3"
           vectorEffect="non-scaling-stroke"
         />
         {CAMPUS.buildings
           .filter((b) => !appOsm.has(b.osm) && !placeOsm.has(b.osm))
           .map((b) => (
-            <path key={b.osm} d={shape(b.outline)} className="fill-zinc-300 dark:fill-zinc-700">
+            <path key={b.osm} d={shape(b.outline)} className="fill-map-building">
               {b.name && <title>{b.name}</title>}
             </path>
           ))}
@@ -94,10 +102,10 @@ export function CampusMap({
           const [x, y] = project(b.center);
           return (
             <g key={p.id} aria-hidden="true">
-              <path d={shape(b.outline)} className="fill-zinc-400 dark:fill-zinc-500" />
+              <path d={shape(b.outline)} className="fill-map-guide" />
               <g transform={`translate(${x} ${y}) scale(${pz.px})`}>
-                <circle r="9" className="fill-background stroke-current" strokeWidth="1.2" />
-                <text y="3.8" textAnchor="middle" className="fill-current text-[10px] font-bold">
+                <circle r="9" className="fill-white stroke-ink-900" strokeWidth="1.2" />
+                <text y="3.8" textAnchor="middle" className="fill-ink-900 text-[10px] font-bold">
                   {i + 1}
                 </text>
               </g>
@@ -127,15 +135,20 @@ export function CampusMap({
               />
               <g transform={`translate(${x} ${y}) scale(${pz.px})`}>
                 <rect
-                  x="-24"
-                  y="-11"
-                  width="48"
-                  height="22"
-                  rx="11"
-                  className={FILL.PROGRAM_FREE}
-                  strokeWidth={active ? 3 : 1.5}
+                  x="-26"
+                  y="-12"
+                  width="52"
+                  height="24"
+                  rx="12"
+                  className={active ? "fill-ink-900 stroke-ink-900" : FILL.PROGRAM_FREE}
+                  strokeWidth="1.5"
                 />
-                <text aria-hidden="true" y="4.5" textAnchor="middle" className="fill-current text-[12px] font-bold">
+                <text
+                  aria-hidden="true"
+                  y="4.5"
+                  textAnchor="middle"
+                  className={`text-[12px] font-bold ${active ? "fill-lime-500" : "fill-status-program-fg"}`}
+                >
                   {free} oda
                 </text>
               </g>
@@ -158,8 +171,8 @@ export function CampusMap({
               >
                 <path d={shape(ob.outline)} className={FILL[p.status.code]} strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
                 <g transform={`translate(${x} ${y}) scale(${pz.px})`}>
-                  <circle r={active ? 16 : 13} className={FILL[p.status.code]} strokeWidth={active ? 3.5 : 2} />
-                  <text aria-hidden="true" y="5" textAnchor="middle" className="fill-current text-[14px] font-bold">
+                  <circle r={active ? 14 : 11} className={`fill-ink-900 ${STROKE[p.status.code]}`} strokeWidth="3" />
+                  <text aria-hidden="true" y="5" textAnchor="middle" className="fill-lime-500 font-display text-[14px] font-bold">
                     {p.kind === "LIBRARY" ? "K" : "C"}
                   </text>
                 </g>
@@ -168,24 +181,13 @@ export function CampusMap({
           })}
       </svg>
 
-      <div
-        className={`absolute right-2 bottom-[21.5rem] flex flex-col gap-2 lg:bottom-20 lg:flex ${controlsHidden ? "max-lg:hidden" : ""}`}
-        role="group"
-        aria-label="Harita denetimleri"
-      >
-        <button type="button" className={btn} onClick={pz.zoomIn} aria-label="Yakınlaştır">
-          +
-        </button>
-        <button type="button" className={btn} onClick={pz.zoomOut} aria-label="Uzaklaştır">
-          −
-        </button>
-        <button type="button" className={`${btn} text-xs`} onClick={() => pz.show(center)} aria-label="Merkeze dön">
-          ◎
-        </button>
-        <button type="button" className={`${btn} text-xs`} onClick={() => pz.show(BOUNDS)} aria-label="Tüm kampüsü göster">
-          ⤢
-        </button>
-      </div>
+      <MapControls
+        hidden={controlsHidden}
+        onZoomIn={pz.zoomIn}
+        onZoomOut={pz.zoomOut}
+        onCenter={() => pz.show(center)}
+        onAll={() => pz.show(BOUNDS)}
+      />
     </div>
   );
 }

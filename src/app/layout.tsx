@@ -4,14 +4,14 @@ import { TabBar } from "@/components/nav/TabBar";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: { default: "SAÜ Çalışma Asistanı", template: "%s · SAÜ Çalışma Asistanı" },
+  title: { default: "neredeçalışalım", template: "%s · neredeçalışalım" },
   description: "Şimdi nerede çalışabilirsin? Seçtiğin süre boyunca uygun görünen çalışma alanları, kaynağı ve güven etiketiyle.",
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#0b3d91",
+  themeColor: "#1f3fd8",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -20,7 +20,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="flex min-h-full flex-col pb-[calc(3.5rem+env(safe-area-inset-bottom))] lg:pb-0">
         <a
           href="#icerik"
-          className="sr-only z-30 rounded bg-foreground px-4 py-2 text-background focus:not-sr-only focus:fixed focus:top-2 focus:left-2"
+          className="sr-only z-30 rounded-md bg-cobalt-500 px-4 py-2 font-semibold text-white focus:not-sr-only focus:fixed focus:top-2 focus:left-2"
         >
           İçeriğe atla
         </a>

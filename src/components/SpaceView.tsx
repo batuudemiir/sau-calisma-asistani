@@ -47,7 +47,7 @@ export function SpaceView() {
 
       {loading && !data && <p role="status">Yükleniyor…</p>}
       {error && (
-        <div role="alert" className="rounded-lg border border-red-700 p-3 text-sm">
+        <div role="alert" className="rounded-md border border-danger p-3 text-sm">
           {error}.{" "}
           <button type="button" onClick={() => void reload()} className="font-semibold underline">
             Tekrar dene
@@ -58,11 +58,11 @@ export function SpaceView() {
       {data && s && (
         <>
           <header className="space-y-2">
-            <h1 className="text-3xl font-bold lg:text-4xl">{s.code}</h1>
-            {!isLibrary && <p className="opacity-80">{s.buildingName}</p>}
+            <h1 className="text-[40px] leading-[44px] font-bold">{s.code}</h1>
+            {!isLibrary && <p className="text-fg-2">{s.buildingName}</p>}
             {s.excludedBecause ? (
               <>
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-zinc-600 bg-zinc-100 px-3 py-1 text-sm font-semibold text-zinc-900 dark:border-zinc-400 dark:bg-zinc-800 dark:text-zinc-100">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-zinc-600 bg-zinc-100 px-3 py-1 text-sm font-semibold text-zinc-900 dark:border-line-strong dark:bg-zinc-800 dark:text-zinc-100">
                   <span aria-hidden="true">–</span>
                   {data.durationMin} dakika için uygun değil
                 </span>
@@ -91,7 +91,7 @@ export function SpaceView() {
 
               {!isLibrary && (
                 <section aria-labelledby="today-title" className="space-y-2">
-                  <h2 id="today-title" className="text-lg font-bold">
+                  <h2 id="today-title" className="text-xl font-bold">
                     {s.source?.isPartial ? "Bugün bilinen dersler" : "Bugünkü program"} ({WEEKDAY_NAMES[data.now.weekday]})
                   </h2>
                   {data.today.length === 0 ? (
@@ -101,7 +101,7 @@ export function SpaceView() {
                         : "Yayımlanmış programda bugün bu odada ders yok."}
                     </p>
                   ) : (
-                    <ul className="divide-y divide-zinc-300 rounded-lg border border-zinc-300 text-sm dark:divide-zinc-700 dark:border-zinc-700">
+                    <ul className="divide-y divide-zinc-300 rounded-md border border-line text-sm dark:divide-zinc-700">
                       {data.today.map((b) => (
                         <li key={`${b.startMinute}-${b.courseCode}`} className="flex gap-3 p-2">
                           <span className="font-mono">
@@ -109,7 +109,7 @@ export function SpaceView() {
                           </span>
                           <span>
                             {b.courseCode} {b.courseName}
-                            <span className="block text-xs opacity-70">Belgedeki yeri: {b.sourceRef}</span>
+                            <span className="block text-xs text-fg-3">Belgedeki yeri: {b.sourceRef}</span>
                           </span>
                         </li>
                       ))}
@@ -124,14 +124,14 @@ export function SpaceView() {
               )}
             </div>
 
-            <div className="space-y-5 lg:rounded-2xl lg:border lg:border-zinc-300 lg:p-6 lg:dark:border-zinc-700">
+            <div className="space-y-5 lg:rounded-xl lg:border lg:border-line lg:p-6 lg:dark:border-zinc-700">
               <ReportButtons spaceId={s.spaceId} onReported={() => void reload()} />
 
               <RatingSummaryView rating={s.rating} />
               <RatingForm spaceId={s.spaceId} onRated={() => void reload()} />
 
               <section aria-labelledby="reports-title" className="space-y-2">
-                <h2 id="reports-title" className="text-lg font-bold">
+                <h2 id="reports-title" className="text-xl font-bold">
                   Son 30 dakikadaki bildirimler
                 </h2>
                 {data.recentReports.length === 0 ? (
@@ -158,11 +158,11 @@ function PlaceInfo({ spaceId, openingHours, osm }: { spaceId: string; openingHou
   const facts = placeById(spaceId)?.facts ?? [];
   return (
     <section aria-labelledby="place-title" className="space-y-2 text-sm">
-      <h2 id="place-title" className="text-lg font-bold">
+      <h2 id="place-title" className="text-xl font-bold">
         Bu yer hakkında
       </h2>
       <p>{openingHoursText(openingHours) ?? "Açılış saatleri bilinmiyor."}</p>
-      <p className="opacity-80">Doluluk yalnızca öğrenci bildirimleriyle bilinir; ölçüm yoktur.</p>
+      <p className="text-fg-2">Doluluk yalnızca öğrenci bildirimleriyle bilinir; ölçüm yoktur.</p>
       {facts.length > 0 && (
         <ul className="list-disc space-y-1 pl-5">
           {facts.map((f) => (

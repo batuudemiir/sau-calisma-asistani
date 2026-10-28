@@ -10,11 +10,11 @@ export function SpaceCard({ r, href }: { r: ResultDTO; href: string }) {
     <li>
       <Link
         href={href}
-        className="block h-full rounded-xl border border-zinc-300 p-4 focus-visible:outline-3 focus-visible:outline-offset-2 dark:border-zinc-700"
+        className="block h-full rounded-lg border border-line bg-card p-4 transition-colors duration-[var(--dur-fast)] hover:border-fg-1"
       >
         <div className="flex items-baseline justify-between gap-2">
-          <h2 className="text-xl font-bold">{r.code}</h2>
-          <span className="text-sm opacity-80">{r.buildingName}</span>
+          <h2 className="text-2xl leading-7 font-bold">{r.code}</h2>
+          <span className="text-sm text-fg-2">{r.buildingName}</span>
         </div>
         <div className="mt-2">
           <StatusBadge status={r.status} />
@@ -49,13 +49,13 @@ export function SpaceFacts({ r }: { r: ResultDTO }) {
           <li>{partial ? "Bugün bilinen başka ders yok" : "Bugün başka ders yok (programa göre)"}</li>
         ))}
       {r.source && (
-        <li className="opacity-80">
+        <li className="text-fg-2">
           Kaynak: {r.source.department} · {r.source.termLabel}
           {partial ? " · ekibin kişisel programları (kısmi)" : " programı"}
           {r.source.isManual && !r.source.isSimulated && !partial && " (ekip tarafından elle derlenmiş)"}
         </li>
       )}
-      {r.accessStatus !== "OPEN" && <li className="opacity-80">{ACCESS_UNVERIFIED_LABEL}</li>}
+      {r.accessStatus !== "OPEN" && <li className="text-fg-2">{ACCESS_UNVERIFIED_LABEL}</li>}
       {(r.isSimulated || r.source?.isSimulated) && (
         <li>
           <SimulatedBadge />

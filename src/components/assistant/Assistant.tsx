@@ -17,6 +17,7 @@ import { CAMPUS_CENTER, CAMPUS_RADIUS_M, candidatesFrom } from "@/lib/assistant-
 import { statusTitle } from "@/lib/labels";
 import type { MapResponse } from "@/server/search-service";
 import type { MapSelection } from "../map/CampusMap";
+import { buttonClass } from "../ui/Button";
 
 type Step = "menu" | "duration" | "needs" | "kind" | "location" | "results";
 type Line = { from: "bot" | "me"; text: string };
@@ -144,7 +145,7 @@ export function Assistant({
   const ready = data && data.durationMin === duration;
   const recs: Recommendation[] = step === "results" && ready ? recommend(candidatesFrom(data), { criteria, kind, here }) : [];
 
-  const option = "min-h-11 rounded-full border border-zinc-400 px-3 text-sm font-semibold";
+  const option = "min-h-11 rounded-full border border-line-strong bg-card px-3.5 text-sm font-semibold hover:bg-sunken";
   return (
     <>
       <button
@@ -154,7 +155,7 @@ export function Assistant({
         aria-expanded={open}
         aria-controls={`${id}-panel`}
         aria-label="Asistan"
-        className={`absolute right-3 bottom-[17rem] z-20 flex size-14 items-center justify-center rounded-full border-2 border-current bg-foreground text-background shadow-lg lg:bottom-4 ${buttonHidden && !open ? "max-lg:hidden" : ""}`}
+        className={`absolute right-3 bottom-[17rem] z-20 flex size-14 items-center justify-center rounded-full border-2 border-cobalt-500 bg-cobalt-500 text-lime-500 shadow-control hover:bg-cobalt-600 active:translate-y-px lg:bottom-4 ${buttonHidden && !open ? "max-lg:hidden" : ""}`}
       >
         <svg
           width="26"
@@ -178,23 +179,19 @@ export function Assistant({
           role="dialog"
           aria-modal="false"
           aria-labelledby={`${id}-title`}
-          className="absolute inset-x-2 bottom-2 z-30 flex max-h-[80%] flex-col rounded-2xl border border-zinc-300 bg-background shadow-xl lg:inset-x-auto lg:right-4 lg:bottom-20 lg:w-[26rem] dark:border-zinc-700"
+          className="absolute inset-x-2 bottom-2 z-30 flex max-h-[80%] flex-col rounded-xl border border-line bg-background shadow-xl lg:inset-x-auto lg:right-4 lg:bottom-20 lg:w-[26rem]"
         >
-          <div className="flex items-center justify-between gap-2 border-b border-zinc-300 p-3 dark:border-zinc-700">
+          <div className="flex items-center justify-between gap-2 border-b border-line p-3">
             <h2 id={`${id}-title`} ref={title} tabIndex={-1} className="font-bold outline-none">
               Çalışma asistanı
             </h2>
             <div className="flex gap-2">
               {step !== "menu" && (
-                <button type="button" onClick={restart} className="min-h-11 rounded-lg border border-zinc-400 px-3 text-sm">
+                <button type="button" onClick={restart} className={buttonClass("secondary", "md")}>
                   Baştan
                 </button>
               )}
-              <button
-                type="button"
-                onClick={close}
-                className="min-h-11 rounded-lg border border-zinc-400 px-3 text-sm font-semibold"
-              >
+              <button type="button" onClick={close} className={buttonClass("secondary", "md")}>
                 Kapat
               </button>
             </div>
@@ -211,8 +208,8 @@ export function Assistant({
                   key={i}
                   className={
                     l.from === "me"
-                      ? "ml-8 rounded-xl bg-zinc-100 p-2 text-right dark:bg-zinc-800"
-                      : "mr-8 rounded-xl border border-zinc-300 p-2 dark:border-zinc-700"
+                      ? "ml-8 rounded-lg bg-zinc-100 p-2 text-right dark:bg-zinc-800"
+                      : "mr-8 rounded-lg border border-line bg-card p-2"
                   }
                 >
                   <span className="sr-only">{l.from === "me" ? "Sen: " : "Asistan: "}</span>
@@ -278,7 +275,7 @@ export function Assistant({
                         key={k}
                         type="button"
                         aria-pressed={on}
-                        className={`${option} ${on ? "bg-foreground text-background" : ""}`}
+                        className={`${option} ${on ? "bg-ink-900 text-lime-500 border-ink-900 dark:bg-lime-500 dark:text-ink-900 dark:border-lime-500" : ""}`}
                         onClick={() => setCriteria((c) => (on ? c.filter((x) => x !== k) : [...c, k]))}
                       >
                         {on && <span aria-hidden="true">✓ </span>}
@@ -355,10 +352,10 @@ export function Assistant({
                 ) : (
                   <ol className="space-y-3">
                     {recs.map((r, i) => (
-                      <li key={r.candidate.id} className="space-y-1 rounded-xl border border-zinc-300 p-3 dark:border-zinc-700">
+                      <li key={r.candidate.id} className="space-y-1 rounded-lg border border-line bg-card p-3">
                         <p className="font-bold">
                           {i + 1}. {r.candidate.name}
-                          {r.candidate.context && <span className="font-normal opacity-80"> · {r.candidate.context}</span>}
+                          {r.candidate.context && <span className="font-normal text-fg-2"> · {r.candidate.context}</span>}
                         </p>
                         <p className="text-sm">{statusTitle(r.candidate.status, r.candidate.kind !== "CLASSROOM")}</p>
                         <ul className="text-sm">
@@ -369,7 +366,7 @@ export function Assistant({
                             </li>
                           ))}
                           {r.cautions.map((x) => (
-                            <li key={x} className="opacity-80">
+                            <li key={x} className="text-fg-2">
                               <span aria-hidden="true">! </span>
                               <span className="sr-only">Dikkat: </span>
                               {x}
@@ -401,7 +398,7 @@ export function Assistant({
                     ))}
                   </ol>
                 )}
-                <p className="text-xs opacity-70">
+                <p className="text-xs text-fg-3">
                   Oraya gidince &quot;Buradayım&quot; de veya kapıdaki QR kodu okut; diğer öğrencilere yardımcı olur, puan
                   kazanırsın.
                 </p>

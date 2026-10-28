@@ -5,19 +5,22 @@ export function StatusBadge({ status, isLibrary = false }: { status: Status; isL
   const detail = statusDetail(status, isLibrary);
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm font-semibold ${STATUS_STYLE[status.code]}`}>
+      <span
+        className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm font-semibold ${STATUS_STYLE[status.code]}`}
+      >
         <span aria-hidden="true">{STATUS_ICON[status.code]}</span>
         {statusTitle(status, isLibrary)}
       </span>
-      {detail && <span className="text-sm opacity-80">{detail}</span>}
+      {detail && <span className="text-sm text-fg-2">{detail}</span>}
       {"simulated" in status && status.simulated && <SimulatedBadge />}
     </div>
   );
 }
 
+/** Yapay/demo veriyi işaretler. Kesik kenar = "gerçek değil". */
 export function SimulatedBadge() {
   return (
-    <span className="inline-flex rounded-md border border-dashed border-amber-700 bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-900 dark:border-amber-400 dark:bg-amber-950 dark:text-amber-100">
+    <span className="inline-flex rounded-sm border border-dashed border-simulated-border bg-simulated-bg px-2 py-0.5 text-xs font-semibold text-simulated-fg">
       Örnek demo verisi
     </span>
   );

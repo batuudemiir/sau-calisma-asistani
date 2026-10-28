@@ -43,6 +43,21 @@ export function SearchBox({
       <label htmlFor={`${listId}-input`} className="sr-only">
         Oda, bina veya yer ara
       </label>
+      <svg
+        aria-hidden="true"
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="pointer-events-none absolute top-[13px] left-3 text-fg-3"
+      >
+        <circle cx="11" cy="11" r="8" />
+        <path d="m21 21-4.3-4.3" />
+      </svg>
       <input
         id={`${listId}-input`}
         type="search"
@@ -52,7 +67,7 @@ export function SearchBox({
         placeholder="Oda, bina veya yer ara"
         autoComplete="off"
         aria-describedby={`${listId}-count`}
-        className="min-h-11 w-full rounded-lg border border-zinc-400 bg-background px-3"
+        className="min-h-11 w-full rounded-md border border-line-strong bg-card pr-3 pl-9 placeholder:text-fg-3 focus:border-ink-900 focus:outline-2 focus:outline-offset-0 focus:outline-[var(--focus-ring)]"
       />
       <p id={`${listId}-count`} aria-live="polite" className="sr-only">
         {text.trim() ? `${hits.length} sonuç` : ""}
@@ -60,21 +75,21 @@ export function SearchBox({
       {text.trim() && (
         <ul
           aria-label="Arama sonuçları"
-          className="mt-1 max-h-72 overflow-y-auto rounded-lg border border-zinc-300 bg-background dark:border-zinc-700"
+          className="mt-1 max-h-72 overflow-y-auto rounded-md border border-line bg-card shadow-control"
         >
           {hits.length === 0 && <li className="p-3 text-sm">Sonuç yok. Oda kodunu (ör. Ö-102) veya yer adını dene.</li>}
           {hits.map((h) => {
             const row = (
               <>
                 <span className="font-semibold">{h.label}</span>
-                <span className="text-xs opacity-70">
+                <span className="text-xs text-fg-3">
                   {TYPE_LABEL[h.type]}
                   {h.context ? ` · ${h.context}` : ""}
                 </span>
               </>
             );
             const cls =
-              "flex min-h-11 w-full flex-col justify-center px-3 py-1 text-left hover:bg-zinc-100 dark:hover:bg-zinc-800";
+              "flex min-h-11 w-full flex-col justify-center px-3 py-1 text-left no-underline hover:bg-cobalt-50 dark:hover:bg-sunken";
             return (
               <li key={`${h.type}-${h.id}`}>
                 {h.type === "room" ? (

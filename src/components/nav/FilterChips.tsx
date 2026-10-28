@@ -28,9 +28,13 @@ export function FilterChips() {
             type="button"
             aria-pressed={on}
             onClick={() => toggle(f)}
-            className={`min-h-11 shrink-0 rounded-full border px-3 text-sm font-semibold whitespace-nowrap ${on ? "border-current bg-foreground text-background" : "border-zinc-400"}`}
+            className={`min-h-11 shrink-0 rounded-full border px-3.5 text-sm font-semibold whitespace-nowrap transition-colors duration-[var(--dur-fast)] ${on ? "border-ink-900 bg-ink-900 text-white dark:border-lime-500 dark:bg-lime-500 dark:text-ink-900" : "border-line-strong bg-card hover:bg-sunken"}`}
           >
-            {on && <span aria-hidden="true">✓ </span>}
+            {on && (
+              <span aria-hidden="true" className="text-lime-500 dark:text-ink-900">
+                ✓{" "}
+              </span>
+            )}
             {FILTER_LABELS[f]}
           </button>
         );

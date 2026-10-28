@@ -41,12 +41,15 @@ export const STATUS_ICON: Record<StatusCode, string> = {
   REPORTED_BUSY: "✕",
 };
 
+/** Durum renkleri tasarım token'larından (src/app/globals.css); açık/koyu tema orada. */
 export const STATUS_STYLE: Record<StatusCode, string> = {
-  VERIFIED_FREE: "bg-green-100 text-green-900 border-green-700 dark:bg-green-950 dark:text-green-100 dark:border-green-400",
-  PROGRAM_FREE: "bg-sky-100 text-sky-900 border-sky-700 dark:bg-sky-950 dark:text-sky-100 dark:border-sky-400",
-  UNKNOWN: "bg-zinc-100 text-zinc-900 border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100 dark:border-zinc-400",
-  REPORTED_BUSY: "bg-red-100 text-red-900 border-red-700 dark:bg-red-950 dark:text-red-100 dark:border-red-400",
+  VERIFIED_FREE: "bg-status-verified-bg text-status-verified-fg border-status-verified-border",
+  PROGRAM_FREE: "bg-status-program-bg text-status-program-fg border-status-program-border",
+  UNKNOWN: "bg-status-unknown-bg text-status-unknown-fg border-status-unknown-border",
+  REPORTED_BUSY: "bg-status-busy-bg text-status-busy-fg border-status-busy-border",
 };
+
+export const EXCLUDED_STYLE = "bg-status-excluded-bg text-status-excluded-fg border-status-excluded-border border-dashed";
 
 export const REPORT_LABELS: Record<ReportType, string> = {
   AVAILABLE: "Buradayım, uygun",

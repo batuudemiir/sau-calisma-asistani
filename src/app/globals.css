@@ -1,24 +1,365 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+ * neredeçalışalım tasarım sistemi (design_handoff_neredecalisalim_app/tokens). Renkler yalnızca burada tanımlanır;
+ * bileşenler Tailwind sınıflarıyla (bg-cobalt-500, text-fg-2, bg-status-verified-bg …) kullanır.
+ * Tailwind'in zinc ölçeği marka "mürekkep" nötrleriyle değiştirilir (soğuk lacivert griler).
+ */
+
+/* Fontlar: Google Fonts (OFL), yerelden; latin + latin-ext (Türkçe ğ ı ş İ). */
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/IBMPlexMono-400-latin-ext.woff2") format("woff2");
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F,
+    U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/IBMPlexMono-400-latin.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+    U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/IBMPlexMono-500-latin-ext.woff2") format("woff2");
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F,
+    U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/IBMPlexMono-500-latin.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+    U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/IBMPlexMono-600-latin-ext.woff2") format("woff2");
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F,
+    U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/IBMPlexMono-600-latin.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+    U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Public Sans";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/PublicSans-400-latin-ext.woff2") format("woff2");
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F,
+    U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Public Sans";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/PublicSans-400-latin.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+    U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Zilla Slab";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/ZillaSlab-500-latin-ext.woff2") format("woff2");
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F,
+    U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Zilla Slab";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/ZillaSlab-500-latin.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+    U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Zilla Slab";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/ZillaSlab-600-latin-ext.woff2") format("woff2");
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F,
+    U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Zilla Slab";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/ZillaSlab-600-latin.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+    U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Zilla Slab";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/ZillaSlab-700-latin-ext.woff2") format("woff2");
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F,
+    U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Zilla Slab";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/ZillaSlab-700-latin.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+    U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+:root {
+  --bg-page: #f6f7fb;
+  --surface-card: #ffffff;
+  --surface-sunken: #eceef4;
+  --surface-map: #eceef4;
+  --surface-map-campus: #f3f4f8;
+  --surface-overlay: rgba(246, 247, 251, 0.95);
+  --fg-1: #0e1636;
+  --fg-2: #3a4160;
+  --fg-3: #565d7a;
+  --border-subtle: #e0e3ec;
+  --border-default: #c9cdda;
+  --border-strong: #9aa0b5;
+  --accent: #1f3fd8;
+  --accent-hover: #1a34b5;
+  --focus-ring: #1f3fd8;
+  --link-underline: #1f3fd8;
+  --status-verified-bg: #d9f2e3;
+  --status-verified-fg: #0b3f24;
+  --status-verified-border: #17804a;
+  --status-program-bg: #d6eff6;
+  --status-program-fg: #063f52;
+  --status-program-border: #0b7fa6;
+  --status-unknown-bg: #eceef4;
+  --status-unknown-fg: #0e1636;
+  --status-unknown-border: #565d7a;
+  --status-busy-bg: #fde1dc;
+  --status-busy-fg: #5c1610;
+  --status-busy-border: #d23a2a;
+  --status-excluded-bg: #e0e3ec;
+  --status-excluded-fg: #3a4160;
+  --status-excluded-border: #737a94;
+  --simulated-bg: #f9ffe0;
+  --simulated-fg: #3a4705;
+  --simulated-border: #7c9a0a;
+  --danger: #d23a2a;
+  --danger-fg: #a12b1f;
+  --danger-soft: #fde1dc;
+  --map-building: #c9cdda;
+  --map-guide-building: #9aa0b5;
+  --map-boundary: #9aa0b5;
+  --dur-fast: 120ms;
+  --dur-sheet: 260ms;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --bg-page: #0a0f26;
+    --surface-card: #121a3a;
+    --surface-sunken: #1b2448;
+    --surface-map: #070b1c;
+    --surface-map-campus: #10173a;
+    --surface-overlay: rgba(10, 15, 38, 0.95);
+    --fg-1: #eef0fa;
+    --fg-2: #c3c8dc;
+    --fg-3: #9aa0b5;
+    --border-subtle: #1f2850;
+    --border-default: #2b3563;
+    --border-strong: #454f80;
+    /* Paket koyu temada #5b78e6 öneriyor; beyaz yazıyla kontrastı 3.98:1 (AA 4.5:1 altında). Daha koyu kobalt: ≈5.6:1 */
+    --accent: #2f4fe0;
+    --accent-hover: #1f3fd8;
+    --focus-ring: #d9ff3f;
+    --link-underline: #d9ff3f;
+    --status-verified-bg: #08261a;
+    --status-verified-fg: #d6f4e2;
+    --status-verified-border: #5cd192;
+    --status-program-bg: #062530;
+    --status-program-fg: #d4f0f8;
+    --status-program-border: #5cc8e6;
+    --status-unknown-bg: #1b2448;
+    --status-unknown-fg: #eef0fa;
+    --status-unknown-border: #9aa0b5;
+    --status-busy-bg: #300d09;
+    --status-busy-fg: #fde1dc;
+    --status-busy-border: #ff8b7d;
+    --status-excluded-bg: #10173a;
+    --status-excluded-fg: #c3c8dc;
+    --status-excluded-border: #565d7a;
+    --simulated-bg: #1f2608;
+    --simulated-fg: #f0ffb3;
+    --simulated-border: #d9ff3f;
+    --danger: #ff8b7d;
+    --danger-fg: #ffb3a8;
+    --danger-soft: #300d09;
+    --map-building: #2b3563;
+    --map-guide-building: #454f80;
+    --map-boundary: #454f80;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0ms;
+    --dur-sheet: 0ms;
+  }
+}
+
+@theme {
+  --font-display: "Zilla Slab", "Rockwell", "Georgia", serif;
+  --font-sans: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
+
+  --color-cobalt-50: #eef1fd;
+  --color-cobalt-100: #dfe5fb;
+  --color-cobalt-200: #bccaf7;
+  --color-cobalt-300: #8ea4f0;
+  --color-cobalt-400: #5b78e6;
+  --color-cobalt-500: #1f3fd8;
+  --color-cobalt-600: #1a34b5;
+  --color-cobalt-700: #152a90;
+  --color-lime-50: #f9ffe0;
+  --color-lime-100: #f0ffb3;
+  --color-lime-500: #d9ff3f;
+  --color-lime-700: #7c9a0a;
+  --color-lime-900: #3a4705;
+  --color-ink-900: #0e1636;
+
+  /* zinc → mürekkep nötrleri */
+  --color-zinc-50: #f3f4f8;
+  --color-zinc-100: #eceef4;
+  --color-zinc-200: #e0e3ec;
+  --color-zinc-300: #c9cdda;
+  --color-zinc-400: #9aa0b5;
+  --color-zinc-500: #737a94;
+  --color-zinc-600: #565d7a;
+  --color-zinc-700: #3a4160;
+  --color-zinc-800: #1e2647;
+  --color-zinc-900: #0e1636;
+  --color-zinc-950: #080d22;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+
+  --shadow-float: 0 1px 2px rgba(26, 26, 26, 0.08), 0 1px 3px rgba(26, 26, 26, 0.06);
+  --shadow-control: 0 1px 3px rgba(26, 26, 26, 0.12), 0 1px 2px rgba(26, 26, 26, 0.08);
+  --shadow-sheet: 0 -4px 16px rgba(0, 0, 0, 0.12);
+
+  --ease-brand: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* Semantik renkler: açık/koyu temada değişen değişkenlere bağlı */
+@theme inline {
+  --color-background: var(--bg-page);
+  --color-foreground: var(--fg-1);
+  --color-page: var(--bg-page);
+  --color-card: var(--surface-card);
+  --color-sunken: var(--surface-sunken);
+  --color-overlay: var(--surface-overlay);
+  --color-map: var(--surface-map);
+  --color-map-campus: var(--surface-map-campus);
+  --color-map-building: var(--map-building);
+  --color-map-guide: var(--map-guide-building);
+  --color-map-boundary: var(--map-boundary);
+  --color-fg-1: var(--fg-1);
+  --color-fg-2: var(--fg-2);
+  --color-fg-3: var(--fg-3);
+  --color-line-subtle: var(--border-subtle);
+  --color-line: var(--border-default);
+  --color-line-strong: var(--border-strong);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-danger: var(--danger);
+  --color-danger-fg: var(--danger-fg);
+  --color-danger-soft: var(--danger-soft);
+  --color-status-verified-bg: var(--status-verified-bg);
+  --color-status-verified-fg: var(--status-verified-fg);
+  --color-status-verified-border: var(--status-verified-border);
+  --color-status-program-bg: var(--status-program-bg);
+  --color-status-program-fg: var(--status-program-fg);
+  --color-status-program-border: var(--status-program-border);
+  --color-status-unknown-bg: var(--status-unknown-bg);
+  --color-status-unknown-fg: var(--status-unknown-fg);
+  --color-status-unknown-border: var(--status-unknown-border);
+  --color-status-busy-bg: var(--status-busy-bg);
+  --color-status-busy-fg: var(--status-busy-fg);
+  --color-status-busy-border: var(--status-busy-border);
+  --color-status-excluded-bg: var(--status-excluded-bg);
+  --color-status-excluded-fg: var(--status-excluded-fg);
+  --color-status-excluded-border: var(--status-excluded-border);
+  --color-simulated-bg: var(--simulated-bg);
+  --color-simulated-fg: var(--simulated-fg);
+  --color-simulated-border: var(--simulated-border);
+}
+
+@layer base {
+  html,
+  body {
+    background: var(--bg-page);
+    color: var(--fg-1);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  a {
+    text-decoration-color: var(--link-underline);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+  }
+  a:hover {
+    text-decoration-color: currentColor;
+  }
+  :focus-visible {
+    outline: 3px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+  /* Başlıklar ve oda kodları: Zilla Slab */
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
 }

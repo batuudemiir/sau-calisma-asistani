@@ -8,7 +8,10 @@ import { LIBRARY_LEVEL_LABELS, WEEKDAY_NAMES, statusTitle, time } from "@/lib/la
 import { applyFilters, parseFilters } from "@/lib/filters";
 import { carryQuery, durationParam, useApi } from "@/lib/use-api";
 import type { MapResponse, PlaceDTO, ResultDTO } from "@/server/search-service";
+import { Wordmark } from "../brand/Wordmark";
 import { DurationChips } from "../nav/DurationChips";
+import { buttonClass } from "../ui/Button";
+import { PlaceGlyph } from "../ui/PlaceGlyph";
 import { FilterChips } from "../nav/FilterChips";
 import { ShareButton } from "../ShareButton";
 import { openingHoursText } from "../PlaceCard";
@@ -71,12 +74,13 @@ export function MapHome() {
   return (
     <div className="relative flex h-[calc(100dvh-3.5rem-env(safe-area-inset-bottom))] flex-col overflow-hidden lg:h-[calc(100dvh-3.5rem)] lg:flex-row">
       <div className="relative min-h-0 flex-1">
-        <header className="absolute inset-x-2 top-2 z-10 space-y-2 rounded-xl border border-zinc-300 bg-background/95 p-2 shadow-sm lg:right-auto lg:w-[28rem] dark:border-zinc-700">
-          <div className="flex items-baseline justify-between gap-2 px-1">
-            <h1 className="text-base font-bold">Kampüs haritası</h1>
+        <header className="absolute inset-x-2 top-2 z-10 space-y-2 rounded-lg border border-line bg-overlay p-2 shadow-float lg:right-auto lg:w-[28rem]">
+          <div className="flex items-center justify-between gap-2 px-1">
+            <h1 className="sr-only">Kampüs haritası</h1>
+            <Wordmark size={19} />
             {data && (
-              <p className="text-xs opacity-80">
-                {WEEKDAY_NAMES[data.now.weekday]} {time(data.now.minute)}
+              <p className="text-xs text-fg-2">
+                {WEEKDAY_NAMES[data.now.weekday]} <span className="font-mono">{time(data.now.minute)}</span>
                 {data.now.isDemoClock && <strong className="ml-1">(demo saati)</strong>}
               </p>
             )}
@@ -91,7 +95,7 @@ export function MapHome() {
           </p>
         )}
         {error && (
-          <div role="alert" className="absolute inset-x-2 top-32 z-10 rounded-lg border border-red-700 bg-background p-3 text-sm">
+          <div role="alert" className="absolute inset-x-2 top-40 z-10 rounded-md border border-danger bg-card p-3 text-sm">
             {error}.{" "}
             <button type="button" onClick={() => void reload()} className="font-semibold underline">
               Tekrar dene
@@ -111,7 +115,7 @@ export function MapHome() {
 
       <section
         aria-labelledby="sheet-title"
-        className={`absolute inset-x-0 bottom-0 z-20 flex flex-col rounded-t-2xl border-t border-zinc-300 bg-background shadow-[0_-4px_16px_rgba(0,0,0,0.12)] motion-safe:transition-[height] lg:static lg:h-auto lg:w-[26rem] lg:rounded-none lg:border-t-0 lg:border-l lg:shadow-none dark:border-zinc-700 ${SHEET_HEIGHT[state]}`}
+        className={`absolute inset-x-0 bottom-0 z-20 flex flex-col rounded-t-xl border-t border-line bg-card shadow-sheet transition-[height] duration-[var(--dur-sheet)] ease-brand lg:static lg:h-auto lg:w-[26rem] lg:rounded-none lg:border-t-0 lg:border-l lg:shadow-none ${SHEET_HEIGHT[state]}`}
       >
         <button
           type="button"
@@ -121,7 +125,7 @@ export function MapHome() {
           aria-label={state === "full" ? "Paneli küçült" : "Paneli büyüt"}
           className="flex min-h-8 w-full shrink-0 items-center justify-center lg:hidden"
         >
-          <span aria-hidden="true" className="h-1.5 w-12 rounded-full bg-zinc-400" />
+          <span aria-hidden="true" className="h-1.5 w-12 rounded-full bg-line-strong" />
         </button>
         <div id="sheet-body" className="min-h-0 flex-1 overflow-y-auto px-4 pb-4 lg:pt-4">
           {data && building && (
@@ -137,7 +141,7 @@ export function MapHome() {
                 </strong>
               </p>
               <BuildingMap spaces={building.spaces} query={query} />
-              <p className="text-xs opacity-70">Kat görünümü şematiktir, ölçekli değildir. Odaya dokun: ayrıntı ve check-in.</p>
+              <p className="text-xs text-fg-3">Kat görünümü şematiktir, ölçekli değildir. Odaya dokun: ayrıntı ve check-in.</p>
               <Legend data={data} />
             </Panel>
           )}
@@ -183,11 +187,7 @@ function Panel({ title, onClose, children }: { title: string; onClose: () => voi
         <h2 id="panel-title" ref={heading} tabIndex={-1} className="text-xl font-bold outline-none">
           {title}
         </h2>
-        <button
-          type="button"
-          onClick={onClose}
-          className="min-h-11 shrink-0 rounded-lg border border-zinc-400 px-3 text-sm font-semibold"
-        >
+        <button type="button" onClick={onClose} className={buttonClass("secondary", "md")}>
           Kapat
         </button>
       </div>
@@ -220,14 +220,19 @@ function ResultRow({ r, query }: { r: ResultDTO; query: string }) {
     <li>
       <Link
         href={`/yer/${encodeURIComponent(r.spaceId)}?${query}`}
-        className="flex min-h-11 items-center justify-between gap-3 rounded-lg border border-zinc-300 px-3 py-1.5 dark:border-zinc-700"
+        className="flex min-h-11 items-center justify-between gap-3 rounded-md border border-line bg-card px-3 py-1.5 transition-colors duration-[var(--dur-fast)] hover:border-fg-1"
       >
         <span>
-          <strong>{r.code}</strong> <span className="text-sm opacity-80">· {r.buildingName}</span>
+          <strong className="font-display text-[17px] font-bold">{r.code}</strong>{" "}
+          <span className="text-sm text-fg-2">· {r.buildingName}</span>
         </span>
         <span className="text-right text-sm">
           {statusTitle(r.status)}
-          {r.freeUntil !== null && <span className="block text-xs opacity-80">{time(r.freeUntil)} saatine kadar</span>}
+          {r.freeUntil !== null && (
+            <span className="block text-xs text-fg-2">
+              <span className="font-mono">{time(r.freeUntil)}</span> saatine kadar
+            </span>
+          )}
           {r.isSimulated && <span className="sr-only"> (örnek demo verisi)</span>}
         </span>
       </Link>
@@ -259,10 +264,10 @@ function Overview({
   return (
     <div className="space-y-3">
       <div>
-        <h2 id="sheet-title" ref={titleRef} tabIndex={-1} className="text-lg font-bold outline-none">
+        <h2 id="sheet-title" ref={titleRef} tabIndex={-1} className="text-[21px] leading-[26px] font-bold outline-none">
           {n > 0 ? `Şu an ${n} derslik uygun görünüyor` : "Programda uygun görünen derslik yok"}
         </h2>
-        <p className="text-sm opacity-80">
+        <p className="text-sm text-fg-2">
           {d} dakika boyunca · çalışma yerleri aşağıda
           {filters.length > 0 && ` · filtre: ${filters.length} etkin, ${results.length} derslik uyuyor`}
         </p>
@@ -299,10 +304,11 @@ function Overview({
                   }}
                   className="flex min-h-11 items-center justify-between gap-3"
                 >
-                  <span className="underline">
-                    {p.kind === "LIBRARY" ? "K" : "C"} · {p.name}
+                  <span className="flex items-center gap-2">
+                    <PlaceGlyph kind={p.kind} size={20} />
+                    <span className="underline">{p.name}</span>
                   </span>
-                  <span className="shrink-0 text-right text-sm opacity-80">{statusTitle(p.status, true)}</span>
+                  <span className="shrink-0 text-right text-sm text-fg-2">{statusTitle(p.status, true)}</span>
                 </a>
               </li>
             ))}
@@ -335,7 +341,7 @@ function Overview({
 
         <Legend data={data} />
 
-        <details className="rounded-lg border border-zinc-300 p-3 text-sm dark:border-zinc-700">
+        <details className="rounded-md border border-line p-3 text-sm">
           <summary className="min-h-11 cursor-pointer content-center font-semibold">Kampüs rehberi (numaralı binalar)</summary>
           <ol className="mt-2 list-decimal space-y-1 pl-6">
             {GUIDE.map((p) => (
@@ -343,7 +349,7 @@ function Overview({
                 <a href={osmUrl(p.osm)} target="_blank" rel="noreferrer" className="underline">
                   {p.name}
                 </a>
-                <span className="opacity-70">
+                <span className="text-fg-3">
                   {" "}
                   · {CATEGORY_LABEL[p.category]}
                   {p.operator ? ` · ${p.operator}` : ""}
@@ -351,7 +357,7 @@ function Overview({
               </li>
             ))}
           </ol>
-          <p className="mt-2 text-xs opacity-80">
+          <p className="mt-2 text-xs text-fg-2">
             Konumu açık kaynakta bulunamayanlar (haritada gösterilmez): {MISSING_LOCATIONS.join("; ")}.
           </p>
         </details>
@@ -394,7 +400,7 @@ function Legend({ data }: { data: MapResponse }) {
           <SimulatedBadge /> * işaretli puan ve bildirimler örnek demo verisidir.
         </p>
       )}
-      <p className="text-xs opacity-70">
+      <p className="text-xs text-fg-3">
         Bina konum ve sınırları gerçek ölçeklidir; adlar gönüllü haritacılardandır, eksik olabilir. Renk tek başına anlam taşımaz;
         her yerde durum metni yazar. Harita verisi{" "}
         <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer" className="underline">

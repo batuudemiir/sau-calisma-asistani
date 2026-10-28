@@ -16,7 +16,7 @@ export function DurationChips({ basePath }: { basePath: string }) {
           key={x}
           href={`${basePath}?${carryQuery(params, { d: String(x) })}`}
           aria-current={x === d ? "page" : undefined}
-          className={`min-h-11 flex-1 rounded-lg border px-2 py-2 text-center text-sm font-semibold ${x === d ? "border-current bg-foreground text-background" : "border-zinc-400"}`}
+          className={`flex min-h-11 flex-1 items-center justify-center rounded-md border px-2 text-sm no-underline transition-colors duration-[var(--dur-fast)] ${x === d ? "border-ink-900 bg-ink-900 font-bold text-lime-500 dark:border-lime-500 dark:bg-lime-500 dark:text-ink-900" : "border-line-strong bg-card font-semibold text-fg-1 hover:bg-sunken"}`}
         >
           {x} dk
         </Link>
