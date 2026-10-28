@@ -33,11 +33,11 @@ Amaç: Canlı demonun (3-5 dk) adım adım provası. `DEMO_AND_PITCH.md` neyin a
 | 4 | Dizüstünde kaynak belgede aynı satır | "Program kurallarla/Gemini ile ayrıştırıldı, elle kontrol edildi." |
 | 5 | B telefonu (jüri) **Liste** sekmesinde. A telefonu basılı QR'ı okutur → "Buradayım, uygun (QR ile check-in)" → "+10 puan" | "Bildirim anonim. B telefonunda 5 saniye içinde 'Öğrenci doğruladı'." |
 | 6 | Aynı sayfada 4 kriteri puanla → "Değerlendirmeyi gönder" | "Ortalama 3 değerlendirmeden önce gösterilmez." |
-| 7 | **Profil**: puan, seviye → "Aylık ödüller" → "SAÜ hesabıyla giriş yap" → çay (örnek, 10 puan) "ödülü al" → `ORNEK-` kupon | "Çekiliş değil, eşik + stok. Sponsor yok; kupon geçersiz. Puanlar sıralamayı etkilemez." |
+| 7 | **Profil**: puan (+10), seviye → "Aylık ödüller": çay (örnek, 10 puan) "Eşiğe ulaştın; ödül öğrenci girişi açılınca alınabilir" | "Çekiliş değil, eşik + stok. Sponsor yok; ödüller örnek. Öğrenci girişi yakında. Puanlar sıralamayı etkilemez." |
 | 8 | (İsteğe bağlı) Terminal: `npm run ingest -- <eski dönem PDF> ...` | "Eski dönem belgesi; yayımlanmaz, yalnızca hat gösterimi." |
 
 Hangi verinin örnek, hangisinin gerçek olduğu sözlü olarak da söylenir.
-Google girişi canlı projede doğrulanmadıysa 7. adımda giriş yerine yalnızca puan ve ödül ilerlemesi gösterilir.
+Google girişi şimdilik kapalı (`NEXT_PUBLIC_GOOGLE_LOGIN` tanımlı değil); açmak için `.env.local`'a `NEXT_PUBLIC_GOOGLE_LOGIN=true`.
 
 ## Telefonlarla yerel demo (internet olmadan da)
 

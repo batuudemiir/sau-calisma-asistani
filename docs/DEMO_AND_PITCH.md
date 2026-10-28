@@ -13,7 +13,7 @@ Somut oda, saat ve sayı değerleri yayımlanan gerçek veriye göre son saatte 
 | 4 | Jüriye kaynak belgeyi açıp aynı satırı gösterir | Gerçek belge |
 | 5 | Kapıdaki **QR** okutulur → "QR ile check-in" (+10 puan) → ikinci telefonda kart 5 sn içinde "Öğrenci doğruladı" | Gerçek bildirim |
 | 6 | Hemen ardından 4 kriterle geri bildirim ("Burayı değerlendirelim") | Gerçek değerlendirme; hazır örnekler etiketli |
-| 7 | **Profil**: puan, seviye, aylık ödül ilerlemesi; SAÜ hesabıyla giriş → örnek ödül kuponu (`ORNEK-`) | Puan gerçek; ödüller örnek (sponsor yok) |
+| 7 | **Profil**: puan, seviye, aylık ödül ilerlemesi (öğrenci girişi yakında; açılınca kupon alınır) | Puan gerçek; ödüller örnek (sponsor yok) |
 | 8 | (İsteğe bağlı) Terminalde PDF → Gemini → taslak JSON ve işaretlenen kayıt | Gerçek hat |
 
 Hangi adımın gerçek, hangisinin örnek olduğu sunumda sözlü olarak da söylenir.

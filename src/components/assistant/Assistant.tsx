@@ -41,7 +41,7 @@ const FAQ: { q: string; a: string }[] = [
   },
   {
     q: "Puan ve ödüller nasıl çalışıyor?",
-    a: `Check-in +${POINTS.CHECKIN} (QR ile +${POINTS.QR_CHECKIN}), bildirim +${POINTS.REPORT}, değerlendirme +${POINTS.RATING}; günde en fazla ${DAILY_CAP} puan. Ay içinde ödül eşiğine ulaşırsan SAÜ öğrenci hesabınla Profil'den ödül alabilirsin (stokla sınırlı). Puanlar sonuçların sırasını etkilemez.`,
+    a: `Check-in +${POINTS.CHECKIN} (QR ile +${POINTS.QR_CHECKIN}), bildirim +${POINTS.REPORT}, değerlendirme +${POINTS.RATING}; günde en fazla ${DAILY_CAP} puan. Ay içinde ödül eşiğine ulaşırsan SAÜ öğrenci hesabınla Profil'den ödül alabilirsin (stokla sınırlı; öğrenci girişi henüz açık değilse açılınca). Puanlar sonuçların sırasını etkilemez.`,
   },
 ];
 

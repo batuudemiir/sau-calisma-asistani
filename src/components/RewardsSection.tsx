@@ -6,6 +6,7 @@ import { getWithSession, postWithSession } from "@/lib/session";
 import type { RewardsResponse } from "@/server/reward-service";
 import { SimulatedBadge } from "./StatusBadge";
 import { buttonClass } from "./ui/Button";
+import { GOOGLE_LOGIN_ENABLED, LOGIN_SOON_TEXT } from "@/lib/features";
 
 const MONTHS = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
 const monthName = (key: string) => `${MONTHS[Number(key.slice(5, 7)) - 1]} ${key.slice(0, 4)}`;
@@ -51,7 +52,11 @@ export function RewardsSection({ version }: { version: string }) {
             {monthName(data.monthKey)}: <strong>{data.monthPoints} puan</strong>. Eşiğe ulaşınca ödülü alabilirsin; her ödülden
             ayda bir kez, stok bitene kadar. Çekiliş değildir.
           </p>
-          {!data.student && <p className="text-sm font-semibold">{CLAIM_MESSAGES.NOT_STUDENT}.</p>}
+          {!data.student && (
+            <p className="text-sm font-semibold">
+              {GOOGLE_LOGIN_ENABLED ? `${CLAIM_MESSAGES.NOT_STUDENT}.` : `Ödüller öğrenci hesabıyla alınır. ${LOGIN_SOON_TEXT}.`}
+            </p>
+          )}
           {data.rewards.length === 0 ? (
             <p className="text-sm">Henüz ödül sponsoru yok. Puanların birikmeye devam eder.</p>
           ) : (
@@ -80,7 +85,11 @@ export function RewardsSection({ version }: { version: string }) {
                       {r.isSimulated && <span className="block text-xs">Örnek demo kuponu — hiçbir yerde geçerli değildir.</span>}
                     </div>
                   ) : r.block ? (
-                    <p className="text-sm text-fg-2">{CLAIM_MESSAGES[r.block]}</p>
+                    <p className="text-sm text-fg-2">
+                      {r.block === "NOT_STUDENT" && !GOOGLE_LOGIN_ENABLED
+                        ? "Eşiğe ulaştın; ödül öğrenci girişi açılınca alınabilir"
+                        : CLAIM_MESSAGES[r.block]}
+                    </p>
                   ) : (
                     <button
                       type="button"

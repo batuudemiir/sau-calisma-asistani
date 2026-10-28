@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { DAILY_CAP, LEVELS, POINTS, type PointKind } from "@/domain/points";
+import { GOOGLE_LOGIN_ENABLED, LOGIN_SOON_TEXT } from "@/lib/features";
 import { RewardsSection } from "./RewardsSection";
 import { deleteAccount, getWithSession, signInWithGoogle, signOutUser, useAuthUser } from "@/lib/session";
 import { buttonClass } from "./ui/Button";
@@ -105,14 +106,28 @@ export function ProfileView() {
           </>
         ) : (
           <>
-            <p className="text-sm text-fg-2">
-              Check-in ve değerlendirme için giriş gerekmez. SAÜ öğrenci hesabınla giriş yaparsan puanların ve katkı geçmişin
-              cihaz değişse de korunur; şimdiye kadarki puanların hesabına aktarılır.
-            </p>
-            <button type="button" onClick={() => void signIn()} disabled={busy} className={buttonClass("outline", "lg", true)}>
-              {busy ? "Giriş yapılıyor…" : "SAÜ hesabıyla giriş yap (Google)"}
-            </button>
-            <p className="text-xs text-fg-3">Yalnızca @ogr.sakarya.edu.tr adresleri kabul edilir.</p>
+            {GOOGLE_LOGIN_ENABLED ? (
+              <>
+                <p className="text-sm text-fg-2">
+                  Check-in ve değerlendirme için giriş gerekmez. SAÜ öğrenci hesabınla giriş yaparsan puanların ve katkı geçmişin
+                  cihaz değişse de korunur; şimdiye kadarki puanların hesabına aktarılır.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => void signIn()}
+                  disabled={busy}
+                  className={buttonClass("outline", "lg", true)}
+                >
+                  {busy ? "Giriş yapılıyor…" : "SAÜ hesabıyla giriş yap (Google)"}
+                </button>
+                <p className="text-xs text-fg-3">Yalnızca @ogr.sakarya.edu.tr adresleri kabul edilir.</p>
+              </>
+            ) : (
+              <p className="text-sm text-fg-2">
+                Check-in ve değerlendirme için giriş gerekmez; puanların bu cihazda birikir. {LOGIN_SOON_TEXT}; açıldığında
+                şimdiye kadarki puanların hesabına aktarılacak.
+              </p>
+            )}
           </>
         )}
         <p aria-live="polite" className="text-sm font-semibold">

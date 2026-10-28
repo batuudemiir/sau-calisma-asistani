@@ -36,7 +36,8 @@ bilinmeyen bilgi asla "boş" kabul edilmez.
 | Uçtan uca akış | `npm run test:e2e`: 29 Playwright testi (harita, liste, arama/filtre, check-in, puan, Google girişi, hesap silme, asistan, QR, ödül + axe) emulator + örnek veriyle geçiyor |
 | Erişilebilirlik | axe (WCAG 2.2 A/AA kuralları) açık ve koyu temada 8 sayfa + asistan panelinde ihlal bulmadı; ekran okuyucuyla elle test yapılmadı |
 | Mapbox haritası | Kod ve SVG'ye geri dönüş test edildi (Mapbox engelliyken SVG açılıyor); **gerçek Mapbox görünümü bu ortamdan doğrulanamadı** |
-| Google girişi, QR, ödüller | Emulator'da test edildi; **canlı Firebase projesinde doğrulanmadı**. Ödül sponsoru yok |
+| Google girişi | **Şimdilik kapalı** (`NEXT_PUBLIC_GOOGLE_LOGIN=true` ile açılır); kod ve emulator testleri hazır |
+| QR, ödüller | Emulator'da test edildi; **canlı Firebase projesinde doğrulanmadı**. Ödül sponsoru yok |
 | Gerçek SAÜ ders programı | **Yok.** Geliştirme ortamından sakarya.edu.tr erişilemedi; belge eklenip `ingest` ile işlenmeli |
 | Gemini ile PDF ayrıştırma | Kod ve yanıt doğrulama testli; **gerçek API çağrısı doğrulanmadı** (anahtar yok). Model `GEMINI_MODEL` ile seçilir |
 | Firebase App Hosting dağıtımı | `apphosting.yaml` hazır; **canlı ortamda doğrulanmadı** |
