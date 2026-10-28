@@ -28,8 +28,6 @@ export default defineConfig({
       QR_SECRET: "e2e-qr-anahtari",
       // Google girişi uygulamada varsayılan kapalı; testler emulator'un sahte Google hesaplarıyla açık çalışır
       NEXT_PUBLIC_GOOGLE_LOGIN: process.env.E2E_GOOGLE_LOGIN ?? "true",
-      // Varsayılan boş: e2e SVG yedek haritayla çalışır. Mapbox yolunu denemek için E2E_MAPBOX_TOKEN verilebilir.
-      NEXT_PUBLIC_MAPBOX_TOKEN: process.env.E2E_MAPBOX_TOKEN ?? "",
     },
   },
 });

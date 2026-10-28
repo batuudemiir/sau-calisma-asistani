@@ -1,4 +1,4 @@
-// Harita düğmeleri (SVG ve Mapbox haritası ortak): 44×44, beyaz kart, Lucide plus / minus / locate / maximize-2.
+// Harita düğmeleri: 44×44, beyaz kart, Lucide plus / minus / locate / maximize-2.
 const ICONS = {
   in: "M5 12h14 M12 5v14",
   out: "M5 12h14",

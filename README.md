@@ -17,7 +17,6 @@ bilinmeyen bilgi asla "boş" kabul edilmez.
 - **Check-in ve bildirim:** anonim oturum, tek dokunuş, hız sınırı (aynı oda 10 dk'da 1, saatte 20)
 - **Değerlendirme:** check-in sonrası 3 saat içinde Sessizlik / Priz / İnternet / Işık için 1-5 puan; 3 değerlendirmeden önce ortalama gösterilmez
 - **Marka:** neredeçalışalım tasarım sistemi (kobalt + limon, Zilla Slab / Public Sans / IBM Plex Mono), token'lar `src/app/globals.css`
-- **Mapbox harita:** ana ekranda Mapbox (`NEXT_PUBLIC_MAPBOX_TOKEN`: yerelde `.env.local`, canlıda App Hosting secret'ı); yüklenemezse SVG harita
 - **Gerçek kampüs haritası:** OpenStreetMap'ten 181 binanın gerçek konum ve sınırları (SVG, harita paketi yok); kat görünümünde her odada durum ve puan
 - **Çalışma yerleri:** Merkez Kütüphane, Kütüphane Ek Bina ve kampüsteki 4 kafe/kantin — açılış saati (kaynaklıysa), bildirim ve puanla
 - **Kütüphane kartı:** bildirim tabanlı; demo modunda "Örnek demo verisi" etiketli gün içi doluluk deseni
@@ -35,7 +34,6 @@ bilinmeyen bilgi asla "boş" kabul edilmez.
 | SABİS ders programı | **Erişilemedi** (ağ politikası); içe aktarıcı erişim açılınca yazılacak |
 | Uçtan uca akış | `npm run test:e2e`: 29 Playwright testi (harita, liste, arama/filtre, check-in, puan, Google girişi, hesap silme, asistan, QR, ödül + axe) emulator + örnek veriyle geçiyor |
 | Erişilebilirlik | axe (WCAG 2.2 A/AA kuralları) açık ve koyu temada 8 sayfa + asistan panelinde ihlal bulmadı; ekran okuyucuyla elle test yapılmadı |
-| Mapbox haritası | Kod ve SVG'ye geri dönüş test edildi (Mapbox engelliyken SVG açılıyor); **gerçek Mapbox görünümü bu ortamdan doğrulanamadı** |
 | Google girişi | **Şimdilik kapalı** (`NEXT_PUBLIC_GOOGLE_LOGIN=true` ile açılır); kod ve emulator testleri hazır |
 | QR, ödüller | Emulator'da test edildi; **canlı Firebase projesinde doğrulanmadı**. Ödül sponsoru yok |
 | Gerçek SAÜ ders programı | **Yok.** Geliştirme ortamından sakarya.edu.tr erişilemedi; belge eklenip `ingest` ile işlenmeli |

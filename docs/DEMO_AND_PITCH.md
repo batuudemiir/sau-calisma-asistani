@@ -7,7 +7,7 @@ Somut oda, saat ve sayı değerleri yayımlanan gerçek veriye göre son saatte 
 
 | Adım | Ekranda | Veri türü |
 |---|---|---|
-| 1 | Telefonda **neredeçalışalım** açılır: kampüs haritası (Mapbox), altta "Şu an N derslik uygun görünüyor" | Konumlar gerçek (OSM); oda durumları yayımlanan programdan |
+| 1 | Telefonda **neredeçalışalım** açılır: kampüs haritası, altta "Şu an N derslik uygun görünüyor" | Konumlar gerçek (OSM); oda durumları yayımlanan programdan |
 | 2 | Sağ alttaki **asistan**: "Çalışacak yer bul" → 60 dk → Priz → Fark etmez → en iyi 3 öneri, gerekçe ve "bilgi yok" uyarılarıyla | Kural motoru; yapay zekâ API'si yok |
 | 3 | Bir öneriyi açar: "Programda boş · 15.00 saatine kadar · Sonraki ders 15.10 · Kaynak: <bölüm> programı" | Gerçek program (yoksa "Örnek demo verisi") |
 | 4 | Jüriye kaynak belgeyi açıp aynı satırı gösterir | Gerçek belge |
@@ -49,4 +49,4 @@ yalnızca toplam sayılar alınırsa kütüphane doluluğu da tahmin değil öl�
 - **Ödüller çekiliş mi?** → Hayır, eşik + stok (çekiliş izin gerektirir). Şu an sponsor yok; ödüller "Örnek demo verisi",
   kuponlar geçersiz.
 - **Konumum nereye gidiyor?** → Hiçbir yere. Asistan konumu yalnızca telefonda mesafe hesabı için kullanıyor; harita
-  görüntüleri Mapbox'tan geliyor, konum Mapbox'a da gönderilmiyor.
+  uygulamanın içinde çiziliyor, dışarıya istek gitmiyor.

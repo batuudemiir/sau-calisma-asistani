@@ -20,11 +20,6 @@ env:
   - variable: NEXT_PUBLIC_FIREBASE_APP_ID
     value: "<appId>"
     availability: [BUILD, RUNTIME]
-  # Mapbox public token (pk.); pakete gömüldüğü için BUILD'de gerekir. Repoda tutulmaz (GitHub push koruması):
-  # firebase apphosting:secrets:set NEXT_PUBLIC_MAPBOX_TOKEN. Mapbox hesabında canlı alan adıyla kısıtlanmalı.
-  - variable: NEXT_PUBLIC_MAPBOX_TOKEN
-    secret: NEXT_PUBLIC_MAPBOX_TOKEN
-    availability: [BUILD, RUNTIME]
   # Demo sırasında etiketli simülasyonu ve demo saatini (?at=) açar
   - variable: DEMO_MODE
     value: "true"
