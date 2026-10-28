@@ -54,6 +54,9 @@ ardından Firebase Emulator + Playwright ile uçtan uca testler. Gizli anahtar g
 
 ## Yerel çalıştırma (Emulator + örnek veri)
 
+macOS: projeyi iCloud ile eşitlenen Masaüstü/Belgeler yerine örneğin `~/Projeler/` altına klonla (aksi hâlde
+`next dev` "Operation timed out (os error 60)" ile çökebilir).
+
 Gereksinimler: Node 22+, Java 21 (Firestore emulator için; macOS'ta Homebrew yoksa https://adoptium.net → Temurin 21 `.pkg`).
 
 ```bash

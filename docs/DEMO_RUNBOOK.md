@@ -67,6 +67,10 @@ Google girişi şimdilik kapalı (`NEXT_PUBLIC_GOOGLE_LOGIN` tanımlı değil); 
 
 ## Bilinen tuzaklar
 
+- **macOS: projeyi Masaüstü veya Belgeler'e koyma.** Bu klasörler çoğu zaman iCloud Drive ile eşitlenir; iCloud
+  `node_modules` ve `.next` dosyalarını yüklerken okumaları bekletir ve `next dev` (Turbopack)
+  "Operation timed out (os error 60)" ile çöker. Projeyi örneğin `~/Projeler/` altına klonla.
+
 - **Aynı odaya 10 dk içinde ikinci bildirim reddedilir.** Provada kullanılan odayı demoda kullanma ya da yeni gizli sekme aç.
 - **Puan için önce check-in gerekir**, aynı check-in'e ikinci puan reddedilir — demo sırasında bu mesajlar da gösterilebilir.
 - Haritada ortalama için 3 değerlendirme gerekir; örnek veride Ö-102 ve Ö-103'te hazır (\* işaretli = örnek).
