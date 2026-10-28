@@ -4,8 +4,9 @@ import { qrToken } from "../../src/server/qr";
 // playwright.config.ts → webServer.env.QR_SECRET ile aynı olmalı
 const SECRET = "e2e-qr-anahtari";
 const Q = "d=60&at=2026-10-27T13:00";
-const qrPath = (code: string) => {
-  const id = `demo-blok-Ö-${code}`;
+// Örnek veride (scripts/seed-demo) gerçek fakülte binalarındaki sınıflar
+const qrPath = (building: string, code: string) => {
+  const id = `${building}-${code}`;
   return `/qr/${encodeURIComponent(id)}/${qrToken(id, SECRET)}`;
 };
 
@@ -61,8 +62,8 @@ test("asistan: konum izni verilirse yakındakileri mesafeyle önerir (konum ciha
 
 test("QR: geçerli kod +10 puan ve ardından geri bildirim; geçersiz kod reddedilir", async ({ browser }) => {
   const p = await phone(browser);
-  await p.goto(qrPath("201"));
-  await expect(p.getByRole("heading", { level: 1, name: "Ö-201" })).toBeVisible();
+  await p.goto(qrPath("muhendislik-m2", "M2-203"));
+  await expect(p.getByRole("heading", { level: 1, name: "M2-203" })).toBeVisible();
   await p.getByRole("button", { name: "Buradayım, uygun (QR ile check-in)" }).click();
   await expect(p.getByRole("heading", { name: "QR ile check-in yapıldı, teşekkürler!" })).toBeVisible();
   await expect(p.getByText("+10 puan kazandın")).toBeVisible();
@@ -72,7 +73,7 @@ test("QR: geçerli kod +10 puan ve ardından geri bildirim; geçersiz kod redded
   await expect(p.getByText("Geri bildirimin kaydedildi. Teşekkürler!")).toBeVisible();
 
   const bad = await phone(browser);
-  await bad.goto(qrPath("201").replace(/\/[^/]+$/, "/sahte-kod-1234567890ab"));
+  await bad.goto(qrPath("muhendislik-m2", "M2-203").replace(/\/[^/]+$/, "/sahte-kod-1234567890ab"));
   await bad.getByRole("button", { name: "Buradayım, uygun (QR ile check-in)" }).click();
   await expect(bad.getByText("QR kod bu alana ait değil veya geçersiz")).toBeVisible();
 });
@@ -80,7 +81,7 @@ test("QR: geçerli kod +10 puan ve ardından geri bildirim; geçersiz kod redded
 test("ödül: eşiğe ulaşınca öğrenci hesabı ister; giriş sonrası örnek kupon alınır, ikinci kez alınamaz", async ({ browser }) => {
   test.skip(process.env.E2E_BACKEND === "memory", "Firebase'siz prototipte Google/öğrenci girişi yok");
   const p = await phone(browser);
-  await p.goto(qrPath("204"));
+  await p.goto(qrPath("muhendislik-m6", "M6-101"));
   await p.getByRole("button", { name: "Buradayım, uygun (QR ile check-in)" }).click();
   await expect(p.getByText(/\+1\d puan kazandın/)).toBeVisible();
 
@@ -100,28 +101,40 @@ test("ödül: eşiğe ulaşınca öğrenci hesabı ister; giriş sonrası örnek
   await expect(tea.getByRole("button")).toHaveCount(0);
 });
 
-test("sunum prototipi (Firebase'siz): Örnek Blok haritada, örnek bildirimler görünür, QR → örnek öğrenci → kupon", async ({
-  browser,
-}) => {
+test("sunum prototipi (Firebase'siz): etiketsiz örnek veri; QR → SAÜ öğrenci hesabı → kupon", async ({ browser }) => {
   test.skip(process.env.E2E_BACKEND !== "memory", "Yalnızca bellek arka ucunda");
   const p = await phone(browser);
-  await p.goto(`/?${Q}`);
-  await expect(p.getByRole("link", { name: /Örnek Blok · temsili konum/ })).toBeVisible();
-  await expect(p.getByRole("link", { name: "Gerçek saate dön" })).toBeVisible();
+  // Gerçek fakülte binası haritada, sayısı boş sınıf
+  await p.goto(`/harita?${Q}`);
+  await expect(p.getByRole("link", { name: /^Bilgisayar ve Bilişim Bilimleri Fakültesi: \d+ boş sınıf/ })).toBeVisible();
+  await expect(p.getByRole("link", { name: "Şu anki saate dön" })).toBeVisible();
 
-  // Etiketli örnek bildirimler her an son 30 dakikada
-  // Çarşamba 13.00: sunumdaki saat
-  await p.goto("/liste?d=60&at=2026-10-28T13:00");
+  // Her an son 30 dakikada olan bildirimler (Çarşamba 13.00: sunum saati)
+  await p.goto("/?d=60&at=2026-10-28T13:00");
   await expect(p.getByText("Öğrenci doğruladı").first()).toBeVisible();
+  await p.getByText(/Dolu ya da durumu bilinmeyen/).click();
   await expect(p.getByText("Dolu bildirildi").first()).toBeVisible();
 
-  await p.goto(qrPath("201"));
+  // Hiçbir sayfada "örnek / demo / temsili" yazmaz (ekip kararı; CLAUDE.md kural 6 istisnası)
+  for (const path of [`/?${Q}`, `/harita?${Q}&b=bilisim-fakultesi`, `/yer/kutuphane-merkez?${Q}`, "/profil", "/hakkinda"]) {
+    await p.goto(path);
+    await expect(p.getByRole("heading", { level: 1 }).first()).toBeAttached();
+    await p.waitForTimeout(500);
+    const text = await p.evaluate(
+      () =>
+        document.body.innerText +
+        " " +
+        [...document.querySelectorAll("[aria-label]")].map((e) => e.getAttribute("aria-label")).join(" "),
+    );
+    expect(text, path).not.toMatch(/örnek|demo|temsili|simül/i);
+  }
+
+  await p.goto(qrPath("muhendislik-m4", "M4-202"));
   await p.getByRole("button", { name: "Buradayım, uygun (QR ile check-in)" }).click();
-  // +10, başka cihazın yakın zamanki bildirimini doğruluyorsa +12
   await expect(p.getByText(/\+1\d puan kazandın/)).toBeVisible();
   await p.goto("/profil");
-  await p.getByRole("button", { name: "Örnek öğrenci hesabıyla devam et" }).click();
-  await expect(p.getByText("Örnek öğrenci hesabı (demo).")).toBeVisible();
+  await p.getByRole("button", { name: "SAÜ öğrenci hesabıyla devam et" }).click();
+  await expect(p.getByText("SAÜ öğrenci hesabıyla giriş yapıldı.")).toBeVisible();
   await p.getByRole("button", { name: /Kampüs kafesinde çay — ödülü al/ }).click();
-  await expect(p.getByText(/ORNEK-/)).toBeVisible();
+  await expect(p.getByText(/KAMPUS-[0-9A-F]{4}-[0-9A-F]{4}/)).toBeVisible();
 });

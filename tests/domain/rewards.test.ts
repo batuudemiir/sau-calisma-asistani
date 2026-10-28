@@ -38,7 +38,7 @@ describe("aylık ödüller", () => {
   });
 
   it("örnek ödülün kuponu ORNEK- ile başlar; biçim sabit", () => {
-    expect(couponCode("a1b2c3d4e5", true)).toBe("ORNEK-A1B2-C3D4");
-    expect(couponCode("ff", false)).toBe("SAU-FF00-0000");
+    expect(couponCode("a1b2c3d4e5", "ORNEK")).toBe("ORNEK-A1B2-C3D4");
+    expect(couponCode("ff", "SAU")).toBe("SAU-FF00-0000");
   });
 });

@@ -65,3 +65,15 @@ export const LIBRARY_LEVEL_LABELS: Record<LibraryLevel, string> = {
 };
 
 export const time = formatMinute;
+
+// Sayının okunuşundaki son kelimeye göre yönelme eki: 1 bir'e, 2 iki'ye, 6 altı'ya, 9 dokuz'a, 10 on'a, 20 yirmi'ye…
+const UNIT_SUFFIX = ["'a", "'e", "'ye", "'e", "'e", "'e", "'ya", "'ye", "'e", "'a"];
+const TENS_SUFFIX = ["'a", "'a", "'ye", "'a", "'a", "'ye"];
+const numberSuffix = (n: number) => (n % 10 !== 0 ? UNIT_SUFFIX[n % 10] : TENS_SUFFIX[Math.floor(n / 10)]);
+
+/** "17.00'ye kadar", "15.10'a kadar", "13.00'e kadar". */
+export function untilText(minute: number): string {
+  const h = Math.floor(minute / 60) % 24;
+  const m = minute % 60;
+  return `${time(minute)}${m === 0 ? numberSuffix(h) : numberSuffix(m)} kadar`;
+}

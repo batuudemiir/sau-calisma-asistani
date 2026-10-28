@@ -4,18 +4,14 @@ import { DemoClockNotice } from "../DemoClockNotice";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { MISSING_LOCATIONS, OSM_ATTRIBUTION, buildingShape, osmUrl, type PlaceCategory } from "@/data/campus";
-import { LIBRARY_LEVEL_LABELS, WEEKDAY_NAMES, statusTitle, time } from "@/lib/labels";
-import { applyFilters, parseFilters } from "@/lib/filters";
+import { OSM_ATTRIBUTION, buildingShape } from "@/data/campus";
+import { LIBRARY_LEVEL_LABELS, statusTitle } from "@/lib/labels";
 import { carryQuery, durationParam, useApi } from "@/lib/use-api";
-import type { MapResponse, PlaceDTO, ResultDTO } from "@/server/search-service";
-import { Wordmark } from "../brand/Wordmark";
+import type { MapResponse, PlaceDTO } from "@/server/search-service";
 import { DurationChips } from "../nav/DurationChips";
 import { buttonClass } from "../ui/Button";
 import { PlaceGlyph } from "../ui/PlaceGlyph";
-import { FilterChips } from "../nav/FilterChips";
-import { ShareButton } from "../ShareButton";
-import { openingHoursText } from "../PlaceCard";
+import { openingHoursText } from "@/lib/opening-hours";
 import { RatingChip } from "../Ratings";
 import { ReportButtons } from "../ReportButtons";
 import { POLL_MS } from "../ResultsView";
@@ -23,23 +19,16 @@ import { SimulatedBadge, StatusBadge } from "../StatusBadge";
 import { Assistant } from "../assistant/Assistant";
 import { BuildingMap } from "./BuildingMap";
 import { SearchBox } from "./SearchBox";
-import { CampusMap, GUIDE, type MapSelection } from "./CampusMap";
-import { FILL, SHORT, isSimStatus, shownRating, type Tone } from "./map-style";
+import { CampusMap, type MapSelection } from "./CampusMap";
+import { FILL, SHORT, type Tone } from "./map-style";
 
 type SheetState = "peek" | "half" | "full";
 const NEXT: Record<SheetState, SheetState> = { peek: "half", half: "full", full: "peek" };
 const SHEET_HEIGHT: Record<SheetState, string> = { peek: "h-64", half: "h-[55%]", full: "h-[calc(100%-0.5rem)]" };
 
-const CATEGORY_LABEL: Record<PlaceCategory, string> = {
-  FACULTY: "Fakülte / öğretim binası",
-  LAB: "Laboratuvar / araştırma merkezi",
-  LIBRARY: "Kütüphane",
-  CAFE: "Kafe / kantin",
-  OTHER: "Diğer",
-};
 
 /**
- * Ana ekran: tam ekran kampüs haritası + alt panel. Telefonda panel 3 kademelidir (özet / liste / tam);
+ * Harita sekmesi: tam ekran kampüs haritası + alt panel. Telefonda panel 3 kademelidir (özet / liste / tam);
  * geniş ekranda sağda sabit sütundur. Haritadaki her bilgi panelde metin olarak da vardır.
  */
 export function MapHome() {
@@ -62,10 +51,10 @@ export function MapHome() {
 
   const select = (sel: MapSelection, from: Element | null) => {
     trigger.current = from;
-    router.replace(`/?${carryQuery(params, sel as Record<string, string>)}`, { scroll: false });
+    router.replace(`/harita?${carryQuery(params, sel as Record<string, string>)}`, { scroll: false });
   };
   const close = () => {
-    router.replace(`/?${query}`, { scroll: false });
+    router.replace(`/harita?${query}`, { scroll: false });
     // Odak, paneli açan işarete döner (yoksa panel başlığına)
     const t = trigger.current;
     trigger.current = null;
@@ -76,18 +65,9 @@ export function MapHome() {
     <div className="relative flex h-[calc(100dvh-3.5rem-env(safe-area-inset-bottom))] flex-col overflow-hidden lg:h-[calc(100dvh-3.5rem)] lg:flex-row">
       <div className="relative min-h-0 flex-1">
         <header className="absolute inset-x-2 top-2 z-10 space-y-2 rounded-lg border border-line bg-overlay p-2 shadow-float lg:right-auto lg:w-[28rem]">
-          <div className="flex items-center justify-between gap-2 px-1">
-            <h1 className="sr-only">Kampüs haritası</h1>
-            <Wordmark size={19} />
-            {data && (
-              <p className="text-sm text-fg-2">
-                {WEEKDAY_NAMES[data.now.weekday]} <span className="font-mono">{time(data.now.minute)}</span>
-                {data.now.isDemoClock && <strong className="ml-1">(demo saati)</strong>}
-              </p>
-            )}
-          </div>
+          <h1 className="sr-only">Kampüs haritası</h1>
           {data && <SearchBox data={data} query={query} onSelect={select} />}
-          <DurationChips basePath="/" />
+          <DurationChips basePath="/harita" />
         </header>
 
         {loading && !data && (
@@ -107,7 +87,7 @@ export function MapHome() {
         <Assistant
           data={data}
           duration={d}
-          onDuration={(x) => router.replace(`/?${carryQuery(params, { d: String(x) })}`, { scroll: false })}
+          onDuration={(x) => router.replace(`/harita?${carryQuery(params, { d: String(x) })}`, { scroll: false })}
           onSelect={select}
           query={query}
           buttonHidden={state !== "peek"}
@@ -132,24 +112,15 @@ export function MapHome() {
           {data && building && (
             <Panel title={building.name} onClose={close}>
               <p className="text-sm">
-                {d} dakika için uygun görünen oda:{" "}
-                <strong>
-                  {
-                    building.spaces.filter(
-                      (s) => !s.excludedBecause && (s.status.code === "PROGRAM_FREE" || s.status.code === "VERIFIED_FREE"),
-                    ).length
-                  }
-                </strong>
+                {d} dakika boyunca <strong>{freeCount(building)}</strong> boş sınıf. Sınıfa dokun: ayrıntı ve check-in.
               </p>
               <BuildingMap spaces={building.spaces} query={query} />
-              <p className="text-sm text-fg-3">Kat görünümü şematiktir, ölçekli değildir. Odaya dokun: ayrıntı ve check-in.</p>
-              <Legend data={data} />
+              <Legend />
             </Panel>
           )}
           {data && place && !building && (
             <Panel title={place.name} onClose={close}>
               <PlaceSummary place={place} nowMs={data.now.nowMs} />
-              <ShareButton title={place.name} />
               <ReportButtons spaceId={place.spaceId} onReported={() => void reload()} />
               <Link
                 href={`/yer/${encodeURIComponent(place.spaceId)}?${query}`}
@@ -160,7 +131,7 @@ export function MapHome() {
             </Panel>
           )}
           {data && !panelOpen && (
-            <Overview data={data} query={query} d={d} expanded={state !== "peek"} titleRef={sheetTitle} onSelect={select} />
+            <Overview data={data} query={query} expanded={state !== "peek"} titleRef={sheetTitle} onSelect={select} />
           )}
         </div>
       </section>
@@ -216,197 +187,113 @@ function PlaceSummary({ place, nowMs }: { place: PlaceDTO; nowMs: number }) {
   );
 }
 
-function ResultRow({ r, query }: { r: ResultDTO; query: string }) {
-  return (
-    <li>
-      <Link
-        href={`/yer/${encodeURIComponent(r.spaceId)}?${query}`}
-        className="flex min-h-11 items-center justify-between gap-3 rounded-md border border-line bg-card px-3 py-1.5 transition-colors duration-[var(--dur-fast)] hover:border-fg-1"
-      >
-        <span>
-          <strong className="font-display text-[17px] font-bold">{r.code}</strong>{" "}
-          <span className="text-sm text-fg-2">· {r.buildingName}</span>
-        </span>
-        <span className="text-right text-sm">
-          {statusTitle(r.status)}
-          {r.freeUntil !== null && (
-            <span className="block text-sm text-fg-2">
-              <span className="font-mono">{time(r.freeUntil)}</span> saatine kadar
-            </span>
-          )}
-          {r.isSimulated && <span className="sr-only"> (örnek demo verisi)</span>}
-        </span>
-      </Link>
-    </li>
-  );
-}
+const freeCount = (b: MapResponse["buildings"][number]) =>
+  b.spaces.filter((s) => !s.excludedBecause && (s.status.code === "PROGRAM_FREE" || s.status.code === "VERIFIED_FREE")).length;
 
+/** Seçim yokken alt panel: kaç boş sınıf var, hangi binada; kütüphane ve kafeler. */
 function Overview({
   data,
   query,
-  d,
   expanded,
   titleRef,
   onSelect,
 }: {
   data: MapResponse;
   query: string;
-  d: number;
   expanded: boolean;
   titleRef: React.RefObject<HTMLHeadingElement | null>;
   onSelect: (sel: MapSelection, el: Element) => void;
 }) {
-  // Başlık yalnızca boş görünenleri sayar; dolu bildirilen ve durumu bilinmeyen odalar listede ama "uygun" değil
-  const n = data.results.filter((r) => r.status.code === "PROGRAM_FREE" || r.status.code === "VERIFIED_FREE").length;
+  const buildings = data.buildings
+    .filter((b) => buildingShape(b))
+    .map((b) => ({ b, free: freeCount(b) }))
+    .sort((x, y) => y.free - x.free || x.b.name.localeCompare(y.b.name, "tr"));
+  const total = buildings.reduce((n, x) => n + x.free, 0);
   const more = expanded ? "" : "hidden lg:block";
-  const filters = parseFilters(useSearchParams().get("f"));
-  const results = applyFilters(data.results, filters);
-  const places = applyFilters(data.places, filters);
-  const noLocation = data.buildings.filter((b) => !buildingShape(b));
+  const pick = (sel: MapSelection) => (e: React.MouseEvent<Element>) => {
+    e.preventDefault();
+    onSelect(sel, e.currentTarget);
+  };
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       <div>
         <h2 id="sheet-title" ref={titleRef} tabIndex={-1} className="text-[21px] leading-[26px] font-bold outline-none">
-          {n > 0 ? `Şu an ${n} derslik uygun görünüyor` : "Programda uygun görünen derslik yok"}
+          {total > 0 ? `${total} boş sınıf` : "Şu an boş sınıf görünmüyor"}
         </h2>
-        <p className="text-sm text-fg-2">
-          {d} dakika boyunca · çalışma yerleri aşağıda
-          {filters.length > 0 && ` · filtre: ${filters.length} etkin, ${results.length} derslik uyuyor`}
-        </p>
-        <DemoClockNotice now={data.now} basePath="/" durationMin={d} />
+        <p className="text-sm text-fg-2">Haritada bir binaya dokun, boş sınıfları gör.</p>
+        <DemoClockNotice now={data.now} basePath="/harita" durationMin={data.durationMin} />
       </div>
-      <div className={more}>
-        <FilterChips />
-      </div>
-      <ul className="space-y-2" aria-label="Uygun görünen derslikler">
-        {(expanded ? results : results.slice(0, 3)).map((r) => (
-          <ResultRow key={r.spaceId} r={r} query={query} />
-        ))}
-      </ul>
-      {!expanded && results.length > 3 && (
-        <p className="text-sm lg:hidden">ve {results.length - 3} derslik daha — paneli büyüt.</p>
-      )}
-
-      <div className={`space-y-4 ${more}`}>
-        <Link href={`/liste?${query}`} className="inline-flex min-h-11 items-center text-sm font-semibold underline">
-          Ayrıntılı liste →
-        </Link>
-        <section aria-labelledby="places-title" className="space-y-2">
-          <h3 id="places-title" className="font-bold">
-            Çalışma yerleri
-          </h3>
-          <ul className="space-y-1">
-            {places.length === 0 && <li className="text-sm">Filtreye uyan çalışma yeri yok.</li>}
-            {places.map((p) => (
-              <li key={p.spaceId}>
-                <a
-                  href={`/?${query}&s=${encodeURIComponent(p.spaceId)}`}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    onSelect({ s: p.spaceId }, e.currentTarget);
-                  }}
-                  className="flex min-h-11 items-center justify-between gap-3"
-                >
-                  <span className="flex items-center gap-2">
-                    <PlaceGlyph kind={p.kind} size={20} />
-                    <span className="underline">{p.name}</span>
-                  </span>
-                  <span className="shrink-0 text-right text-sm text-fg-2">{statusTitle(p.status, true)}</span>
-                </a>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        {data.buildings.length > 0 && (
-          <section aria-labelledby="buildings-title" className="space-y-1">
-            <h3 id="buildings-title" className="font-bold">
-              Derslikli binalar
-            </h3>
-            <ul className="text-sm">
-              {data.buildings.map((b) => (
-                <li key={b.id}>
-                  <a
-                    href={`/?${query}&b=${encodeURIComponent(b.id)}`}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      onSelect({ b: b.id }, e.currentTarget);
-                    }}
-                    className="inline-flex min-h-11 items-center underline"
-                  >
-                    {b.name} — odaları gör
-                    {noLocation.includes(b) ? " (konumu haritada yok)" : !b.osm ? " (haritada temsili konum)" : ""}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
-
-        <Legend data={data} />
-
-        <details className="rounded-md border border-line p-3 text-sm">
-          <summary className="min-h-11 cursor-pointer content-center font-semibold">Kampüs rehberi (numaralı binalar)</summary>
-          <ol className="mt-2 list-decimal space-y-1 pl-6">
-            {GUIDE.map((p) => (
-              <li key={p.id}>
-                <a href={osmUrl(p.osm)} target="_blank" rel="noreferrer" className="underline">
-                  {p.name}
-                </a>
-                <span className="text-fg-3">
-                  {" "}
-                  · {CATEGORY_LABEL[p.category]}
-                  {p.operator ? ` · ${p.operator}` : ""}
+      <section aria-labelledby="buildings-title" className="space-y-2">
+        <h3 id="buildings-title" className="sr-only">
+          Binalar
+        </h3>
+        <ul className="space-y-2">
+          {(expanded ? buildings : buildings.slice(0, 3)).map(({ b, free }) => (
+            <li key={b.id}>
+              <a
+                href={`/harita?${query}&b=${encodeURIComponent(b.id)}`}
+                onClick={pick({ b: b.id })}
+                className="flex min-h-12 items-center justify-between gap-3 rounded-md border border-line bg-card px-3 no-underline hover:border-fg-1"
+              >
+                <span className="font-semibold">{b.name}</span>
+                <span className="shrink-0 text-sm">
+                  <strong>{free}</strong> boş
                 </span>
-              </li>
-            ))}
-          </ol>
-          <p className="mt-2 text-sm text-fg-2">
-            Konumu açık kaynakta bulunamayanlar (haritada gösterilmez): {MISSING_LOCATIONS.join("; ")}.
-          </p>
-        </details>
+              </a>
+            </li>
+          ))}
+        </ul>
+        {!expanded && buildings.length > 3 && (
+          <p className="text-sm text-fg-2 lg:hidden">ve {buildings.length - 3} bina daha — paneli yukarı çek.</p>
+        )}
+      </section>
+      <section aria-labelledby="places-title" className={`space-y-2 ${more}`}>
+        <h3 id="places-title" className="font-bold">
+          Kütüphane ve kafeler
+        </h3>
+        <ul className="space-y-1">
+          {data.places.map((p) => (
+            <li key={p.spaceId}>
+              <a
+                href={`/harita?${query}&s=${encodeURIComponent(p.spaceId)}`}
+                onClick={pick({ s: p.spaceId })}
+                className="flex min-h-11 items-center justify-between gap-3"
+              >
+                <span className="flex items-center gap-2">
+                  <PlaceGlyph kind={p.kind} size={20} />
+                  <span className="underline">{p.name}</span>
+                </span>
+                <span className="shrink-0 text-right text-sm text-fg-2">{statusTitle(p.status, true)}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+      <div className={more}>
+        <Legend />
       </div>
     </div>
   );
 }
 
-function Legend({ data }: { data: MapResponse }) {
-  const anySimulated =
-    data.buildings.some((b) => b.spaces.some((s) => shownRating(s.rating)?.simulated || isSimStatus(s))) ||
-    data.places.some((p) => shownRating(p.rating)?.simulated || isSimStatus(p));
+function Legend() {
   return (
     <div className="space-y-2">
-      <ul className="grid grid-cols-2 gap-x-3 gap-y-1 text-sm" aria-label="Harita açıklaması">
-        {(Object.keys(SHORT) as Tone[]).map((t) => (
+      <ul className="flex flex-wrap gap-x-4 gap-y-1 text-sm" aria-label="Harita açıklaması">
+        {(["VERIFIED_FREE", "PROGRAM_FREE", "REPORTED_BUSY", "UNKNOWN"] as Tone[]).map((t) => (
           <li key={t} className="flex items-center gap-1.5">
             <svg width="14" height="14" aria-hidden="true">
-              <rect
-                x="1"
-                y="1"
-                width="12"
-                height="12"
-                rx="2"
-                className={FILL[t]}
-                strokeWidth="1.5"
-                strokeDasharray={t === "EXCLUDED" ? "3 2" : undefined}
-              />
+              <rect x="1" y="1" width="12" height="12" rx="2" className={FILL[t]} strokeWidth="1.5" />
             </svg>
             {SHORT[t]}
           </li>
         ))}
-        <li>★ ortalama puan (3+ değerlendirme)</li>
         <li>
-          <strong>K</strong> kütüphane · <strong>C</strong> kafe
+          <strong>K</strong> kütüphane · <strong>C</strong> kafe · binadaki sayı: boş sınıf
         </li>
       </ul>
-      {anySimulated && (
-        <p className="flex items-center gap-2 text-sm">
-          <SimulatedBadge /> * işaretli puan ve bildirimler örnek demo verisidir.
-        </p>
-      )}
-      <p className="text-sm text-fg-3">
-        Bina konum ve sınırları gerçek ölçeklidir; adlar gönüllü haritacılardandır, eksik olabilir. Renk tek başına anlam taşımaz;
-        her yerde durum metni yazar. Harita verisi{" "}
+      <p className="text-xs text-fg-3">
+        Harita:{" "}
         <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer" className="underline">
           {OSM_ATTRIBUTION}
         </a>

@@ -1,4 +1,5 @@
 import type { RatingSummary } from "@/domain/ratings";
+import { SHOW_SAMPLE_LABELS } from "@/lib/backend-mode";
 import type { Status, StatusCode } from "@/domain/types";
 import { statusTitle } from "@/lib/labels";
 import type { MapSpaceDTO } from "@/server/search-service";
@@ -23,13 +24,14 @@ export const FILL: Record<Tone, string> = {
 };
 
 export const toneOf = (s: MapSpaceDTO): Tone => (s.excludedBecause ? "EXCLUDED" : s.status.code);
+// Örnek veri işareti (*) yalnızca etiketler açıkken (Firebase modu); sunum prototipinde gösterilmez
 export const isSimStatus = (s: { status: Status; excludedBecause?: unknown }) =>
-  !s.excludedBecause && "simulated" in s.status && s.status.simulated === true;
+  SHOW_SAMPLE_LABELS && !s.excludedBecause && "simulated" in s.status && s.status.simulated === true;
 
 /** Haritada gösterilecek puan: gerçek yeterliyse o, değilse (demo) simüle; ikisi de yoksa null. */
 export function shownRating(r: { real: RatingSummary; simulated: RatingSummary }) {
   if (r.real.overall !== null) return { value: r.real.overall, simulated: false };
-  if (r.simulated.overall !== null) return { value: r.simulated.overall, simulated: true };
+  if (r.simulated.overall !== null) return { value: r.simulated.overall, simulated: SHOW_SAMPLE_LABELS };
   return null;
 }
 

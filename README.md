@@ -70,7 +70,7 @@ npm run demo:local      # emulator'ları açar, örnek veriyi yükler, next dev 
 ```
 
 Sonra http://localhost:3000 adresini aç (dev modunda ilk API isteği derleme yüzünden 10-20 sn sürebilir). Gece geliştirme yaparken bina kapalı görünür; demo modunda program saati
-`?at=` ile verilebilir: http://localhost:3000/liste?d=60&at=2026-10-27T13:00
+`?at=` ile verilebilir: http://localhost:3000/?d=60&at=2026-10-27T13:00
 (demo saati yalnızca ders programını kaydırır; bildirimler gerçek saatle değerlendirilir).
 
 ## Komutlar
@@ -144,11 +144,11 @@ yapılandırması (`NEXT_PUBLIC_FIREBASE_PROJECT_ID`) yoksa bu mod kendiliğinde
    kullanılır (yalnızca bu örnek veri modunda). Ortam değişkeni ekleyip değiştirdikten sonra **Redeploy** gerekir.
 3. QR sayfası: `npm run qr -- --base https://<proje>.vercel.app --demo` (QR_SECRET verdiysen başına `QR_SECRET=<aynı değer>`).
 
-Bu modda: Kampüs + örnek bina/oda/ders programı (haritada "temsili konum") + kütüphane simülasyonu + her an
-"x dk önce" görünen 3 örnek bildirim (hepsi "Örnek demo verisi"); bildirim, QR check-in, değerlendirme, puan ve
-ödüller çalışır. Kimlik, tarayıcıdaki rastgele cihaz kimliğidir; Google girişi yerine Profil → Aylık ödüller'de
-"Örnek öğrenci hesabıyla devam et" vardır (kupon `ORNEK-…`, geçersiz örnek). Gece 08.00-22.00 dışında ekrandaki
-"Sunum için bugün 13.00'e göre göster" demo saatine geçirir. Sunum akışı: `docs/DEMO_RUNBOOK.md`.
+Bu modda: gerçek fakülte binalarında (OSM konumları) 37 sınıf, uydurma ders programı, her an "x dk önce" görünen 8
+bildirim, değerlendirmeler, kütüphane yoğunluk deseni ve 3 ödül. Ekip kararıyla arayüzde "örnek" etiketi yoktur
+(CLAUDE.md kural 6 istisnası); örnek olduğu sunumda sözlü söylenir. Kimlik tarayıcıdaki rastgele cihaz kimliğidir;
+Profil → Aylık ödüller'de "SAÜ öğrenci hesabıyla devam et" doğrudan öğrenci hesabına geçirir (kupon `KAMPUS-…`).
+Gece 08.00-22.00 dışında "Gündüz 13.00 görünümüne geç" bağlantısı çıkar. Sunum akışı: `docs/DEMO_RUNBOOK.md`.
 Sınırlar: veri kalıcı değildir (sunucu örneği yeniden başlayınca sıfırlanır) ve Vercel isteği farklı sunucusuz
 örneklere dağıtırsa bir telefonun bildirimi diğerinde görünmeyebilir. Vercel'de iki telefonla paylaşım doğrulanmadı;
 birim ve e2e testleri bu modda yerelde (`npm run test:e2e:memory`) geçiyor.

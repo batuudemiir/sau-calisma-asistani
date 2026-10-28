@@ -23,12 +23,13 @@ export function MapControls({
   const buttons = [
     { label: "Yakınlaştır", icon: ICONS.in, on: onZoomIn },
     { label: "Uzaklaştır", icon: ICONS.out, on: onZoomOut },
-    { label: "Merkeze dön", icon: ICONS.center, on: onCenter },
-    { label: "Tüm kampüsü göster", icon: ICONS.all, on: onAll },
+    // Telefonda yalnızca yakınlaştır/uzaklaştır (işaretleri kapatmasın); diğerleri geniş ekranda
+    { label: "Merkeze dön", icon: ICONS.center, on: onCenter, wide: true },
+    { label: "Tüm kampüsü göster", icon: ICONS.all, on: onAll, wide: true },
   ];
   return (
     <div
-      className={`absolute top-[11.5rem] right-2 z-10 flex gap-2 lg:top-auto lg:bottom-20 lg:flex-col ${hidden ? "max-lg:hidden" : ""}`}
+      className={`absolute bottom-[17.5rem] left-2 z-10 flex gap-2 lg:right-2 lg:bottom-20 lg:left-auto lg:flex-col ${hidden ? "max-lg:hidden" : ""}`}
       role="group"
       aria-label="Harita denetimleri"
     >
@@ -38,7 +39,7 @@ export function MapControls({
           type="button"
           onClick={b.on}
           aria-label={b.label}
-          className="flex size-11 items-center justify-center rounded-md border border-line-strong bg-card text-fg-1 shadow-control transition-colors duration-[var(--dur-fast)] hover:bg-sunken active:translate-y-px"
+          className={`${"wide" in b ? "max-lg:hidden " : ""}flex size-11 items-center justify-center rounded-md border border-line-strong bg-card text-fg-1 shadow-control transition-colors duration-[var(--dur-fast)] hover:bg-sunken active:translate-y-px`}
         >
           <svg
             width="20"

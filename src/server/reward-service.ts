@@ -1,4 +1,5 @@
 import { randomBytes } from "node:crypto";
+import { SHOW_SAMPLE_LABELS } from "@/lib/backend-mode";
 import { z } from "zod";
 import { CLAIM_MESSAGES, claimBlock, couponCode, monthPointsFor, type ClaimBlock, type Reward } from "@/domain/rewards";
 import { toLocalTime } from "@/domain/time";
@@ -84,4 +85,5 @@ export async function claimRewardFor(
   return { ok: false, error: CLAIM_MESSAGES[res.block], status: res.block === "NOT_STUDENT" ? 403 : 409 };
 }
 
-export const newCouponCode = (isSimulated: boolean) => couponCode(randomBytes(4).toString("hex"), isSimulated);
+export const newCouponCode = (isSimulated: boolean) =>
+  couponCode(randomBytes(4).toString("hex"), isSimulated ? (SHOW_SAMPLE_LABELS ? "ORNEK" : "KAMPUS") : "SAU");

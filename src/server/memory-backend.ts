@@ -3,7 +3,7 @@ import type { Rating } from "@/domain/ratings";
 import type { Building, LibrarySimulation, ScheduleBlock, Space, SpaceReport, Term } from "@/domain/types";
 import { toLocalTime } from "@/domain/time";
 import { campusPlan } from "../../scripts/seed-campus/plan";
-import { DEMO_REWARDS, demoPlan } from "../../scripts/seed-demo/plan";
+import { DEMO_REWARDS, demoPlan, roomId } from "../../scripts/seed-demo/plan";
 import type { DataSource, SourceSummary } from "./data-source";
 import { DELETED_UID, type PointEventDTO, type WriteStore } from "./write-store";
 
@@ -41,8 +41,13 @@ interface State {
  */
 export const DEMO_REPORTS: { spaceId: string; type: SpaceReport["type"]; agoMin: number }[] = [
   { spaceId: "lumo-coffee", type: "AVAILABLE", agoMin: 6 },
-  { spaceId: "demo-blok-Ö-104", type: "AVAILABLE", agoMin: 4 },
-  { spaceId: "demo-blok-Ö-203", type: "BUSY", agoMin: 11 },
+  { spaceId: "kutuphane-merkez", type: "AVAILABLE", agoMin: 5 },
+  { spaceId: "kantin", type: "BUSY", agoMin: 10 },
+  { spaceId: roomId("bilisim-fakultesi", "BB-103"), type: "AVAILABLE", agoMin: 4 },
+  { spaceId: roomId("muhendislik-m2", "M2-102"), type: "AVAILABLE", agoMin: 9 },
+  { spaceId: roomId("fen-edebiyat-fakultesi", "FE-202"), type: "AVAILABLE", agoMin: 14 },
+  { spaceId: roomId("bilisim-fakultesi", "BB-201"), type: "BUSY", agoMin: 7 },
+  { spaceId: roomId("muhendislik-m4", "M4-102"), type: "BUSY", agoMin: 12 },
 ];
 
 function demoReports(nowMs: number): StoredReport[] {
@@ -69,7 +74,7 @@ function initialState(nowMs: number): State {
   return {
     term: demo.term,
     spaces,
-    buildings: [...campus.buildings, demo.building],
+    buildings: campus.buildings,
     sources: [
       {
         id: demo.source.id,

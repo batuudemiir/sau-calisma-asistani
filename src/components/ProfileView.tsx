@@ -88,10 +88,7 @@ export function ProfileView() {
   const next = profile?.level.next;
   const levelStart = profile ? LEVELS[profile.level.index].min : 0;
 
-  return (
-    <div className="mx-auto w-full max-w-md flex-1 space-y-5 px-4 py-6 lg:max-w-3xl lg:px-8 lg:py-10">
-      <h1 className="text-[28px] leading-8 font-bold">Profil</h1>
-
+  const account = (
       <section aria-labelledby="hesap" className="space-y-3 rounded-lg border border-line bg-card p-4">
         <h2 id="hesap" className="text-xl font-bold">
           {student ? "SAÜ öğrenci hesabı" : "Katkıların bu cihazda anonim"}
@@ -133,10 +130,17 @@ export function ProfileView() {
             )}
           </>
         )}
-        <p aria-live="polite" className="text-sm font-semibold">
-          {notice}
-        </p>
       </section>
+  );
+
+  return (
+    <div className="mx-auto w-full max-w-md flex-1 space-y-5 px-4 pt-5 pb-28 lg:max-w-3xl lg:px-8 lg:py-10">
+      <h1 className="text-[28px] leading-8 font-bold">Profil</h1>
+
+      {(GOOGLE_LOGIN_ENABLED || student) && account}
+      <p aria-live="polite" className="text-sm font-semibold empty:hidden">
+        {notice}
+      </p>
 
       {error && (
         <div role="alert" className="rounded-md border border-danger p-3 text-sm">
@@ -221,6 +225,10 @@ export function ProfileView() {
         </section>
       )}
 
+      <details className="rounded-lg border border-line bg-card p-4">
+        <summary className="min-h-11 cursor-pointer content-center text-lg font-bold">Ayarlar</summary>
+        <div className="mt-3 space-y-5">
+          {!GOOGLE_LOGIN_ENABLED && !student && account}
       {profile && (
         <section aria-labelledby="sil" className="space-y-2 rounded-lg border border-danger bg-card p-4">
           <h2 id="sil" className="text-xl font-bold">
@@ -248,6 +256,8 @@ export function ProfileView() {
       )}
 
       <ThemeSetting />
+        </div>
+      </details>
 
       <Link href="/hakkinda" className="inline-flex min-h-11 items-center underline">
         Hakkında, veri kaynakları ve gizlilik

@@ -20,6 +20,8 @@ GDG on Campus SAÜ Hackathon, 27-28 Ekim 2026. Teslim: 28 Ekim 13.00.
 4. Gemini yalnızca `scripts/ingest/` içinde, geliştiricinin makinesinde çalışır. Web uygulaması Gemini'yi asla çağırmaz.
 5. Kaynakta olmayan oda, saat, ders veya doluluk bilgisi uydurma. Bilinmeyen = `UNKNOWN`, asla "boş".
 6. Simüle edilen her veri `isSimulated: true` taşır ve arayüzde "Örnek demo verisi" etiketiyle görünür.
+   İstisna (ekip kararı, 28.10): Firebase'siz sunum prototipinde (`MEMORY_BACKEND`, Vercel) etiketler gösterilmez
+   (`SHOW_SAMPLE_LABELS`); örnek veri sunumda sözlü olarak açıklanır. Firebase modunda etiket kuralı aynen geçerli.
 7. API anahtarı, token veya kullanıcı kimliği loglama. Gizli anahtar istemci paketine girmez (`NEXT_PUBLIC_` önekli değişkenler hariç, onlar gizli değildir).
 8. Firestore'a istemciden yazma yok; yazmalar Route Handler + Admin SDK üzerinden, Zod doğrulamasıyla.
 9. Kullanılmayan paket, özellik, harita kütüphanesi ekleme. Harita el çizimi SVG ile yapılır (`src/components/map/`), paket yok.

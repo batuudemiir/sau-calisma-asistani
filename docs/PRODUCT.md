@@ -20,12 +20,13 @@ Programda boş görünen derslik, gerçekten boş olduğu doğrulanmış derslik
 algoritmada, arayüz metninde ve testlerde korunur. Bilinmeyen bilgi asla olumlu kabul edilmez.
 
 ## Kullanıcı akışı
-1. Ana ekran kampüs haritasıdır (gerçek OSM konumları): üstte arama ve süre seçimi (30/60/90/120, varsayılan 60),
-   altta panel "Şu an N derslik uygun görünüyor" + ilk 3 sonuç. Kayıt gerekmez, konum izni istenmez.
-   Haritadaki her bilgi panelde ve Liste sekmesinde metin olarak da vardır.
-2. Liste sekmesi: alan kartları, güven etiketine göre sıralı; filtreler (Sessiz, Priz, Şu an açık, doğrulandı, tür).
-   Bilinmeyen filtreye girmez. Kütüphane kartı en üstte, kendi etiketiyle.
-3. Alan ayrıntısı: boş kalacağı süre, sonraki ders, kaynak belge ve dönemi, son bildirimler.
+1. Ana ekran **Şimdi** (`/`): "Kaç dakikan var?" (30/60/90/120, varsayılan 60) → "Şu an boş sınıflar": kartta yalnızca
+   sınıf, bina, durum ve "17.00'ye kadar"; doğrulanmışlar üstte, dolu/bilinmeyenler açılır bölümde. Altında
+   "Kütüphane ve kafeler". Filtreler: Sessiz, Priz var, Şu an açık (bilinmeyen filtreye girmez). Kayıt gerekmez.
+2. **Harita** sekmesi (`/harita`, gerçek OSM konumları): binadaki sayı = boş sınıf; binaya dokununca kat görünümü.
+   Haritadaki her bilgi alt panelde metin olarak da vardır.
+3. Sınıf/yer ayrıntısı: büyük durum + ne zamana kadar boş, "Buradayım" düğmesi, bugünkü dersler, puanlar;
+   kaynak belge ve son bildirimler "Bilgi kaynağı" bölümünde.
 4. Bildirim: "Buradayım, uygun (check-in)" / "Dolu" / "Kullanılamıyor" / "Bilgi güncel değil" — tek dokunuş.
    "Buradayım, uygun" aynı zamanda check-in'dir; ayrı bir check-in kaydı yoktur.
 5. Değerlendirme: check-in yapan öğrenci, 3 saat içinde o alanı sabit kriterlere 1-5 puanla değerlendirir

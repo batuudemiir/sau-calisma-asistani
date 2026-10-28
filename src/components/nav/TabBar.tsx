@@ -5,19 +5,20 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { carryQuery } from "@/lib/use-api";
 import { Wordmark } from "../brand/Wordmark";
 
-// Lucide map / list / user yolları
+// Lucide clock / map / user yolları
 const TABS = [
   {
     href: "/",
-    label: "Harita",
-    icon: "M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z M15 5.764v15 M9 3.236v15",
-    match: (p: string) => p === "/",
+    label: "Şimdi",
+    // Lucide clock
+    icon: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z M12 6v6l4 2",
+    match: (p: string) => p === "/" || p.startsWith("/yer"),
   },
   {
-    href: "/liste",
-    label: "Liste",
-    icon: "M3 12h.01 M3 18h.01 M3 6h.01 M8 12h13 M8 18h13 M8 6h13",
-    match: (p: string) => p.startsWith("/liste") || p.startsWith("/yer"),
+    href: "/harita",
+    label: "Harita",
+    icon: "M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z M15 5.764v15 M9 3.236v15",
+    match: (p: string) => p.startsWith("/harita"),
   },
   {
     href: "/profil",

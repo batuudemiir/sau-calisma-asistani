@@ -1,5 +1,6 @@
 "use client";
 
+import { SHOW_SAMPLE_LABELS } from "@/lib/backend-mode";
 import { useState } from "react";
 import { MIN_RATINGS_TO_SHOW } from "@/domain/config";
 import { CRITERIA, CRITERION_LABELS, type Criterion, type RatingSummary } from "@/domain/ratings";
@@ -31,14 +32,16 @@ export function RatingSummaryView({ rating }: { rating: Pair }) {
       <h2 id="rating-title" className="text-xl font-bold">
         Öğrenci değerlendirmeleri
       </h2>
-      {rating.real.averages || rating.simulated.count === 0 ? (
+      {!SHOW_SAMPLE_LABELS && !rating.real.averages && rating.simulated.count > 0 ? (
+        <SummaryBlock s={rating.simulated} />
+      ) : rating.real.averages || rating.simulated.count === 0 ? (
         <SummaryBlock s={rating.real} />
       ) : (
         <p className="text-sm">
           Gerçek öğrenci değerlendirmesi henüz {rating.real.count}/{MIN_RATINGS_TO_SHOW}; aşağıdakiler örnek demo verisidir.
         </p>
       )}
-      {rating.simulated.count > 0 && (
+      {SHOW_SAMPLE_LABELS && rating.simulated.count > 0 && (
         <div className="space-y-1 rounded-md border border-dashed border-simulated-border p-2">
           <SimulatedBadge />
           <SummaryBlock s={rating.simulated} />

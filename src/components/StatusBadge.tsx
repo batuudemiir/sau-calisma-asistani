@@ -1,4 +1,5 @@
 import type { Status } from "@/domain/types";
+import { SHOW_SAMPLE_LABELS } from "@/lib/backend-mode";
 import { STATUS_ICON, STATUS_STYLE, statusDetail, statusTitle } from "@/lib/labels";
 
 export function StatusBadge({ status, isLibrary = false }: { status: Status; isLibrary?: boolean }) {
@@ -17,8 +18,9 @@ export function StatusBadge({ status, isLibrary = false }: { status: Status; isL
   );
 }
 
-/** Yapay/demo veriyi işaretler. Kesik kenar = "gerçek değil". */
+/** Yapay/demo veriyi işaretler. Kesik kenar = "gerçek değil". Sunum prototipinde gösterilmez (SHOW_SAMPLE_LABELS). */
 export function SimulatedBadge() {
+  if (!SHOW_SAMPLE_LABELS) return null;
   return (
     <span className="inline-flex rounded-sm border border-dashed border-simulated-border bg-simulated-bg px-2 py-0.5 text-xs font-semibold text-simulated-fg">
       Örnek demo verisi

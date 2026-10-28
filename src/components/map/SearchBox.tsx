@@ -41,7 +41,7 @@ export function SearchBox({
   return (
     <div className="relative">
       <label htmlFor={`${listId}-input`} className="sr-only">
-        Oda, bina veya yer ara
+        Sınıf, bina veya yer ara
       </label>
       <svg
         aria-hidden="true"
@@ -64,7 +64,7 @@ export function SearchBox({
         value={text}
         onChange={(e) => setText(e.target.value)}
         onKeyDown={(e) => e.key === "Escape" && setText("")}
-        placeholder="Oda, bina veya yer ara"
+        placeholder="Sınıf, bina veya yer ara"
         autoComplete="off"
         aria-describedby={`${listId}-count`}
         className="min-h-11 w-full rounded-md border border-line-strong bg-card pr-3 pl-9 placeholder:text-fg-3 focus:border-ink-900 focus:outline-2 focus:outline-offset-0 focus:outline-[var(--focus-ring)]"

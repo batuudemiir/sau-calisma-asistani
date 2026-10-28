@@ -31,9 +31,9 @@ export function DemoClockNotice({
     real.delete("at");
     return (
       <p className="text-sm text-fg-2">
-        Sunum için demo saati gösteriliyor.{" "}
+        Gündüz 13.00 görünümü.{" "}
         <Link href={`${basePath}?${real.toString()}`} className={link}>
-          Gerçek saate dön
+          Şu anki saate dön
         </Link>
       </p>
     );
@@ -43,10 +43,10 @@ export function DemoClockNotice({
   if (!closed) return null;
   return (
     <div className="rounded-md border border-line bg-sunken p-3 text-sm">
-      <p>Binalar 08.00–22.00 arası açık kabul edilir; bu saatte derslik önerilmez. Çalışma yerleri aşağıda.</p>
+      <p>Binalar 08.00–22.00 arası açık; bu saatte sınıf önerilmez. Kütüphane ve kafeler aşağıda.</p>
       {MEMORY_BACKEND && (
         <Link href={`${basePath}?${carryQuery(params, { at: `${now.dateISO}T${DEMO_CLOCK}` })}`} className={link}>
-          Sunum için bugün 13.00&apos;e göre göster
+          Gündüz 13.00 görünümüne geç
         </Link>
       )}
     </div>

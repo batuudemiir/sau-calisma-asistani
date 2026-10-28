@@ -48,12 +48,12 @@ export function claimBlock(i: ClaimInput): ClaimBlock | null {
   return null;
 }
 
-/** Kupon kodu. Örnek ödülde "ORNEK-" ile başlar ve hiçbir yerde geçerli değildir. */
-export function couponCode(randomHex: string, isSimulated: boolean): string {
+/** Kupon kodu: "<önek>-XXXX-XXXX". Örnek ödülün kuponu ("ORNEK-", sunum prototipinde "KAMPUS-") hiçbir yerde geçmez. */
+export function couponCode(randomHex: string, prefix: "SAU" | "ORNEK" | "KAMPUS"): string {
   const body = randomHex
     .toUpperCase()
     .replace(/[^0-9A-F]/g, "")
     .slice(0, 8)
     .padEnd(8, "0");
-  return `${isSimulated ? "ORNEK" : "SAU"}-${body.slice(0, 4)}-${body.slice(4)}`;
+  return `${prefix}-${body.slice(0, 4)}-${body.slice(4)}`;
 }

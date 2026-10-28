@@ -35,6 +35,8 @@ export interface Needs {
   kind: KindPreference;
   /** Kullanıcının konumu; yalnızca cihazda kullanılır, sunucuya gönderilmez. */
   here: LatLng | null;
+  /** Örnek veriyi "Örnek demo verisi" diye belirt (varsayılan evet; sunum prototipinde hayır). */
+  labelSamples?: boolean;
 }
 
 export interface Recommendation {
@@ -125,7 +127,7 @@ function evaluate(c: Candidate, needs: Needs): Recommendation {
     }
   }
 
-  if (c.isSimulated) cautions.push("Örnek demo verisi");
+  if (c.isSimulated && needs.labelSamples !== false) cautions.push("Örnek demo verisi");
   return { candidate: c, score, reasons, cautions, distanceM: dist };
 }
 

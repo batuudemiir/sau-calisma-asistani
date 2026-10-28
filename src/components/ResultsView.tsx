@@ -1,31 +1,40 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { WEEKDAY_NAMES, time } from "@/lib/labels";
 import { applyFilters, parseFilters } from "@/lib/filters";
 import { matchesQuery } from "@/lib/search";
 import { carryQuery, durationParam, useApi } from "@/lib/use-api";
-import type { SearchResponse } from "@/server/search-service";
+import type { MapResponse, SearchResponse } from "@/server/search-service";
+import { Assistant } from "./assistant/Assistant";
+import { DemoClockNotice } from "./DemoClockNotice";
+import { PlaceRow, RoomCard } from "./home/RoomCard";
 import { DurationChips } from "./nav/DurationChips";
 import { FilterChips } from "./nav/FilterChips";
-import { PlaceCard } from "./PlaceCard";
-import { SpaceCard } from "./SpaceCard";
-import { DemoClockNotice } from "./DemoClockNotice";
 
 export const POLL_MS = 4000;
 
+/** Telefonda ilk ekranda gösterilen boş sınıf sayısı; gerisi "Tümünü göster" ile. */
+const FIRST = 6;
+
+const isFree = (code: string) => code === "PROGRAM_FREE" || code === "VERIFIED_FREE";
+
+/**
+ * Ana sayfa ("Şimdi"): kaç dakikan var → şu an boş sınıflar → kütüphane ve kafeler. Kaynak, erişim ve ders ayrıntısı
+ * oda sayfasındadır; burada yalnızca karar için gereken: oda, bina, durum, ne zamana kadar.
+ */
 export function ResultsView() {
   const params = useSearchParams();
   const query = carryQuery(params);
   const { data, error, loading, reload } = useApi<SearchResponse>(`/api/search?${query}`, POLL_MS);
   const d = durationParam(params);
   const filters = parseFilters(params.get("f"));
-  // Listede arama: URL'de q (paylaşılabilir); Türkçe katlamalı ("o102" → Ö-102)
+  // Arama URL'de (q) tutulur; Türkçe katlamalı ("bb101" → BB-101)
   const router = useRouter();
   const pathname = usePathname();
   const [text, setText] = useState(params.get("q") ?? "");
+  const [all, setAll] = useState(false);
   const searching = text.trim().length > 0;
   const onSearch = (value: string) => {
     setText(value);
@@ -36,14 +45,21 @@ export function ResultsView() {
   };
   const places = data ? applyFilters(data.places, filters).filter((p) => matchesQuery(text, p.name)) : [];
   const results = data ? applyFilters(data.results, filters).filter((r) => matchesQuery(text, r.code, r.buildingName)) : [];
+  const free = results.filter((r) => isFree(r.status.code));
+  const others = results.filter((r) => !isFree(r.status.code));
+  const visible = all || searching ? free : free.slice(0, FIRST);
+  const href = (id: string) => `/yer/${encodeURIComponent(id)}?${query}`;
+  // Asistan öneri için harita verisini (konumlar dahil) kullanır; yalnızca açılış ve süre değişince yüklenir
+  const assistantData = useApi<MapResponse>(`/api/map?${query}`).data;
 
   return (
-    <div className="mx-auto w-full max-w-md flex-1 space-y-5 px-4 py-6 lg:max-w-6xl lg:px-8 lg:py-10">
+    <div className="mx-auto w-full max-w-md flex-1 space-y-6 px-4 pt-5 pb-28 lg:max-w-5xl lg:px-8 lg:py-10">
       <header className="space-y-3">
-        <h1 className="text-[28px] leading-8 font-bold">{d} dakika nerede çalışalım?</h1>
+        <h1 className="text-[28px] leading-8 font-bold">Kaç dakikan var?</h1>
+        <DurationChips basePath="/" />
         <div className="relative">
-          <label htmlFor="liste-ara" className="sr-only">
-            Listede ara: oda, bina veya çalışma yeri
+          <label htmlFor="ara" className="sr-only">
+            Sınıf, bina veya yer ara
           </label>
           <svg
             aria-hidden="true"
@@ -61,11 +77,11 @@ export function ResultsView() {
             <path d="m21 21-4.3-4.3" />
           </svg>
           <input
-            id="liste-ara"
+            id="ara"
             type="search"
             value={text}
             onChange={(e) => onSearch(e.target.value)}
-            placeholder="Oda, bina veya yer ara"
+            placeholder="Sınıf, bina veya yer ara"
             autoComplete="off"
             className="min-h-11 w-full rounded-md border border-line-strong bg-card pr-3 pl-9 placeholder:text-fg-3 focus:border-ink-900 focus:outline-2 focus:outline-offset-0 focus:outline-[var(--focus-ring)]"
           />
@@ -73,19 +89,13 @@ export function ResultsView() {
         <p aria-live="polite" className="sr-only">
           {searching && data ? `${places.length + results.length} sonuç` : ""}
         </p>
-        <DurationChips basePath="/liste" />
-        <FilterChips />
+        <FilterChips only={["quiet", "power", "open"]} />
         {data && (
           <p className="text-sm text-fg-2">
-            {WEEKDAY_NAMES[data.now.weekday]} {time(data.now.minute)}
-            {data.termLabel ? ` · ${data.termLabel}` : ""}
-            {data.now.isDemoClock && <strong className="ml-1">(demo saati)</strong>}
+            {WEEKDAY_NAMES[data.now.weekday]} <span className="font-mono">{time(data.now.minute)}</span>
           </p>
         )}
-        {data && <DemoClockNotice now={data.now} basePath="/liste" durationMin={d} />}
-        <Link href={`/?${query}`} className="inline-flex min-h-11 items-center text-sm font-semibold underline">
-          Haritada gör →
-        </Link>
+        {data && <DemoClockNotice now={data.now} basePath="/" durationMin={d} />}
       </header>
 
       {loading && !data && <p role="status">Yükleniyor…</p>}
@@ -99,89 +109,73 @@ export function ResultsView() {
       )}
 
       {data && (
-        // Telefonda tek sütun; geniş ekranda solda çalışma yerleri (kaydırırken sabit), sağda derslikler
-        <div className="space-y-5 lg:grid lg:grid-cols-[22rem_minmax(0,1fr)] lg:items-start lg:gap-8 lg:space-y-0">
-          <section aria-labelledby="places-title" className="space-y-3 lg:sticky lg:top-6">
-            <h2 id="places-title" className="sr-only">
-              Çalışma yerleri
+        <div className="space-y-6 lg:grid lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start lg:gap-8 lg:space-y-0">
+          <section aria-labelledby="bos-siniflar" className="space-y-3">
+            <h2 id="bos-siniflar" className="text-[22px] leading-7 font-bold">
+              Şu an boş sınıflar <span className="text-fg-2">({free.length})</span>
             </h2>
-            {filters.length > 0 || searching ? (
-              places.length === 0 ? (
-                <p className="text-sm">{searching ? "Aramaya uyan çalışma yeri yok." : "Filtreye uyan çalışma yeri yok."}</p>
-              ) : (
-                <ul className="space-y-2">
-                  {places.map((p) => (
-                    <li key={p.spaceId}>
-                      <PlaceCard
-                        place={p}
-                        href={`/yer/${encodeURIComponent(p.spaceId)}?${query}`}
-                        nowMs={data.now.nowMs}
-                        compact
-                      />
-                    </li>
-                  ))}
-                </ul>
-              )
-            ) : (
-              <>
-                <PlaceCard
-                  place={data.places[0]}
-                  href={`/yer/${encodeURIComponent(data.places[0].spaceId)}?${query}`}
-                  nowMs={data.now.nowMs}
-                />
-                {data.places.length > 1 && (
-                  <details className="rounded-lg border border-line bg-card p-3">
-                    <summary className="min-h-11 cursor-pointer content-center font-semibold">
-                      Diğer çalışma yerleri ({data.places.length - 1}) — kütüphane ek bina, kafeler
-                    </summary>
-                    <ul className="mt-2 space-y-2">
-                      {data.places.slice(1).map((p) => (
-                        <li key={p.spaceId}>
-                          <PlaceCard
-                            place={p}
-                            href={`/yer/${encodeURIComponent(p.spaceId)}?${query}`}
-                            nowMs={data.now.nowMs}
-                            compact
-                          />
-                        </li>
-                      ))}
-                    </ul>
-                  </details>
-                )}
-              </>
-            )}
-          </section>
-          <div className="space-y-4">
-            <h2 className="text-[22px] leading-7 font-bold">Derslikler</h2>
-            {searching && results.length === 0 ? (
+            {free.length === 0 ? (
               <p className="rounded-md border border-line-strong p-4">
-                &quot;{text.trim()}&quot; aramasına uyan uygun derslik yok. Oda kodunu (ör. Ö-102) veya bina adını dene; dolu ya
-                da dersi olan odalar bu listede görünmez, haritadaki bina panelinde görünür.
-              </p>
-            ) : data.results.length > 0 && results.length === 0 ? (
-              <p className="rounded-md border border-line-strong p-4">
-                Filtreye uyan derslik yok. Yeterli değerlendirmesi olmayan yerler &quot;Sessiz&quot; ve &quot;Priz var&quot;
-                filtrelerine girmez.
-              </p>
-            ) : results.length === 0 ? (
-              <p className="rounded-md border border-line-strong p-4">
-                Bu süre için programda uygun görünen derslik yok. Daha kısa bir süre deneyebilirsin.
-                {data.now.minute + d > 1320 && " Bina kapanış saatine (22.00) yakın olabilir."}
+                {searching
+                  ? `"${text.trim()}" aramasına uyan boş sınıf yok. Sınıf kodunu (ör. BB-102) veya bina adını dene.`
+                  : filters.length > 0
+                    ? "Filtreye uyan boş sınıf yok. Bir filtreyi kaldırmayı dene."
+                    : `${d} dakika boyunca boş sınıf görünmüyor. Daha kısa bir süre seç ya da kütüphaneye bak.`}
               </p>
             ) : (
-              <ul className="space-y-3 xl:grid xl:grid-cols-2 xl:gap-3 xl:space-y-0" aria-label="Uygun görünen alanlar">
-                {results.map((r) => (
-                  <SpaceCard key={r.spaceId} r={r} href={`/yer/${encodeURIComponent(r.spaceId)}?${query}`} />
+              <ul className="space-y-2" aria-label="Boş sınıflar">
+                {visible.map((r) => (
+                  <RoomCard key={r.spaceId} r={r} href={href(r.spaceId)} />
                 ))}
               </ul>
             )}
-            <p className="text-sm text-fg-3">
-              Sınav, tatil, ders iptali ve program dışı etkinlik bilgisi yok. Programda boş görünen derslik gerçekten boş
-              olmayabilir; gördüğünü bildir, birlikte bilelim.
-            </p>
-          </div>
+            {!all && !searching && free.length > FIRST && (
+              <button
+                type="button"
+                onClick={() => setAll(true)}
+                className="min-h-11 w-full rounded-md border border-line-strong bg-card font-semibold hover:bg-sunken"
+              >
+                Tümünü göster ({free.length})
+              </button>
+            )}
+            {others.length > 0 && (
+              <details className="rounded-lg border border-line bg-card p-3">
+                <summary className="min-h-11 cursor-pointer content-center font-semibold">
+                  Dolu ya da durumu bilinmeyen ({others.length})
+                </summary>
+                <ul className="mt-2 space-y-2">
+                  {others.map((r) => (
+                    <RoomCard key={r.spaceId} r={r} href={href(r.spaceId)} />
+                  ))}
+                </ul>
+              </details>
+            )}
+          </section>
+
+          <section aria-labelledby="calisma-alanlari" className="space-y-3 lg:sticky lg:top-6">
+            <h2 id="calisma-alanlari" className="text-[22px] leading-7 font-bold">
+              Kütüphane ve kafeler
+            </h2>
+            {places.length === 0 ? (
+              <p className="text-sm">{searching ? "Aramaya uyan yer yok." : "Filtreye uyan yer yok."}</p>
+            ) : (
+              <ul className="space-y-2">
+                {places.map((p) => (
+                  <PlaceRow key={p.spaceId} place={p} href={href(p.spaceId)} />
+                ))}
+              </ul>
+            )}
+          </section>
         </div>
       )}
+      <Assistant
+        page
+        data={assistantData}
+        duration={d}
+        onDuration={(x) => router.replace(`/?${carryQuery(params, { d: String(x) })}`, { scroll: false })}
+        onSelect={(sel) => sel.s && router.push(href(sel.s))}
+        query={query}
+      />
     </div>
   );
 }

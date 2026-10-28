@@ -1,5 +1,6 @@
 "use client";
 
+import { SHOW_SAMPLE_LABELS } from "@/lib/backend-mode";
 import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 import {
@@ -52,7 +53,10 @@ export function Assistant({
   onSelect,
   query,
   buttonHidden = false,
+  page = false,
 }: {
+  /** Kaydırılan sayfada (ana sayfa): düğme ve panel ekrana sabitlenir; haritada harita kutusuna göre konumlanır. */
+  page?: boolean;
   /** Telefonda alt panel büyükken düğme panelin altında kalmasın diye gizlenir. */
   buttonHidden?: boolean;
   data: MapResponse | null;
@@ -143,7 +147,7 @@ export function Assistant({
   }
 
   const ready = data && data.durationMin === duration;
-  const recs: Recommendation[] = step === "results" && ready ? recommend(candidatesFrom(data), { criteria, kind, here }) : [];
+  const recs: Recommendation[] = step === "results" && ready ? recommend(candidatesFrom(data), { criteria, kind, here, labelSamples: SHOW_SAMPLE_LABELS }) : [];
 
   const option = "min-h-11 rounded-full border border-line-strong bg-card px-3.5 text-sm font-semibold hover:bg-sunken";
   return (
@@ -155,7 +159,7 @@ export function Assistant({
         aria-expanded={open}
         aria-controls={`${id}-panel`}
         aria-label="Asistan"
-        className={`absolute right-3 bottom-[17rem] z-20 flex size-14 items-center justify-center rounded-full border-2 border-cobalt-500 bg-cobalt-500 text-lime-500 shadow-control hover:bg-cobalt-600 active:translate-y-px lg:bottom-4 ${buttonHidden && !open ? "max-lg:hidden" : ""}`}
+        className={`${page ? "fixed right-4 bottom-20 lg:right-8 lg:bottom-8" : "absolute right-3 bottom-[17rem] lg:bottom-4"} z-20 flex size-14 items-center justify-center rounded-full border-2 border-cobalt-500 bg-cobalt-500 text-lime-500 shadow-control hover:bg-cobalt-600 active:translate-y-px ${buttonHidden && !open ? "max-lg:hidden" : ""}`}
       >
         <svg
           width="26"
@@ -179,7 +183,7 @@ export function Assistant({
           role="dialog"
           aria-modal="false"
           aria-labelledby={`${id}-title`}
-          className="absolute inset-x-2 bottom-2 z-30 flex max-h-[80%] flex-col rounded-xl border border-line bg-background shadow-xl lg:inset-x-auto lg:right-4 lg:bottom-20 lg:w-[26rem]"
+          className={`${page ? "fixed bottom-18 max-h-[75dvh] lg:bottom-8" : "absolute bottom-2 max-h-[80%] lg:bottom-20"} inset-x-2 z-30 flex flex-col rounded-xl border border-line bg-background shadow-xl lg:inset-x-auto lg:right-4 lg:w-[26rem]`}
         >
           <div className="flex items-center justify-between gap-2 border-b border-line p-3">
             <h2 id={`${id}-title`} ref={title} tabIndex={-1} className="font-bold outline-none">

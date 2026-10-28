@@ -8,18 +8,18 @@ import { mapView, runSearch } from "../../src/server/search-service";
 
 const NOW = Date.UTC(2026, 9, 27, 10, 0); // Salı 13.00 İstanbul
 const opts = { nowMs: NOW, durationMin: 60, demoMode: true };
-const ROOM = "demo-blok-Ö-102";
+const ROOM = "bilisim-fakultesi-BB-102";
 const scores = { quiet: 4, power: 4, wifi: 4, light: 4 };
 
 describe("bellek arka ucu (Firebase'siz prototip)", () => {
-  it("örnek veri hazır: kampüs çalışma yerleri, örnek blok ve sıralı sonuçlar", async () => {
+  it("örnek veri hazır: kampüs çalışma yerleri, fakülte derslikleri ve sıralı sonuçlar", async () => {
     const { source } = createMemoryBackend(NOW);
     const res = await runSearch(source, opts);
     expect(res.places[0].spaceId).toBe("kutuphane-merkez");
     expect(res.places.length).toBeGreaterThan(1);
-    expect(res.results.some((r) => r.code === "Ö-102")).toBe(true);
+    expect(res.results.some((r) => r.code === "BB-102")).toBe(true);
     const map = await mapView(source, opts);
-    expect(map.buildings.some((b) => b.id === "demo-blok")).toBe(true);
+    expect(map.buildings.some((b) => b.id === "bilisim-fakultesi")).toBe(true);
   });
 
   it("check-in kaydedilir, durumda görünür, puan verir; hız sınırı çalışır", async () => {
@@ -44,12 +44,12 @@ describe("bellek arka ucu (Firebase'siz prototip)", () => {
   it("ödül: puan yeter ama öğrenci değilse alınamaz; öğrenci işaretlenince örnek kupon", async () => {
     const { store } = createMemoryBackend(NOW);
     await submitReport(store, "c", { spaceId: ROOM, type: "AVAILABLE" }, NOW);
-    await submitReport(store, "c", { spaceId: "demo-blok-Ö-103", type: "AVAILABLE" }, NOW + 11 * 60_000);
+    await submitReport(store, "c", { spaceId: "bilisim-fakultesi-BB-204", type: "AVAILABLE" }, NOW + 11 * 60_000);
     const view = await rewardsView(store, "c", NOW + 12 * 60_000, true);
     expect(view.rewards.find((r) => r.id === "ornek-cay")?.block).toBe("NOT_STUDENT");
     await store.markStudent("c");
     const res = await claimRewardFor(store, "c", { rewardId: "ornek-cay" }, NOW + 12 * 60_000, true);
-    expect(res).toMatchObject({ ok: true, code: expect.stringMatching(/^ORNEK-/) });
+    expect(res).toMatchObject({ ok: true, code: expect.stringMatching(/^KAMPUS-/) });
     expect(await claimRewardFor(store, "c", { rewardId: "ornek-cay" }, NOW + 13 * 60_000, true)).toMatchObject({
       ok: false,
       status: 409,

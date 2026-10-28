@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { MEMORY_BACKEND } from "@/lib/backend-mode";
+import { MEMORY_BACKEND, SHOW_SAMPLE_LABELS } from "@/lib/backend-mode";
 import { Wordmark } from "@/components/brand/Wordmark";
 import { OSM_ATTRIBUTION } from "@/data/campus";
 
@@ -29,7 +29,7 @@ export default function AboutPage() {
           </li>
           <li>&quot;Öğrenci doğruladı&quot; ve &quot;Dolu&quot; etiketleri son 30 dakikadaki öğrenci bildirimlerinden gelir.</li>
           <li>Programı bilinmeyen alanlar &quot;Bilinmiyor&quot; olarak gösterilir, asla &quot;boş&quot; değil.</li>
-          <li>&quot;Örnek demo verisi&quot; etiketli bilgiler gösterim amaçlı yapay veridir.</li>
+          {SHOW_SAMPLE_LABELS && <li>&quot;Örnek demo verisi&quot; etiketli bilgiler gösterim amaçlı yapay veridir.</li>}
           <li>Bina konumları ve açılış saatleri: {OSM_ATTRIBUTION}.</li>
           <li>Puanlar yalnızca sana görünür; sonuçların sırasını ve güven etiketlerini etkilemez.</li>
         </ul>
@@ -60,7 +60,7 @@ export default function AboutPage() {
           <li>
             <strong>Hizmet sağlayıcı:</strong> veriler Google Firebase (Firestore, Authentication) üzerinde işlenir.
             {MEMORY_BACKEND &&
-              " Bu sunum prototipinde Firebase kullanılmaz: veriler yalnızca sunucunun belleğinde tutulur ve sunucu yeniden başlayınca silinir."}
+              " Bu sürümde veriler yalnızca sunucuda geçici olarak tutulur."}
           </li>
           <li>
             <strong>Silme hakkı:</strong> Profil → &quot;Hesabımı sil&quot; ile puanların, katkı geçmişin ve hesabın silinir.

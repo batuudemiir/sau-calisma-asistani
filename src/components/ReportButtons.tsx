@@ -13,7 +13,7 @@ const BUTTONS: { type: ReportType; label: string; style: string }[] = [
   },
   { type: "BUSY", label: "Dolu", style: "border-danger bg-card hover:bg-danger-soft" },
   { type: "UNUSABLE", label: "Kullanılamıyor", style: "border-danger bg-card hover:bg-danger-soft" },
-  { type: "OUTDATED", label: "Bilgi güncel değil", style: "col-span-2 border-line-strong bg-card hover:bg-sunken" },
+  { type: "OUTDATED", label: "Bilgi güncel değil", style: "col-span-2 min-h-11 border-transparent text-sm underline" },
 ];
 
 export function ReportButtons({ spaceId, onReported }: { spaceId: string; onReported: (type: ReportType) => void }) {
@@ -54,7 +54,7 @@ export function ReportButtons({ spaceId, onReported }: { spaceId: string; onRepo
             type="button"
             disabled={sending !== null}
             onClick={() => void send(b.type)}
-            className={`min-h-12 rounded-md border-2 px-3 py-2 font-semibold transition-colors duration-[var(--dur-fast)] active:translate-y-px disabled:opacity-50 ${b.style}`}
+            className={`${b.type === "OUTDATED" ? "" : "min-h-12 border-2 "}rounded-md px-3 py-2 font-semibold transition-colors duration-[var(--dur-fast)] active:translate-y-px disabled:opacity-50 ${b.style}`}
           >
             {sending === b.type ? "Gönderiliyor…" : b.label}
           </button>

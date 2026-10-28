@@ -1,12 +1,20 @@
 import { describe, expect, it } from "vitest";
+import { CAMPUS_PLACES, osmBuilding } from "../../src/data/campus";
 import { demoPlan } from "../../scripts/seed-demo/plan";
 
 describe("seed-demo planı", () => {
-  it("her örnek kayıt isSimulated taşır, kodlar Ö- önekli, çakışan blok yok", () => {
+  it("odalar gerçek (OSM konumlu) fakülte binalarında; her kayıt içte isSimulated; çakışan blok yok", () => {
     const p = demoPlan();
-    expect(p.building.isSimulated).toBe(true);
     expect(p.source.isSimulated).toBe(true);
-    expect(p.spaces.every((s) => s.isSimulated && s.code.startsWith("Ö-"))).toBe(true);
+    expect(p.spaces.length).toBeGreaterThanOrEqual(30);
+    const places = new Map(CAMPUS_PLACES.map((c) => [c.id, c]));
+    for (const s of p.spaces) {
+      expect(s.isSimulated).toBe(true);
+      const place = places.get(s.buildingId);
+      expect(place?.category).toBe("FACULTY");
+      expect(osmBuilding(place!.osm)).not.toBeNull();
+    }
+    expect(new Set(p.spaces.map((s) => s.id)).size).toBe(p.spaces.length);
     expect(p.blocks.length).toBeGreaterThan(0);
     expect(p.blocks.every((b) => b.isSimulated)).toBe(true);
     for (const a of p.blocks)

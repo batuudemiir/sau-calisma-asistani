@@ -6,6 +6,7 @@ describe("harita geometrisi", () => {
     expect(floorOf("A204")).toBe(2);
     expect(floorOf("Ö-101")).toBe(1);
     expect(floorOf("Z01")).toBe(0);
+    expect(floorOf("M2-101")).toBe(1);
     expect(floorOf("Amfi")).toBeNull();
   });
 

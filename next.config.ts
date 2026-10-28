@@ -6,9 +6,10 @@ const nextConfig: NextConfig = {
   // Eski bağlantılar (paylaşılmış linkler) yeni rotalara gider; sorgu (d, at, b) korunur.
   redirects() {
     return [
-      { source: "/results", destination: "/liste", permanent: false },
+      { source: "/results", destination: "/", permanent: false },
+      { source: "/liste", destination: "/", permanent: false },
       { source: "/spaces/:id", destination: "/yer/:id", permanent: false },
-      { source: "/map", destination: "/", permanent: false },
+      { source: "/map", destination: "/harita", permanent: false },
     ];
   },
   turbopack: {

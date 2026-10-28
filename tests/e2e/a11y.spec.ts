@@ -3,15 +3,16 @@ import { expect, test } from "@playwright/test";
 
 // Erişilebilirlik taraması (WCAG 2.2 A/AA kuralları, axe-core): tüm ana rotalar, açık ve koyu tema.
 const Q = "d=60&at=2026-10-27T13:00";
+const ROOM = encodeURIComponent("bilisim-fakultesi-BB-102");
 const ROUTES = [
-  { name: "harita", path: `/?${Q}`, ready: /derslik/ },
-  { name: "bina paneli", path: `/?${Q}&b=demo-blok`, ready: "Örnek Blok" },
-  { name: "yer paneli", path: `/?${Q}&s=kutuphane-merkez`, ready: /Süleyman Demirel/ },
-  { name: "liste", path: `/liste?${Q}`, ready: /nerede çalışalım/ },
-  { name: "ayrıntı", path: `/yer/demo-blok-${encodeURIComponent("Ö-102")}?${Q}`, ready: "Ö-102" },
+  { name: "şimdi", path: `/?${Q}`, ready: "Kaç dakikan var?" },
+  { name: "harita", path: `/harita?${Q}`, ready: /boş sınıf/ },
+  { name: "bina paneli", path: `/harita?${Q}&b=bilisim-fakultesi`, ready: /Bilgisayar ve Bilişim/ },
+  { name: "yer paneli", path: `/harita?${Q}&s=kutuphane-merkez`, ready: /Süleyman Demirel/ },
+  { name: "ayrıntı", path: `/yer/${ROOM}?${Q}`, ready: "BB-102" },
   { name: "profil", path: `/profil?${Q}`, ready: "Puanların" },
   { name: "hakkında", path: "/hakkinda", ready: "Hakkında" },
-  { name: "QR", path: `/qr/${encodeURIComponent("demo-blok-Ö-102")}/gecersiz-kod`, ready: "Ö-102" },
+  { name: "QR", path: `/qr/${ROOM}/gecersiz-kod`, ready: "BB-102" },
 ];
 
 for (const scheme of ["light", "dark"] as const) {

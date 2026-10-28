@@ -1,32 +1,7 @@
-import Link from "next/link";
 import { ACCESS_UNVERIFIED_LABEL } from "@/domain/types";
 import { time } from "@/lib/labels";
 import type { ResultDTO } from "@/server/search-service";
-import { RatingChip } from "./Ratings";
-import { SimulatedBadge, StatusBadge } from "./StatusBadge";
-
-export function SpaceCard({ r, href }: { r: ResultDTO; href: string }) {
-  return (
-    <li>
-      <Link
-        href={href}
-        className="block h-full rounded-lg border border-line bg-card p-4 transition-colors duration-[var(--dur-fast)] hover:border-fg-1"
-      >
-        <div className="flex items-baseline justify-between gap-2">
-          <h2 className="text-2xl leading-7 font-bold">{r.code}</h2>
-          <span className="text-sm text-fg-2">{r.buildingName}</span>
-        </div>
-        <div className="mt-2">
-          <StatusBadge status={r.status} />
-        </div>
-        <SpaceFacts r={r} />
-        <div className="mt-2">
-          <RatingChip rating={r.rating} />
-        </div>
-      </Link>
-    </li>
-  );
-}
+import { SimulatedBadge } from "./StatusBadge";
 
 export function SpaceFacts({ r }: { r: ResultDTO }) {
   // Kısmi kaynakta (kişisel programlar) yalnızca bilinen dersler var: "boş" denmez, "bilinen ders yok" denir

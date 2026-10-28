@@ -5,30 +5,29 @@ Amaç: Canlı demonun (3-5 dk) adım adım provası. `DEMO_AND_PITCH.md` neyin a
 ## Jüri sunumu: Vercel prototipi (Firebase'siz)
 
 Hazırlık (T-30 dk):
-- [ ] Vercel bağlantısı açılıyor. Uygulama bir süre boşta kaldıysa ilk açılış birkaç saniye sürebilir; sunumdan
-      hemen önce bir kez aç (veri her yeniden başlatmada sıfırlanır, bu beklenen durum).
-- [ ] Ö-201 (veya başka bir Örnek Blok odası) QR'ı basılı: `npm run qr -- --base https://<proje>.vercel.app --demo`
+- [ ] Vercel bağlantısı açılıyor; sunumdan hemen önce bir kez aç (soğuk başlangıçta veri sıfırdan başlar).
+- [ ] BB-102 (veya başka bir sınıf) QR'ı basılı: `npm run qr -- --base https://<proje>.vercel.app --demo`
       (Vercel'de `QR_SECRET` girdiysen başına `QR_SECRET=<aynı değer>` ekle).
-- [ ] Sunum telefonunda bağlantı **gizli sekmede** açık (temiz cihaz kimliği: 0 puan).
-- [ ] Demo saati bağlantısı hazır: `https://<proje>.vercel.app/?d=60&at=2026-10-28T13:00`
-      (gerçek saat 08.00-22.00 dışındaysa ekrandaki "Sunum için bugün 13.00'e göre göster" de aynı işi yapar).
+- [ ] Sunum telefonunda bağlantı **gizli sekmede** açık (temiz cihaz: 0 puan).
+- [ ] Gündüz görünümü: `https://<proje>.vercel.app/?d=60&at=2026-10-28T13:00` (gece ise ekrandaki
+      "Gündüz 13.00 görünümüne geç" aynı işi yapar).
 
-Ekranda her zaman görünen örnek veri (hepsi "Örnek demo verisi" etiketli): Örnek Blok'un 8 odası ve ders programı,
-haritada kesik çizgiyle "temsili konum"; her an "x dk önce" yapılmış 3 örnek bildirim (Ö-104 ve Lumo Coffee
-"Öğrenci doğruladı", Ö-203 "Dolu bildirildi"); örnek değerlendirmeler; kütüphane yoğunluk deseni; 3 örnek ödül.
+Veri (ekip kararı: bu modda arayüzde "örnek" etiketi yok; jüriye **sözlü** söylenir): 7 gerçek fakülte binasında
+(OSM konumları) 37 sınıf ve uydurma haftalık program; her an "x dk önce" görünen 8 bildirim (BB-103, FE-202, M2-102,
+Lumo Coffee, Merkez Kütüphane "Öğrenci doğruladı"; BB-201, M4-102, Kantin "Dolu"); sınıfların yarısında
+değerlendirme; kütüphane yoğunluk deseni; 3 ödül (kupon `KAMPUS-…`, hiçbir yerde geçmez).
 
 | Adım | Ekran | Söylenecek |
 |---|---|---|
-| 1 | Harita (13.00 demo saati): Örnek Blok "N oda", alt panel "Şu an N derslik uygun görünüyor" | "Kayıt yok. Renk tek başına anlam taşımaz; her şey listede de var." |
-| 2 | Örnek Blok'a dokun → kat görünümü: Doğrulandı / Programda boş / Dolu / Bilinmiyor / Uygun değil | "Programda boş ≠ gerçekten boş. Bilinmeyen asla 'boş' gösterilmez." |
-| 3 | Asistan → Çalışacak yer bul → 60 dk → Priz → Devam → Fark etmez → konumsuz | "Yapay zekâ API'si yok; kural motoru, gerekçesini ve bilmediğini yazar." |
-| 4 | Liste → Ö-104 kartı: "Öğrenci doğruladı · 4 dk önce", kaynak satırı | "Güven etiketi ve kaynak her kartta." |
-| 5 | Basılı QR'ı okut → "Buradayım, uygun (QR ile check-in)" → "+10 puan" → 4 kriteri puanla | "QR kanıtı imzalı; sahte kod reddedilir." |
-| 6 | Profil → 10 puan → "Örnek öğrenci hesabıyla devam et" → "Kampüs kafesinde çay — ödülü al" → `ORNEK-…` kupon | "Eşik + stok, çekiliş değil. Gerçekte SAÜ Google hesabıyla; burada örnek hesap. Kupon geçersiz örnek." |
-| 7 | Profil → "Hesabımı sil" (isteğe bağlı) | "KVKK: kişisel veri silinir, bildirim anonim topluluk verisi olarak kalır." |
+| 1 | **Şimdi**: "Kaç dakikan var?" → 60 dk → "Şu an boş sınıflar" | "Açınca tek soru: kaç dakikan var. En üstte öğrencinin doğruladığı sınıflar." |
+| 2 | Bir karta dokun (BB-103): durum, "17.00'ye kadar boş", bugünkü dersler, puanlar | "Programda boş ≠ gerçekten boş; o yüzden öğrenci doğrulaması ayrı renk." |
+| 3 | **Harita**: binalardaki sayılar = boş sınıf → Bilgisayar ve Bilişim'e dokun → kat görünümü | "Gerçek kampüs haritası (OpenStreetMap), paketsiz ve anında açılır." |
+| 4 | Asistan (yuvarlak düğme) → Çalışacak yer bul → 60 dk → Priz → Devam → Fark etmez → konumsuz | "Yapay zekâ API'si yok; kural motoru, gerekçesini ve bilmediğini yazar." |
+| 5 | Basılı QR'ı okut → "Buradayım, uygun (QR ile check-in)" → "+10 puan" | "QR kanıtı imzalı; sahte kod reddedilir." |
+| 6 | **Profil** → 10 puan → "SAÜ öğrenci hesabıyla devam et" → "Kampüs kafesinde çay — ödülü al" → kupon | "Eşik + stok, çekiliş değil. Gerçekte SAÜ Google hesabıyla giriş." |
 
 Bilinen sınır: veri sunucunun belleğinde; Vercel istekleri farklı örneklere dağıtırsa ikinci telefonda bildirim
-görünmeyebilir (doğrulanmadı). Bu yüzden akış tek telefonla kurgulandı.
+görünmeyebilir (doğrulanmadı). Akış tek telefonla kurgulandı.
 
 ## Demo öncesi (T-30 dk, Firebase/yerel demo)
 
@@ -100,14 +99,14 @@ Google girişi şimdilik kapalı (`NEXT_PUBLIC_GOOGLE_LOGIN` tanımlı değil); 
 
 - **Aynı odaya 10 dk içinde ikinci bildirim reddedilir.** Provada kullanılan odayı demoda kullanma ya da yeni gizli sekme aç.
 - **Puan için önce check-in gerekir**, aynı check-in'e ikinci puan reddedilir — demo sırasında bu mesajlar da gösterilebilir.
-- Haritada ortalama için 3 değerlendirme gerekir; örnek veride Ö-102 ve Ö-103'te hazır (\* işaretli = örnek).
+- Haritada ortalama için 3 değerlendirme gerekir; örnek veride sınıfların yarısında hazır (Firebase modunda \* işaretli = örnek).
 - Dev sunucusunda ilk API isteği 10-20 sn sürebilir; demoda canlı (production) bağlantı kullan.
 - İnternet yoksa: dizüstünde `npm run demo:local` + telefonlar aynı Wi-Fi'da `http://<dizüstü-ip>:3000`
   (doğrulanmadı: emulator auth'un yerel ağdan erişimi denenmedi; gerekirse yalnızca dizüstünde iki pencere).
 
 ## Jüri soruları için hazır ekranlar
 
-- "Gemini yanlış okursa?" → taslak çıktısındaki `needsReview` listesi ve kartta "Program verisi eksik" (Ö-204).
+- "Gemini yanlış okursa?" → taslak çıktısındaki `needsReview` listesi ve kartta "Program verisi eksik" (HF-201).
 - "Program boş ama oda kilitli?" → kartta "Erişim durumu doğrulanmadı" + "Kullanılamıyor" bildirimi.
 - "Kişisel veri?" → Hakkında sayfasındaki gizlilik metni + Profil'deki "Hesabımı ve verilerimi sil".
 - Google girişi canlı projede doğrulanmadı (SAÜ öğrenci e-postasının Google Workspace olduğu teyit edilmedi);

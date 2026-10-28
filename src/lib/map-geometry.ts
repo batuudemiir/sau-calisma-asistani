@@ -1,7 +1,7 @@
-/** Oda kodundan kat: ilk rakam ("A204" → 2, "Ö-101" → 1, "Z01" → 0). Rakam yoksa null. */
+/** Oda kodundan kat: son sayı grubunun ilk rakamı ("A204" → 2, "M2-101" → 1, "Z01" → 0). Rakam yoksa null. */
 export function floorOf(code: string): number | null {
-  const m = code.match(/\d/);
-  return m ? Number(m[0]) : null;
+  const groups = code.match(/\d+/g);
+  return groups ? Number(groups[groups.length - 1][0]) : null;
 }
 
 /** Odaları katlara göre satırlara böler; en üst kat en üstte, katı bilinmeyenler en altta. */

@@ -1,5 +1,6 @@
 // Kullanım: DEMO_MODE=true npm run seed-demo [-- --clear | --only-library]
-// Örnek bina, odalar, program ve kütüphane simülasyonu yazar. --clear yalnızca isSimulated kayıtları siler.
+// Gerçek fakülte binalarına bağlı örnek derslikler, program ve kütüphane simülasyonu yazar
+// (binalar seed-campus'tan gelir; önce o çalışmalı). --clear yalnızca isSimulated kayıtları siler.
 // --only-library: örnek binayı yazmadan yalnızca dönem (yoksa), kütüphane kartı, simülasyonu ve örnek puanlarını yazar
 // (kendi programınızla yapılan demo için).
 
@@ -46,7 +47,6 @@ async function main() {
   const termRef = db.collection("terms").doc(p.term.id);
   if (!(await termRef.get()).exists) batch.set(termRef, p.term);
   const onlyLibrary = values["only-library"];
-  if (!onlyLibrary) batch.set(db.collection("buildings").doc(p.building.id), p.building);
   const libRef = db.collection("spaces").doc(p.library.id);
   if (!(await libRef.get()).exists) batch.set(libRef, p.library);
   if (!onlyLibrary) {

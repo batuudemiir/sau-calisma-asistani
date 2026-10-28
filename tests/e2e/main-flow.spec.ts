@@ -1,8 +1,11 @@
 import { expect, test, type Browser, type Page } from "@playwright/test";
 
-// Örnek veri (scripts/seed-demo) Salı 13.00 için: Ö-102/Ö-103/Ö-201/Ö-202 programda boş, Ö-204 veri eksik.
+// Örnek veri (scripts/seed-demo) Salı 13.00 için: BB-102, BB-204, FE-103, M2-203 programda boş (17.00'ye kadar,
+// değerlendirmesiz), BB-101 derste, HF-201 program verisi eksik. Bellek modundaki "x dk önce" bildirimleri bu
+// odalara düşmez (memory-backend DEMO_REPORTS).
 const Q = "d=60&at=2026-10-27T13:00";
-const room = (code: string) => `/yer/demo-blok-${encodeURIComponent(`Ö-${code}`)}?${Q}`;
+const roomId = (building: string, code: string) => `${building}-${code}`;
+const room = (building: string, code: string) => `/yer/${encodeURIComponent(roomId(building, code))}?${Q}`;
 const CRITERIA = ["Sessizlik", "Priz", "İnternet", "Işık"];
 
 async function newPhone(browser: Browser): Promise<Page> {
@@ -11,70 +14,77 @@ async function newPhone(browser: Browser): Promise<Page> {
 }
 
 async function rate(page: Page, score: number) {
+  // Puanlama formu ayrıntı sayfasında "Burayı puanla" açılır bölümünde
+  const details = page.locator("details", { has: page.locator("summary", { hasText: "Burayı puanla" }) });
+  if (!(await details.evaluate((d) => (d as HTMLDetailsElement).open))) await details.locator("summary").click();
   for (const c of CRITERIA) await page.getByRole("group", { name: c }).getByText(String(score), { exact: true }).click();
   await page.getByRole("button", { name: "Değerlendirmeyi gönder" }).click();
 }
 
 const formMessage = (page: Page) => page.locator("form p[aria-live=polite]");
 const reportMessage = (page: Page) => page.locator("section p[aria-live=polite]");
+const freeList = (page: Page) => page.getByRole("list", { name: "Boş sınıflar" });
 
-test("harita ana ekran, sekmeler sorguyu taşır, eski bağlantılar yönlendirilir", async ({ page }) => {
+test("ana sayfa Şimdi, sekmeler sorguyu taşır, eski bağlantılar yönlendirilir", async ({ page }) => {
   await page.goto(`/?${Q}`);
-  await expect(page.getByRole("heading", { level: 1, name: "Kampüs haritası" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Kaç dakikan var?" })).toBeVisible();
   const tabs = page.getByRole("navigation", { name: "Ana gezinme" });
-  await expect(tabs.getByRole("link", { name: "Harita" })).toHaveAttribute("aria-current", "page");
+  await expect(tabs.getByRole("link", { name: "Şimdi" })).toHaveAttribute("aria-current", "page");
   await page.getByRole("link", { name: "90 dk", exact: true }).click();
   await expect(page).toHaveURL(/\/\?d=90/);
-  await tabs.getByRole("link", { name: "Liste" }).click();
-  await expect(page).toHaveURL(/\/liste\?d=90/);
-  await expect(page.getByRole("heading", { level: 1, name: "90 dakika nerede çalışalım?" })).toBeVisible();
+  await tabs.getByRole("link", { name: "Harita" }).click();
+  await expect(page).toHaveURL(/\/harita\?d=90/);
+  await expect(page.getByRole("heading", { level: 1, name: "Kampüs haritası" })).toBeAttached();
   await tabs.getByRole("link", { name: "Profil" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Profil" })).toBeVisible();
   await page.getByRole("link", { name: /Hakkında/ }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Hakkında" })).toBeVisible();
 
-  await page.goto(`/results?${Q}`);
-  await expect(page).toHaveURL(/\/liste\?d=60&at=2026-10-27T13(:|%3A)00$/);
-  await page.goto(`/spaces/demo-blok-${encodeURIComponent("Ö-102")}?${Q}`);
-  await expect(page).toHaveURL(/\/yer\/demo-blok-/);
-  await expect(page.getByRole("heading", { level: 1, name: "Ö-102" })).toBeVisible();
-  await page.goto(`/map?${Q}`);
+  await page.goto(`/liste?${Q}`);
   await expect(page).toHaveURL(/127\.0\.0\.1:3000\/\?d=60&at=2026-10-27T13(:|%3A)00$/);
-  await expect(page.getByRole("heading", { level: 1, name: "Kampüs haritası" })).toBeVisible();
+  await page.goto(`/results?${Q}`);
+  await expect(page).toHaveURL(/127\.0\.0\.1:3000\/\?d=60/);
+  await page.goto(`/spaces/${encodeURIComponent(roomId("bilisim-fakultesi", "BB-102"))}?${Q}`);
+  await expect(page).toHaveURL(/\/yer\/bilisim-fakultesi-BB-102/);
+  await expect(page.getByRole("heading", { level: 1, name: "BB-102" })).toBeVisible();
+  await page.goto(`/map?${Q}`);
+  await expect(page).toHaveURL(/\/harita\?d=60&at=2026-10-27T13(:|%3A)00$/);
 
   // İçeriğe atla: klavyede ilk odak
+  await page.goto(`/?${Q}`);
   await page.keyboard.press("Tab");
   await expect(page.getByRole("link", { name: "İçeriğe atla" })).toBeFocused();
 });
 
-test("liste: sonuçlar etiket ve kaynakla listelenir", async ({ page }) => {
-  await page.goto(`/liste?${Q}`);
-  const card = page.getByRole("listitem").filter({ hasText: "Ö-102" });
+test("ana sayfa: boş sınıflar sade kartla; dolu/bilinmeyen ayrı; kütüphane ve kafeler", async ({ page }) => {
+  await page.goto(`/?${Q}`);
+  await expect(page.getByRole("heading", { level: 2, name: /Şu an boş sınıflar/ })).toBeVisible();
+  await page.getByRole("button", { name: /Tümünü göster/ }).click();
+  const card = freeList(page).getByRole("listitem").filter({ hasText: "BB-102" });
   await expect(card.getByText("Programda boş")).toBeVisible();
-  await expect(card.getByText("17.00 saatine kadar boş (programa göre)")).toBeVisible();
-  await expect(card.getByText("Örnek demo verisi").first()).toBeVisible();
-  await expect(page.getByRole("listitem").filter({ hasText: "Ö-204" }).getByText("Program verisi eksik")).toBeVisible();
-  // Dersi olan oda listede yok
-  await expect(page.getByRole("listitem").filter({ hasText: "Ö-101" })).toHaveCount(0);
-  // Çalışma yerleri: merkez kütüphane ilk kart, diğerleri açılır listede
+  await expect(card.getByText("17.00'ye kadar")).toBeVisible();
+  await expect(card.getByText("Bilgisayar ve Bilişim Bilimleri Fakültesi")).toBeVisible();
+  // Dersi olan sınıf hiç listelenmez; programı bilinmeyen "Dolu ya da durumu bilinmeyen" bölümünde
+  await expect(page.getByRole("listitem").filter({ hasText: "BB-101" })).toHaveCount(0);
+  await expect(freeList(page).getByRole("listitem").filter({ hasText: "HF-201" })).toHaveCount(0);
+  await page.getByText(/Dolu ya da durumu bilinmeyen/).click();
+  await expect(page.getByRole("listitem").filter({ hasText: "HF-201" }).getByText("Durum bilinmiyor")).toBeVisible();
   const library = page.getByRole("link", { name: /Süleyman Demirel Kütüphanesi/ });
-  await expect(library.getByText("Doluluk verisi yok")).toBeVisible();
-  await expect(library.getByText("7/24 açık (OpenStreetMap)")).toBeVisible();
-  await page.getByText(/Diğer çalışma yerleri/).click();
+  await expect(library.getByText("7/24 açık")).toBeVisible();
   await expect(page.getByRole("link", { name: /Taş Kafe/ })).toBeVisible();
 });
 
 test("check-in diğer cihazda 5 sn içinde görünür, aynı odaya ikinci bildirim hız sınırına takılır (T18)", async ({ browser }) => {
   const a = await newPhone(browser);
   const b = await newPhone(browser);
-  await b.goto(`/liste?${Q}`);
-  await expect(b.getByRole("listitem").filter({ hasText: "Ö-103" }).getByText("Programda boş")).toBeVisible();
+  await b.goto(`/?${Q}&q=bb204`);
+  await expect(freeList(b).getByRole("listitem").filter({ hasText: "BB-204" }).getByText("Programda boş")).toBeVisible();
 
-  await a.goto(room("103"));
+  await a.goto(room("bilisim-fakultesi", "BB-204"));
   await a.getByRole("button", { name: "Buradayım, uygun (check-in)" }).click();
   await expect(reportMessage(a)).toHaveText("Check-in yapıldı. Teşekkürler, birlikte daha iyi biliyoruz.");
 
-  await expect(b.getByRole("listitem").filter({ hasText: "Ö-103" }).getByText("Öğrenci doğruladı")).toBeVisible({
+  await expect(freeList(b).getByRole("listitem").filter({ hasText: "BB-204" }).getByText("Öğrenci doğruladı")).toBeVisible({
     timeout: 5_000,
   });
 
@@ -86,7 +96,7 @@ test("değerlendirme check-in ister, check-in başına bir kez; 3 değerlendirme
   const scores = [3, 4, 5];
   for (const [i, s] of scores.entries()) {
     const p = await newPhone(browser);
-    await p.goto(room("202"));
+    await p.goto(room("fen-edebiyat-fakultesi", "FE-103"));
     if (i === 0) {
       await rate(p, s);
       await expect(formMessage(p)).toHaveText("Değerlendirme için önce bu alanda check-in yapmalısın"); // T19
@@ -103,14 +113,14 @@ test("değerlendirme check-in ister, check-in başına bir kez; 3 değerlendirme
   }
 
   const map = await newPhone(browser);
-  await map.goto(`/?${Q}&b=demo-blok`);
-  await expect(map.locator('a[aria-label^="Ö-202 "]')).toHaveAttribute("aria-label", /Ortalama puan 4\.0$/);
+  await map.goto(`/harita?${Q}&b=fen-edebiyat-fakultesi`);
+  await expect(map.locator('a[aria-label^="FE-103 "]')).toHaveAttribute("aria-label", /Ortalama puan 4\.0$/);
 });
 
-test("harita: işarete dokununca yer paneli açılır, hızlı check-in panelde ve listede görünür", async ({ browser }) => {
+test("harita: işarete dokununca yer paneli açılır, hızlı check-in panelde ve ana sayfada görünür", async ({ browser }) => {
   const a = await newPhone(browser);
-  await a.goto(`/?${Q}`);
-  await expect(a.getByRole("heading", { level: 2, name: /derslik uygun görünüyor/ })).toBeVisible();
+  await a.goto(`/harita?${Q}`);
+  await expect(a.getByRole("heading", { level: 2, name: /boş sınıf/ })).toBeVisible();
   await a.locator('a[aria-label^="Taş Kafe"]').click();
   await expect(a).toHaveURL(/s=tas-kafe/);
   const panel = a.getByRole("dialog", { name: "Taş Kafe" });
@@ -120,8 +130,7 @@ test("harita: işarete dokununca yer paneli açılır, hızlı check-in panelde 
   await expect(panel.getByText("Öğrenci doğruladı")).toBeVisible({ timeout: 5_000 });
 
   const b = await newPhone(browser);
-  await b.goto(`/liste?${Q}`);
-  await b.getByText(/Diğer çalışma yerleri/).click();
+  await b.goto(`/?${Q}`);
   await expect(b.getByRole("link", { name: /Taş Kafe/ }).getByText("Öğrenci doğruladı")).toBeVisible({ timeout: 5_000 });
 
   // Esc paneli kapatır, özet geri gelir
@@ -131,24 +140,23 @@ test("harita: işarete dokununca yer paneli açılır, hızlı check-in panelde 
   await expect(a).not.toHaveURL(/s=tas-kafe/);
 });
 
-test("arama Türkçe karakter katlar, filtre puansızı dışarıda bırakır ve sekmeler arasında taşınır", async ({ page }) => {
-  await page.goto(`/?${Q}`);
-  await page.getByRole("searchbox", { name: "Oda, bina veya yer ara" }).fill("o102");
-  await page.getByRole("list", { name: "Arama sonuçları" }).getByRole("link", { name: /Ö-102/ }).click();
-  await expect(page.getByRole("heading", { level: 1, name: "Ö-102" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Bu yeri paylaş" })).toBeVisible();
+test("harita araması Türkçe karakter katlar; filtre puansızı dışarıda bırakır ve sekmeler arasında taşınır", async ({ page }) => {
+  await page.goto(`/harita?${Q}`);
+  await page.getByRole("searchbox", { name: "Sınıf, bina veya yer ara" }).fill("bb102");
+  await page.getByRole("list", { name: "Arama sonuçları" }).getByRole("link", { name: /BB-102/ }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "BB-102" })).toBeVisible();
 
-  await page.goto(`/?${Q}`);
-  await page.getByRole("searchbox", { name: "Oda, bina veya yer ara" }).fill("kutuphane");
+  await page.goto(`/harita?${Q}`);
+  await page.getByRole("searchbox", { name: "Sınıf, bina veya yer ara" }).fill("kutuphane");
   await page.getByRole("button", { name: /^Kütüphane Ek Bina/ }).click();
   await expect(page.getByRole("dialog", { name: "Kütüphane Ek Bina" })).toBeVisible();
 
-  await page.goto(`/liste?${Q}`);
-  await expect(page.getByRole("listitem").filter({ hasText: "Ö-204" })).toHaveCount(1);
+  await page.goto(`/?${Q}&q=bb102`);
+  await expect(freeList(page).getByRole("listitem").filter({ hasText: "BB-102" })).toHaveCount(1);
   await page.getByRole("button", { name: "Sessiz" }).click();
   await expect(page).toHaveURL(/f=quiet/);
   await expect(page.getByRole("button", { name: "Sessiz" })).toHaveAttribute("aria-pressed", "true");
-  await expect(page.getByRole("listitem").filter({ hasText: "Ö-204" })).toHaveCount(0);
+  await expect(page.getByRole("listitem").filter({ hasText: "BB-102" })).toHaveCount(0);
   await page.getByRole("navigation", { name: "Ana gezinme" }).getByRole("link", { name: "Harita" }).click();
   await expect(page).toHaveURL(/f=quiet/);
 });
@@ -156,9 +164,9 @@ test("arama Türkçe karakter katlar, filtre puansızı dışarıda bırakır ve
 test("puan: check-in +5, profilde görünür; SAÜ dışı Google reddedilir, öğrenci hesabına bağlanınca puan korunur", async ({
   browser,
 }) => {
-  test.skip(process.env.E2E_BACKEND === "memory", "Firebase'siz prototipte Google/öğrenci girişi yok");
+  test.skip(process.env.E2E_BACKEND === "memory", "Firebase'siz prototipte Google girişi yok");
   const p = await newPhone(browser);
-  await p.goto(`/?${Q}&s=kantin`);
+  await p.goto(`/harita?${Q}&s=kantin`);
   const panel = p.getByRole("dialog", { name: "Kantin" });
   await panel.getByRole("button", { name: "Buradayım, uygun (check-in)" }).click();
   await expect(panel.getByText("+5 puan kazandın")).toBeVisible();
@@ -186,48 +194,51 @@ test("puan: check-in +5, profilde görünür; SAÜ dışı Google reddedilir, ö
 
 test("hesap silme: puan ve geçmiş silinir, bildirim topluluk verisi olarak kalır", async ({ browser }) => {
   const p = await newPhone(browser);
-  await p.goto(`/?${Q}&s=kampus-kafeterya`);
+  await p.goto(`/harita?${Q}&s=kampus-kafeterya`);
   const panel = p.getByRole("dialog", { name: "Kampüs Kafeterya" });
   await panel.getByRole("button", { name: "Buradayım, uygun (check-in)" }).click();
   await expect(panel.getByText("+5 puan kazandın")).toBeVisible();
 
   await p.goto(`/profil?${Q}`);
   await expect(p.getByTestId("points")).toHaveText("5");
+  await p.getByText("Ayarlar", { exact: true }).click();
   await p.getByRole("button", { name: "Hesabımı sil" }).click();
   await p.getByRole("button", { name: "Evet, kalıcı olarak sil" }).click();
   await expect(p.getByText(/Hesabın ve kişisel verilerin silindi/)).toBeVisible();
   await expect(p.getByTestId("points")).toHaveText("0");
   await expect(p.getByText(/Henüz katkın yok/)).toBeVisible();
 
-  await p.goto(`/?${Q}&s=kampus-kafeterya`);
+  await p.goto(`/harita?${Q}&s=kampus-kafeterya`);
   await expect(p.getByRole("dialog", { name: "Kampüs Kafeterya" }).getByText("Öğrenci doğruladı")).toBeVisible();
 });
 
-test("görünüm: sistem koyu olsa da açık tema; Profil'den koyu seçilir ve kalır", async ({ browser }) => {
+test("görünüm: sistem koyu olsa da açık tema; Profil → Ayarlar'dan koyu seçilir ve kalır", async ({ browser }) => {
   const p = await (await browser.newContext({ colorScheme: "dark" })).newPage();
   await p.goto(`/?${Q}`);
   await expect(p.locator("html")).not.toHaveAttribute("data-theme", "dark");
   await expect(p.locator("body")).toHaveCSS("background-color", "rgb(246, 247, 251)");
   await p.goto(`/profil?${Q}`);
+  await p.getByText("Ayarlar", { exact: true }).click();
   await p.getByRole("group", { name: "Görünüm" }).getByText("Koyu", { exact: true }).click();
   await expect(p.locator("html")).toHaveAttribute("data-theme", "dark");
   await p.reload();
   await expect(p.locator("html")).toHaveAttribute("data-theme", "dark");
+  await p.getByText("Ayarlar", { exact: true }).click();
   await expect(p.getByRole("radio", { name: /Koyu/ })).toBeChecked();
   await p.getByRole("group", { name: "Görünüm" }).getByText("Açık", { exact: true }).click();
   await expect(p.locator("html")).not.toHaveAttribute("data-theme", "dark");
 });
 
-test("liste: arama Türkçe karakter katlar, URL'de kalır, boş sonuçta ne yapılacağını söyler", async ({ page }) => {
-  await page.goto(`/liste?${Q}`);
-  const box = page.getByRole("searchbox", { name: /Listede ara/ });
-  await box.fill("o102");
-  await expect(page).toHaveURL(/q=o102/);
-  await expect(page.getByRole("listitem").filter({ hasText: "Ö-102" })).toHaveCount(1);
-  await expect(page.getByRole("listitem").filter({ hasText: "Ö-201" })).toHaveCount(0);
+test("ana sayfa araması Türkçe karakter katlar, URL'de kalır, boş sonuçta ne yapılacağını söyler", async ({ page }) => {
+  await page.goto(`/?${Q}`);
+  const box = page.getByRole("searchbox", { name: "Sınıf, bina veya yer ara" });
+  await box.fill("itb102");
+  await expect(page).toHaveURL(/q=itb102/);
+  await expect(freeList(page).getByRole("listitem").filter({ hasText: "İTB-102" })).toHaveCount(1);
+  await expect(page.getByRole("listitem").filter({ hasText: "BB-102" })).toHaveCount(0);
   await box.fill("kutuphane");
   await expect(page.getByRole("link", { name: /Kütüphane Ek Bina/ })).toBeVisible();
-  await expect(page.getByText(/aramasına uyan uygun derslik yok/)).toBeVisible();
+  await expect(page.getByText(/aramasına uyan boş sınıf yok/)).toBeVisible();
   await page.reload();
-  await expect(page.getByRole("searchbox", { name: /Listede ara/ })).toHaveValue("kutuphane");
+  await expect(page.getByRole("searchbox", { name: "Sınıf, bina veya yer ara" })).toHaveValue("kutuphane");
 });

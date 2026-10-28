@@ -216,7 +216,7 @@ Eski dönem PDF'leri yalnızca ayrıştırıcı testlerinde kullanılır, asla y
 - Ödüller (`src/domain/rewards.ts`, `src/server/reward-service.ts`): `rewards` (katalog), `rewardStock/{ödül}_{ay}`
   (verilen sayısı), `rewardClaims/{ödül}_{ay}_{uid}` (kupon; belge kimliği ayda bir hakkı garanti eder). Kontrol ve yazım
   tek transaction'da. Aylık puan `users.monthPoints` (Europe/Istanbul ayı). Örnek ödüller yalnızca DEMO_MODE'da görünür,
-  kuponları `ORNEK-` ile başlar. Hepsi istemciye kapalı.
+  kuponları `ORNEK-` (sunum prototipinde `KAMPUS-`) ile başlar. Hepsi istemciye kapalı.
 - Hesap silme (`DELETE /api/account`): `rewardClaims` da silinir; `users` belgesi ve `pointEvents` silinir, `spaceReports`/`spaceRatings` içindeki
   uid `silinmis` yapılır (topluluk verisi kalır, kişiyle bağı kopar), Firebase Auth kaydı silinir.
 - `GEMINI_API_KEY` yalnızca geliştiricinin `.env.local` dosyasında ve betiklerde. Web uygulamasının ortamına konmaz.

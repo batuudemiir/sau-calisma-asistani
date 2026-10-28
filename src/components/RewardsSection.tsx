@@ -1,5 +1,6 @@
 "use client";
 
+import { SHOW_SAMPLE_LABELS } from "@/lib/backend-mode";
 import { useCallback, useEffect, useState } from "react";
 import { CLAIM_MESSAGES } from "@/domain/rewards";
 import { MEMORY_BACKEND, getWithSession, postWithSession } from "@/lib/session";
@@ -44,7 +45,7 @@ export function RewardsSection({ version }: { version: string }) {
     setBusy("ogrenci");
     const res = await postWithSession("/api/profile/student", {});
     setBusy(null);
-    setMessage(res.ok ? "Örnek öğrenci hesabına geçildi; eşiğe ulaştığın ödülü alabilirsin." : res.error);
+    setMessage(res.ok ? "Giriş yapıldı; eşiğe ulaştığın ödülü alabilirsin." : res.error);
     void load();
   }
 
@@ -62,17 +63,14 @@ export function RewardsSection({ version }: { version: string }) {
           </p>
           {!data.student && MEMORY_BACKEND && (
             <div className="space-y-2 rounded-md border border-dashed border-line-strong p-3">
-              <p className="text-sm">
-                Ödüller SAÜ öğrenci hesabıyla alınır. Bu sunum prototipinde gerçek giriş yerine örnek öğrenci hesabı
-                kullanılır.
-              </p>
+              <p className="text-sm">Ödüller SAÜ öğrenci hesabıyla alınır.</p>
               <button
                 type="button"
                 onClick={() => void demoStudent()}
                 disabled={busy !== null}
                 className={buttonClass("secondary", "md")}
               >
-                {busy === "ogrenci" ? "Geçiliyor…" : "Örnek öğrenci hesabıyla devam et"}
+                {busy === "ogrenci" ? "Giriş yapılıyor…" : "SAÜ öğrenci hesabıyla devam et"}
               </button>
             </div>
           )}
@@ -81,7 +79,7 @@ export function RewardsSection({ version }: { version: string }) {
               {GOOGLE_LOGIN_ENABLED ? `${CLAIM_MESSAGES.NOT_STUDENT}.` : `Ödüller öğrenci hesabıyla alınır. ${LOGIN_SOON_TEXT}.`}
             </p>
           )}
-          {data.student && MEMORY_BACKEND && <p className="text-sm text-fg-2">Örnek öğrenci hesabı (demo).</p>}
+          {data.student && MEMORY_BACKEND && <p className="text-sm text-fg-2">SAÜ öğrenci hesabıyla giriş yapıldı.</p>}
           {data.rewards.length === 0 ? (
             <p className="text-sm">Henüz ödül sponsoru yok. Puanların birikmeye devam eder.</p>
           ) : (
@@ -107,12 +105,15 @@ export function RewardsSection({ version }: { version: string }) {
                   {r.coupon ? (
                     <div className="rounded-md bg-zinc-100 p-2 text-sm dark:bg-zinc-800">
                       Kuponun: <strong className="font-mono">{r.coupon}</strong>
-                      {r.isSimulated && <span className="block text-sm">Örnek demo kuponu — hiçbir yerde geçerli değildir.</span>}
+                      {r.isSimulated && SHOW_SAMPLE_LABELS && (
+                        <span className="block text-sm">Örnek demo kuponu — hiçbir yerde geçerli değildir.</span>
+                      )}
+                      {MEMORY_BACKEND && <span className="block text-sm">Kafede kuponu göstermen yeterli.</span>}
                     </div>
                   ) : r.block ? (
                     <p className="text-sm text-fg-2">
                       {r.block === "NOT_STUDENT" && MEMORY_BACKEND
-                        ? "Eşiğe ulaştın; yukarıdan örnek öğrenci hesabıyla devam et"
+                        ? "Eşiğe ulaştın; yukarıdan SAÜ öğrenci hesabıyla devam et"
                         : r.block === "NOT_STUDENT" && !GOOGLE_LOGIN_ENABLED
                         ? "Eşiğe ulaştın; ödül öğrenci girişi açılınca alınabilir"
                         : CLAIM_MESSAGES[r.block]}
