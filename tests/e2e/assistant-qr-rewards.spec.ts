@@ -78,6 +78,7 @@ test("QR: geçerli kod +10 puan ve ardından geri bildirim; geçersiz kod redded
 });
 
 test("ödül: eşiğe ulaşınca öğrenci hesabı ister; giriş sonrası örnek kupon alınır, ikinci kez alınamaz", async ({ browser }) => {
+  test.skip(process.env.E2E_BACKEND === "memory", "Firebase'siz prototipte Google/öğrenci girişi yok");
   const p = await phone(browser);
   await p.goto(qrPath("204"));
   await p.getByRole("button", { name: "Buradayım, uygun (QR ile check-in)" }).click();

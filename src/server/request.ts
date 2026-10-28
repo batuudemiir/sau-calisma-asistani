@@ -2,7 +2,8 @@ import { z } from "zod";
 import { isDuration } from "@/domain/config";
 import { istanbulLocalToMs } from "@/lib/clock";
 
-export const isDemoMode = () => process.env.DEMO_MODE === "true";
+// Firebase'siz prototip (bellek arka ucu) yalnızca örnek veriyle çalışır; demo modu onda her zaman açık
+export const isDemoMode = () => process.env.DEMO_MODE === "true" || process.env.NEXT_PUBLIC_DEMO_BACKEND === "memory";
 
 const QuerySchema = z.object({
   d: z.coerce.number().refine(isDuration, "Süre 30, 60, 90 veya 120 olmalı"),

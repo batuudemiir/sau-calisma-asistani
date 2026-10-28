@@ -235,6 +235,9 @@ Eski dönem PDF'leri yalnızca ayrıştırıcı testlerinde kullanılır, asla y
 ## 7. Dağıtım ve ortamlar
 
 - Ortamlar: yerel (Emulator), demo (tek Firebase projesi). Ayrı üretim yok.
+- Firebase'siz sunum prototipi: `NEXT_PUBLIC_DEMO_BACKEND=memory` → `src/server/backend.ts` Firestore yerine
+  `memory-backend.ts`'i seçer (aynı `DataSource`/`WriteStore` arayüzü, seed betikleriyle aynı örnek veri).
+  Kimlik `Authorization: Device <rastgele id>` (doğrulanmış kimlik değil; yalnızca sunum). Kalıcı değildir.
 - `.env.example`: `NEXT_PUBLIC_FIREBASE_*`, `FIREBASE_SERVICE_ACCOUNT`, `GEMINI_API_KEY` (yalnızca betikler), `DEMO_MODE`.
 - Demo verisi ayrımı: `isSimulated` alanı + `DEMO_MODE` bayrağı. `seed-demo` yalnızca `DEMO_MODE=true` iken çalışır.
 - Geri dönüş: hatalı yayında `publish --rollback <sourceId>` önceki `SUPERSEDED` kaynağı yeniden `PUBLISHED` yapar.

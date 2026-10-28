@@ -156,6 +156,7 @@ test("arama Türkçe karakter katlar, filtre puansızı dışarıda bırakır ve
 test("puan: check-in +5, profilde görünür; SAÜ dışı Google reddedilir, öğrenci hesabına bağlanınca puan korunur", async ({
   browser,
 }) => {
+  test.skip(process.env.E2E_BACKEND === "memory", "Firebase'siz prototipte Google/öğrenci girişi yok");
   const p = await newPhone(browser);
   await p.goto(`/?${Q}&s=kantin`);
   const panel = p.getByRole("dialog", { name: "Kantin" });

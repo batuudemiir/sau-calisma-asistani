@@ -1,5 +1,5 @@
 import { verifyUid } from "@/server/auth";
-import { firestoreWriteStore } from "@/server/firestore-write-store";
+import { writeStore } from "@/server/backend";
 import { submitRating } from "@/server/rating-service";
 
 export async function POST(request: Request) {
@@ -8,7 +8,7 @@ export async function POST(request: Request) {
 
   const body = await request.json().catch(() => null);
   try {
-    const result = await submitRating(firestoreWriteStore(), uid, body, Date.now());
+    const result = await submitRating(writeStore(), uid, body, Date.now());
     if (result.ok) return Response.json({ id: result.id, points: result.points ?? 0 }, { status: 201 });
     if ("status" in result) return Response.json({ error: result.error }, { status: result.status });
     const headers = result.retryAfterSec ? { "Retry-After": String(result.retryAfterSec) } : undefined;

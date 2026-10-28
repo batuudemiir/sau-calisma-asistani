@@ -1,6 +1,6 @@
 import { verifyUid } from "@/server/auth";
 import { adminAuth } from "@/server/firebase-admin";
-import { firestoreWriteStore } from "@/server/firestore-write-store";
+import { isMemoryBackend, writeStore } from "@/server/backend";
 
 /**
  * Hesabı ve kişisel verileri siler: puanlar ve kullanıcı belgesi silinir, bildirim/değerlendirmelerin kişiyle
@@ -10,8 +10,9 @@ export async function DELETE(request: Request) {
   const uid = await verifyUid(request);
   if (!uid) return Response.json({ error: "Oturum doğrulanamadı" }, { status: 401 });
   try {
-    await firestoreWriteStore().deleteAccountData(uid);
-    await adminAuth().deleteUser(uid);
+    await writeStore().deleteAccountData(uid);
+    // Bellek arka ucunda Firebase Auth kaydı yok (cihaz kimliği istemcide silinir)
+    if (!isMemoryBackend()) await adminAuth().deleteUser(uid);
     return Response.json({ deleted: true });
   } catch (e) {
     console.error("account delete failed:", e instanceof Error ? e.message : "unknown");

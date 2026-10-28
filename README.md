@@ -134,6 +134,25 @@ Emulator ile yerelde: önce `npm run emulators` (ayrı terminal), sonra yukarıd
 programınız, kapıdaki çizelge). Ayrıştırma `.xlsx` ile aynı komutla yapılır: `npm run ingest -- data/sources/elle.csv ...`
 Bu kaynaklar `parseMethod=MANUAL` olarak yayımlanır ve kartta "ekip tarafından elle derlenmiş" yazar.
 
+## Sunum prototipi: Vercel, Firebase'siz
+
+Firebase kurmadan canlı link: veri sunucunun belleğinde tutulur (`NEXT_PUBLIC_DEMO_BACKEND=memory`).
+
+1. vercel.com → Add New → Project → bu GitHub reposunu seç (Framework: Next.js, ayar değiştirme).
+2. Environment Variables:
+   - `NEXT_PUBLIC_DEMO_BACKEND` = `memory`
+   - `QR_SECRET` = rastgele uzun bir değer (ör. `openssl rand -hex 32`)
+   - Firebase değişkenleri gerekmez; `DEMO_MODE` bu modda kendiliğinden açıktır.
+3. Deploy. QR sayfası (yerelde, aynı `QR_SECRET` ile):
+   `QR_SECRET=<aynı değer> npm run qr -- --base https://<proje>.vercel.app --demo`
+
+Bu modda: Kampüs + örnek bina/oda/ders programı + kütüphane simülasyonu (hepsi "Örnek demo verisi"), bildirim,
+QR check-in, değerlendirme, puan ve ödüller çalışır. Kimlik, tarayıcıdaki rastgele cihaz kimliğidir; Google/öğrenci
+girişi kapalıdır (ödül talep etmek öğrenci girişi istediği için kupon alınamaz, ödül listesi görünür).
+Sınırlar: veri kalıcı değildir (sunucu örneği yeniden başlayınca sıfırlanır) ve Vercel isteği farklı sunucusuz
+örneklere dağıtırsa bir telefonun bildirimi diğerinde görünmeyebilir. Vercel'de iki telefonla paylaşım doğrulanmadı;
+birim ve e2e testleri bu modda yerelde (`npm run test:e2e:memory`) geçiyor.
+
 ## Dağıtım (Plan A: Firebase App Hosting)
 
 1. Firebase projesi oluştur, Blaze planını aç; Firestore (europe bölgesi) ve Anonymous Auth'u etkinleştir.
@@ -142,7 +161,7 @@ Bu kaynaklar `parseMethod=MANUAL` olarak yayımlanır ve kartta "ekip tarafında
 4. App Hosting'de GitHub reposunu bağla; her push'ta derlenir. Admin SDK varsayılan kimliği kullanır.
 5. Demo için: `DEMO_MODE=true` ile `seed-demo`'yu üretim projesine karşı çalıştır (servis hesabıyla) ya da gerçek programı yayımla.
 
-Plan B: Vercel — aynı `NEXT_PUBLIC_*` değişkenleri + `FIREBASE_SERVICE_ACCOUNT` (tek satır JSON) + `DEMO_MODE`.
+Plan B: Vercel + Firebase — aynı `NEXT_PUBLIC_*` değişkenleri + `FIREBASE_SERVICE_ACCOUNT` (tek satır JSON) + `DEMO_MODE`.
 
 ## Kampüs verisi
 

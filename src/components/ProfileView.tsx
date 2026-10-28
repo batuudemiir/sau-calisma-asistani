@@ -6,7 +6,7 @@ import { DAILY_CAP, LEVELS, POINTS, type PointKind } from "@/domain/points";
 import { GOOGLE_LOGIN_ENABLED, LOGIN_SOON_TEXT } from "@/lib/features";
 import { RewardsSection } from "./RewardsSection";
 import { ThemeSetting } from "./ThemeSetting";
-import { deleteAccount, getWithSession, signInWithGoogle, signOutUser, useAuthUser } from "@/lib/session";
+import { MEMORY_BACKEND, deleteAccount, getWithSession, signInWithGoogle, signOutUser, useAuthUser } from "@/lib/session";
 import { buttonClass } from "./ui/Button";
 
 interface ProfileResponse {
@@ -71,6 +71,8 @@ export function ProfileView() {
       return;
     }
     setProfile(null);
+    // Firebase'siz prototipte oturum (uid) değişmez; boş profil burada yeniden yüklenir
+    if (MEMORY_BACKEND) void load();
     setNotice("Hesabın ve kişisel verilerin silindi. Bildirimlerin anonim topluluk verisi olarak kaldı.");
   }
 

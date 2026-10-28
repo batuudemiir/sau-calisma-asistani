@@ -57,9 +57,14 @@ Google girişi şimdilik kapalı (`NEXT_PUBLIC_GOOGLE_LOGIN` tanımlı değil); 
   `npm run qr -- --base https://<uygulama-adresi> --building demo-blok` → `data/qr/qr-demo-blok.html` yazdır.
 - Yerel demo (`npm run demo:local` açıkken, ayrı terminal): `npm run qr -- --base http://<dizüstü-ip>:3000 --emulator`
   (anahtar `.env.development`'tan gelir). Telefonun dizüstüne erişebildiği doğrulanmadı.
+- Vercel prototipi (Firebase'siz): `QR_SECRET=<Vercel'dekiyle aynı> npm run qr -- --base https://<proje>.vercel.app --demo`.
 - `data/qr/` gizli imzalı bağlantılar içerir; depoya eklenmez (`.gitignore`).
 
 ## Bilinen tuzaklar
+
+- Vercel prototipi (`NEXT_PUBLIC_DEMO_BACKEND=memory`) veriyi bellekte tutar: yeni dağıtım veya soğuk başlangıç
+  bildirimleri ve puanları sıfırlar. İki telefonun aynı bildirimi görmesi garanti değil (doğrulanmadı); bu sahneyi
+  tek telefonla göster ya da yerel demoyu (`demo:lan`) kullan.
 
 - **macOS: projeyi Masaüstü veya Belgeler'e koyma.** Bu klasörler çoğu zaman iCloud Drive ile eşitlenir; iCloud
   `node_modules` ve `.next` dosyalarını yüklerken okumaları bekletir ve `next dev` (Turbopack)

@@ -16,6 +16,29 @@ import { FirebaseError } from "firebase/app";
 import { useEffect, useState } from "react";
 import { firebaseClient } from "./firebase-client";
 
+/** Firebase'siz prototip (bellek arka ucu): Firebase hiç yüklenmez, istekler rastgele cihaz kimliğiyle gider. */
+export const MEMORY_BACKEND = process.env.NEXT_PUBLIC_DEMO_BACKEND === "memory";
+const DEVICE_KEY = "cihaz-kimligi";
+
+/** Bu cihaza özel rastgele kimlik (yalnızca bu tarayıcıda; kişisel veri değil). */
+function deviceId(): string {
+  try {
+    const saved = localStorage.getItem(DEVICE_KEY);
+    if (saved) return saved;
+    const id = crypto.randomUUID();
+    localStorage.setItem(DEVICE_KEY, id);
+    return id;
+  } catch {
+    // Gizli sekme vb.: kimlik bu sayfa açık kaldıkça geçerli
+    window.__cihazKimligi ??= crypto.randomUUID();
+    return window.__cihazKimligi;
+  }
+}
+
+async function authHeader(forceRefresh: boolean): Promise<string> {
+  return MEMORY_BACKEND ? `Device ${deviceId()}` : `Bearer ${await idToken(forceRefresh)}`;
+}
+
 /** Anonim oturum açar (gerekirse) ve API istekleri için ID token döndürür. Kayıt gerekmez. */
 export async function idToken(forceRefresh = false): Promise<string> {
   const { auth } = firebaseClient();
@@ -28,8 +51,8 @@ type ApiResult<T> = { ok: true; data: T } | { ok: false; error: string; status?:
 
 async function withSession<T>(url: string, init: RequestInit = {}, forceRefresh = false): Promise<ApiResult<T>> {
   try {
-    const token = await idToken(forceRefresh);
-    const res = await fetch(url, { ...init, headers: { ...init.headers, authorization: `Bearer ${token}` }, cache: "no-store" });
+    const authorization = await authHeader(forceRefresh);
+    const res = await fetch(url, { ...init, headers: { ...init.headers, authorization }, cache: "no-store" });
     const data = await res.json().catch(() => null);
     if (res.ok) return { ok: true, data: data as T };
     return { ok: false, error: data?.error ?? "Bir sorun oluştu", status: res.status };
@@ -50,7 +73,14 @@ export function getWithSession<T>(url: string) {
 /** Oturumdaki kullanıcı (yoksa null). Yalnızca ekranda göstermek için; e-posta hiçbir yere gönderilmez. */
 export function useAuthUser() {
   const [state, setState] = useState<{ ready: boolean; user: User | null }>({ ready: false, user: null });
-  useEffect(() => onAuthStateChanged(firebaseClient().auth, (user) => setState({ ready: true, user })), []);
+  useEffect(() => {
+    if (MEMORY_BACKEND) {
+      // Firebase yok: her zaman anonim
+      const t = setTimeout(() => setState({ ready: true, user: null }), 0);
+      return () => clearTimeout(t);
+    }
+    return onAuthStateChanged(firebaseClient().auth, (user) => setState({ ready: true, user }));
+  }, []);
   return state;
 }
 
@@ -58,6 +88,8 @@ declare global {
   interface Window {
     /** Yalnızca emulator testleri: Google penceresi yerine bu e-postayla sahte Google kimliği. */
     __fakeGoogleEmail?: string;
+    /** localStorage kullanılamıyorsa cihaz kimliği (bellek arka ucu). */
+    __cihazKimligi?: string;
   }
 }
 
@@ -122,6 +154,12 @@ export async function signOutUser() {
 export async function deleteAccount(): Promise<{ ok: true } | { ok: false; error: string }> {
   const res = await withSession<{ deleted: boolean }>("/api/account", { method: "DELETE" });
   if (!res.ok) return res;
-  await signOut(firebaseClient().auth).catch(() => {});
+  if (MEMORY_BACKEND) {
+    try {
+      localStorage.removeItem(DEVICE_KEY);
+    } catch {
+      window.__cihazKimligi = undefined;
+    }
+  } else await signOut(firebaseClient().auth).catch(() => {});
   return { ok: true };
 }
