@@ -102,7 +102,7 @@ export function RatingForm({ spaceId, onRated }: { spaceId: string; onRated: () 
       <h2 id="rate-title" className="text-xl font-bold">
         Burayı değerlendirelim
       </h2>
-      <p className="text-xs text-fg-3">Check-in yaptıktan sonraki 3 saat içinde, her check-in için bir kez.</p>
+      <p className="text-sm text-fg-3">Check-in yaptıktan sonraki 3 saat içinde, her check-in için bir kez.</p>
       {CRITERIA.map((c) => (
         <fieldset key={c} className="space-y-1">
           <legend className="text-sm font-semibold">{CRITERION_LABELS[c]}</legend>

@@ -109,7 +109,7 @@ export function SpaceView() {
                           </span>
                           <span>
                             {b.courseCode} {b.courseName}
-                            <span className="block text-xs text-fg-3">Belgedeki yeri: {b.sourceRef}</span>
+                            <span className="block text-sm text-fg-3">Belgedeki yeri: {b.sourceRef}</span>
                           </span>
                         </li>
                       ))}

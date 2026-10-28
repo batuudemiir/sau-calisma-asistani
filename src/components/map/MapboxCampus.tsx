@@ -31,7 +31,7 @@ const PLACE_RING: Record<StatusCode, string> = {
 
 /** Tasarım token'ının o anki (açık/koyu) değeri; Mapbox katman renkleri için. */
 const token = (name: string) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-const dark = () => window.matchMedia("(prefers-color-scheme: dark)").matches;
+const dark = () => document.documentElement.dataset.theme === "dark";
 
 function addLayers(map: mapboxgl.Map, data: MapResponse, selected: Selection) {
   const fill = (tone: string) => token(`--status-${tone}-bg`);
@@ -197,7 +197,7 @@ export function MapboxCampus({
     mapRef.current = map;
     const timer = setTimeout(fail, LOAD_TIMEOUT_MS);
     map.on("error", fail);
-    // style.load: ilk yüklemede ve tema değişince (setStyle) katmanlar yeniden eklenir
+    // style.load: stil yüklenince katmanlar eklenir (tema Profil'de değişir; harita yeniden açılınca uygulanır)
     map.on("style.load", () => {
       addLayers(map, latest.current.data, latest.current.selected);
       syncMarkers();
@@ -206,13 +206,9 @@ export function MapboxCampus({
       loaded = true;
       clearTimeout(timer);
     });
-    const media = window.matchMedia("(prefers-color-scheme: dark)");
-    const onTheme = () => map.setStyle(media.matches ? STYLE.dark : STYLE.light);
-    media.addEventListener("change", onTheme);
     const current = markers.current;
     return () => {
       clearTimeout(timer);
-      media.removeEventListener("change", onTheme);
       current.forEach((m) => m.remove());
       current.clear();
       map.remove();

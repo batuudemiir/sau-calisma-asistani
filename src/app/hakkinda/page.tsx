@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import { Wordmark } from "@/components/brand/Wordmark";
 import { OSM_ATTRIBUTION } from "@/data/campus";
 
-export const metadata: Metadata = { title: "Hakkında" };
+export const metadata: Metadata = {
+  title: "Hakkında",
+  description: "Bilginin kaynakları, gizlilik ve erişilebilirlik.",
+};
 
 export default function AboutPage() {
   return (

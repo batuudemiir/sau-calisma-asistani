@@ -82,7 +82,7 @@ export function SearchBox({
             const row = (
               <>
                 <span className="font-semibold">{h.label}</span>
-                <span className="text-xs text-fg-3">
+                <span className="text-sm text-fg-3">
                   {TYPE_LABEL[h.type]}
                   {h.context ? ` · ${h.context}` : ""}
                 </span>

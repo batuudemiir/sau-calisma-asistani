@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fold, searchItems } from "../../src/lib/search";
+import { fold, matchesQuery, searchItems } from "../../src/lib/search";
 
 const items = [
   { id: "1", label: "Ö-102", context: "Örnek Blok" },
@@ -32,5 +32,16 @@ describe("arama", () => {
   it("büyük I ve ı doğru katlanır; boş sorgu sonuç vermez", () => {
     expect(searchItems("isik", items).map((i) => i.id)).toEqual(["6"]);
     expect(searchItems("  ", items)).toEqual([]);
+  });
+});
+
+describe("liste süzme", () => {
+  it("her kelime metinlerden birinde geçmeli; Türkçe katlama; boş sorgu her şeyi geçirir", () => {
+    expect(matchesQuery("o102", "Ö-102", "Örnek Blok")).toBe(true);
+    expect(matchesQuery("ornek 201", "Ö-201", "Örnek Blok")).toBe(true);
+    expect(matchesQuery("ornek 301", "Ö-201", "Örnek Blok")).toBe(false);
+    expect(matchesQuery("kutuphane", "Kütüphane Ek Bina")).toBe(true);
+    expect(matchesQuery("  ", "x")).toBe(true);
+    expect(matchesQuery("kafe", null, undefined)).toBe(false);
   });
 });

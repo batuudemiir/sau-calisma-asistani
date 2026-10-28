@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { DAILY_CAP, LEVELS, POINTS, type PointKind } from "@/domain/points";
 import { GOOGLE_LOGIN_ENABLED, LOGIN_SOON_TEXT } from "@/lib/features";
 import { RewardsSection } from "./RewardsSection";
+import { ThemeSetting } from "./ThemeSetting";
 import { deleteAccount, getWithSession, signInWithGoogle, signOutUser, useAuthUser } from "@/lib/session";
 import { buttonClass } from "./ui/Button";
 
@@ -99,7 +100,7 @@ export function ProfileView() {
               {google?.displayName && <strong className="block">{google.displayName}</strong>}
               {google?.email}
             </p>
-            <p className="text-xs text-fg-3">E-posta adresin yalnızca bu cihazda gösterilir; sunucuda saklanmaz.</p>
+            <p className="text-sm text-fg-3">E-posta adresin yalnızca bu cihazda gösterilir; sunucuda saklanmaz.</p>
             <button type="button" onClick={() => void signOut()} className={buttonClass("secondary", "md")}>
               Çıkış yap
             </button>
@@ -120,7 +121,7 @@ export function ProfileView() {
                 >
                   {busy ? "Giriş yapılıyor…" : "SAÜ hesabıyla giriş yap (Google)"}
                 </button>
-                <p className="text-xs text-fg-3">Yalnızca @ogr.sakarya.edu.tr adresleri kabul edilir.</p>
+                <p className="text-sm text-fg-3">Yalnızca @ogr.sakarya.edu.tr adresleri kabul edilir.</p>
               </>
             ) : (
               <p className="text-sm text-fg-2">
@@ -208,7 +209,7 @@ export function ProfileView() {
                 <li key={i} className="flex items-center justify-between gap-3 p-2">
                   <span>
                     <strong>{KIND_LABEL[e.kind]}</strong> · {e.spaceName ?? "Silinmiş alan"}
-                    <span className="block text-xs text-fg-3">{dateTime.format(e.createdAtMs)}</span>
+                    <span className="block text-sm text-fg-3">{dateTime.format(e.createdAtMs)}</span>
                   </span>
                   <span className="shrink-0 font-semibold">{e.points > 0 ? `+${e.points}` : "0 (sınır)"}</span>
                 </li>
@@ -243,6 +244,8 @@ export function ProfileView() {
           )}
         </section>
       )}
+
+      <ThemeSetting />
 
       <Link href="/hakkinda" className="inline-flex min-h-11 items-center underline">
         Hakkında, veri kaynakları ve gizlilik

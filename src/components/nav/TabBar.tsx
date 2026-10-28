@@ -48,7 +48,7 @@ export function TabBar() {
                 <Link
                   href={`${t.href}?${query}`}
                   aria-current={active ? "page" : undefined}
-                  className={`relative flex min-h-14 flex-col items-center justify-center gap-0.5 px-3 text-xs no-underline lg:flex-row lg:gap-2 lg:text-sm ${active ? "font-bold text-fg-1" : "font-medium text-fg-3"}`}
+                  className={`relative flex min-h-14 flex-col items-center justify-center gap-0.5 px-3 text-[13px] no-underline lg:flex-row lg:gap-2 lg:text-sm ${active ? "font-bold text-fg-1" : "font-medium text-fg-3"}`}
                 >
                   {active && (
                     <span

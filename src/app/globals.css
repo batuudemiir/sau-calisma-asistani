@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Varsayılan açık tema; koyu tema yalnızca kullanıcı Profil'den seçerse (<html data-theme="dark">) */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 /*
  * neredeçalışalım tasarım sistemi (design_handoff_neredecalisalim_app/tokens). Renkler yalnızca burada tanımlanır;
  * bileşenler Tailwind sınıflarıyla (bg-cobalt-500, text-fg-2, bg-status-verified-bg …) kullanır.
@@ -149,6 +152,7 @@
 }
 
 :root {
+  color-scheme: light;
   --bg-page: #f6f7fb;
   --surface-card: #ffffff;
   --surface-sunken: #eceef4;
@@ -193,8 +197,10 @@
   --dur-sheet: 260ms;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
+/* Koyu tema: kullanıcının seçimi (sistem ayarı değil) */
+@media all {
+  :root[data-theme="dark"] {
+    color-scheme: dark;
     --bg-page: #0a0f26;
     --surface-card: #121a3a;
     --surface-sunken: #1b2448;

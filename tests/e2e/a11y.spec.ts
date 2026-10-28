@@ -17,7 +17,9 @@ const ROUTES = [
 for (const scheme of ["light", "dark"] as const) {
   for (const r of ROUTES) {
     test(`axe: ${r.name} (${scheme})`, async ({ page }) => {
-      await page.emulateMedia({ colorScheme: scheme, reducedMotion: "reduce" });
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      // Koyu tema yalnızca kullanıcının seçimiyle (Profil → Görünüm); sistem ayarı uygulamayı koyulaştırmaz
+      if (scheme === "dark") await page.addInitScript(() => localStorage.setItem("tema", "dark"));
       await page.goto(r.path);
       await expect(page.getByRole("heading", { name: r.ready }).first()).toBeVisible();
       const result = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]).analyze();

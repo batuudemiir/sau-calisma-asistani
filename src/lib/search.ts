@@ -36,3 +36,11 @@ export function searchItems<T extends SearchItem>(query: string, items: readonly
     .slice(0, limit)
     .map((s) => s.item);
 }
+
+/** Listeyi süzmek için: sorgunun her kelimesi metinlerden birinde geçmeli (Türkçe katlamalı). Boş sorgu her şeyi geçirir. */
+export function matchesQuery(query: string, ...texts: (string | null | undefined)[]): boolean {
+  const words = query.split(/\s+/).map(fold).filter(Boolean);
+  if (words.length === 0) return true;
+  const all = texts.map((t) => fold(t ?? "")).join(" ");
+  return words.every((w) => all.includes(w));
+}

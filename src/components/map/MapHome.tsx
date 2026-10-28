@@ -79,7 +79,7 @@ export function MapHome() {
             <h1 className="sr-only">Kampüs haritası</h1>
             <Wordmark size={19} />
             {data && (
-              <p className="text-xs text-fg-2">
+              <p className="text-sm text-fg-2">
                 {WEEKDAY_NAMES[data.now.weekday]} <span className="font-mono">{time(data.now.minute)}</span>
                 {data.now.isDemoClock && <strong className="ml-1">(demo saati)</strong>}
               </p>
@@ -141,7 +141,7 @@ export function MapHome() {
                 </strong>
               </p>
               <BuildingMap spaces={building.spaces} query={query} />
-              <p className="text-xs text-fg-3">Kat görünümü şematiktir, ölçekli değildir. Odaya dokun: ayrıntı ve check-in.</p>
+              <p className="text-sm text-fg-3">Kat görünümü şematiktir, ölçekli değildir. Odaya dokun: ayrıntı ve check-in.</p>
               <Legend data={data} />
             </Panel>
           )}
@@ -229,7 +229,7 @@ function ResultRow({ r, query }: { r: ResultDTO; query: string }) {
         <span className="text-right text-sm">
           {statusTitle(r.status)}
           {r.freeUntil !== null && (
-            <span className="block text-xs text-fg-2">
+            <span className="block text-sm text-fg-2">
               <span className="font-mono">{time(r.freeUntil)}</span> saatine kadar
             </span>
           )}
@@ -357,7 +357,7 @@ function Overview({
               </li>
             ))}
           </ol>
-          <p className="mt-2 text-xs text-fg-2">
+          <p className="mt-2 text-sm text-fg-2">
             Konumu açık kaynakta bulunamayanlar (haritada gösterilmez): {MISSING_LOCATIONS.join("; ")}.
           </p>
         </details>
@@ -372,7 +372,7 @@ function Legend({ data }: { data: MapResponse }) {
     data.places.some((p) => shownRating(p.rating)?.simulated || isSimStatus(p));
   return (
     <div className="space-y-2">
-      <ul className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs" aria-label="Harita açıklaması">
+      <ul className="grid grid-cols-2 gap-x-3 gap-y-1 text-sm" aria-label="Harita açıklaması">
         {(Object.keys(SHORT) as Tone[]).map((t) => (
           <li key={t} className="flex items-center gap-1.5">
             <svg width="14" height="14" aria-hidden="true">
@@ -396,11 +396,11 @@ function Legend({ data }: { data: MapResponse }) {
         </li>
       </ul>
       {anySimulated && (
-        <p className="flex items-center gap-2 text-xs">
+        <p className="flex items-center gap-2 text-sm">
           <SimulatedBadge /> * işaretli puan ve bildirimler örnek demo verisidir.
         </p>
       )}
-      <p className="text-xs text-fg-3">
+      <p className="text-sm text-fg-3">
         Bina konum ve sınırları gerçek ölçeklidir; adlar gönüllü haritacılardandır, eksik olabilir. Renk tek başına anlam taşımaz;
         her yerde durum metni yazar. Harita verisi{" "}
         <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer" className="underline">

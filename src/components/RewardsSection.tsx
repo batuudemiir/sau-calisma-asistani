@@ -67,10 +67,10 @@ export function RewardsSection({ version }: { version: string }) {
                     <h3 className="font-bold">{r.title}</h3>
                     {r.isSimulated && <SimulatedBadge />}
                   </div>
-                  <p className="text-xs text-fg-2">
+                  <p className="text-sm text-fg-2">
                     {r.partner} · {r.threshold} puan · bu ay kalan: {r.remaining}
                   </p>
-                  <label className="block text-xs" htmlFor={`odul-${r.id}`}>
+                  <label className="block text-sm" htmlFor={`odul-${r.id}`}>
                     {Math.min(data.monthPoints, r.threshold)}/{r.threshold} puan
                   </label>
                   <progress
@@ -82,7 +82,7 @@ export function RewardsSection({ version }: { version: string }) {
                   {r.coupon ? (
                     <div className="rounded-md bg-zinc-100 p-2 text-sm dark:bg-zinc-800">
                       Kuponun: <strong className="font-mono">{r.coupon}</strong>
-                      {r.isSimulated && <span className="block text-xs">Örnek demo kuponu — hiçbir yerde geçerli değildir.</span>}
+                      {r.isSimulated && <span className="block text-sm">Örnek demo kuponu — hiçbir yerde geçerli değildir.</span>}
                     </div>
                   ) : r.block ? (
                     <p className="text-sm text-fg-2">

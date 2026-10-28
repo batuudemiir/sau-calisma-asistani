@@ -201,3 +201,32 @@ test("hesap silme: puan ve geçmiş silinir, bildirim topluluk verisi olarak kal
   await p.goto(`/?${Q}&s=kampus-kafeterya`);
   await expect(p.getByRole("dialog", { name: "Kampüs Kafeterya" }).getByText("Öğrenci doğruladı")).toBeVisible();
 });
+
+test("görünüm: sistem koyu olsa da açık tema; Profil'den koyu seçilir ve kalır", async ({ browser }) => {
+  const p = await (await browser.newContext({ colorScheme: "dark" })).newPage();
+  await p.goto(`/?${Q}`);
+  await expect(p.locator("html")).not.toHaveAttribute("data-theme", "dark");
+  await expect(p.locator("body")).toHaveCSS("background-color", "rgb(246, 247, 251)");
+  await p.goto(`/profil?${Q}`);
+  await p.getByRole("group", { name: "Görünüm" }).getByText("Koyu", { exact: true }).click();
+  await expect(p.locator("html")).toHaveAttribute("data-theme", "dark");
+  await p.reload();
+  await expect(p.locator("html")).toHaveAttribute("data-theme", "dark");
+  await expect(p.getByRole("radio", { name: /Koyu/ })).toBeChecked();
+  await p.getByRole("group", { name: "Görünüm" }).getByText("Açık", { exact: true }).click();
+  await expect(p.locator("html")).not.toHaveAttribute("data-theme", "dark");
+});
+
+test("liste: arama Türkçe karakter katlar, URL'de kalır, boş sonuçta ne yapılacağını söyler", async ({ page }) => {
+  await page.goto(`/liste?${Q}`);
+  const box = page.getByRole("searchbox", { name: /Listede ara/ });
+  await box.fill("o102");
+  await expect(page).toHaveURL(/q=o102/);
+  await expect(page.getByRole("listitem").filter({ hasText: "Ö-102" })).toHaveCount(1);
+  await expect(page.getByRole("listitem").filter({ hasText: "Ö-201" })).toHaveCount(0);
+  await box.fill("kutuphane");
+  await expect(page.getByRole("link", { name: /Kütüphane Ek Bina/ })).toBeVisible();
+  await expect(page.getByText(/aramasına uyan uygun derslik yok/)).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole("searchbox", { name: /Listede ara/ })).toHaveValue("kutuphane");
+});

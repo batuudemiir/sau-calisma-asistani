@@ -64,7 +64,7 @@ export function ReportButtons({ spaceId, onReported }: { spaceId: string; onRepo
         {message?.text}
       </p>
       {earned !== null && earned > 0 && <PointsEarned points={earned} />}
-      <p className="text-xs text-fg-3">Bildirimler anonimdir; ad, e-posta veya konum saklanmaz.</p>
+      <p className="text-sm text-fg-3">Bildirimler anonimdir; ad, e-posta veya konum saklanmaz.</p>
     </section>
   );
 }

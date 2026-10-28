@@ -398,7 +398,7 @@ export function Assistant({
                     ))}
                   </ol>
                 )}
-                <p className="text-xs text-fg-3">
+                <p className="text-sm text-fg-3">
                   Oraya gidince &quot;Buradayım&quot; de veya kapıdaki QR kodu okut; diğer öğrencilere yardımcı olur, puan
                   kazanırsın.
                 </p>
