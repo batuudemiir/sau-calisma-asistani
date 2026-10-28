@@ -25,22 +25,31 @@ Amaç: Canlı demonun (3-5 dk) adım adım provası. `DEMO_AND_PITCH.md` neyin a
 
 ## Akış (DEMO_AND_PITCH.md tablosuyla aynı sıra)
 
-| Adım | A telefonu | Söylenecek |
+| Adım | A telefonu (sunan) | Söylenecek |
 |---|---|---|
-| 1 | Harita ana ekranı açılır (60 dk varsayılan; demo saati için `/?d=60&at=...` bağlantısı) → alt panel "Şu an N derslik uygun görünüyor" → **Liste** sekmesi | "Kayıt gerekmez, konum izni istemeyiz." |
-| 2 | Kütüphane kartı: "Doluluk verisi yok" + yoğunluk "Örnek demo verisi" | "Kütüphane seviyesi **simülasyon**; ölçüm değil." |
-| 3 | Liste: etiketler, "… saatine kadar boş (programa göre)", sonraki ders, kaynak | "Programda boş ≠ gerçekten boş." |
-| 4 | Bir kartı aç: bugünkü program, "Belgedeki yeri" | — |
-| 5 | Dizüstünde kaynak belgede aynı satırı göster | "Veri Gemini/kurallarla ayrıştırıldı, elle kontrol edildi." |
-| 6 | **Buradayım, uygun (check-in)** → B telefonunda kart 5 sn içinde "Öğrenci doğruladı" | "Bildirim anonim; uid istemciye hiç gitmez." |
-| 6b | Aynı ekranda 4 kriteri puanla ("+5 puan kazandın") → **Harita** sekmesi → panelde bina → oda rozeti | "Ortalama 3 değerlendirmeden önce gösterilmez." |
-| 6a | Haritada sağ alttaki **Asistan** → "Çalışacak yer bul" → 60 dk → Priz → Fark etmez → konum | "Yapay zekâ API'si yok; kural motoru. Bilmediğini 'bilgi yok' diye söylüyor. Konum telefondan çıkmıyor." |
-| 6d | Basılı QR'ı (veya ekrandaki QR'ı) B telefonuyla okut → "QR ile check-in" (+10) → geri bildirim | "QR fotoğrafı paylaşılabilir; kesin kanıt değil, kısa sürede çok hesap kullanırsa bonus kesilir." |
-| 6e | Profil → **Aylık ödüller**: çay (örnek, 10 puan) → giriş → "ödülü al" → `ORNEK-` kupon | "Çekiliş değil, eşik + stok. Sponsor yok; ödüller örnek, kupon geçersiz." |
-| 6c | **Profil** sekmesi: puan, seviye, son katkılar; "SAÜ hesabıyla giriş yap" | "Giriş isteğe bağlı; puanlar yalnızca sana görünür, sıralamayı etkilemez." |
-| 7 | (İsteğe bağlı) Terminal: `npm run ingest -- <eski dönem PDF> ...` → işaretli kayıtlar | "Eski dönem belgesi; yayımlanmaz, yalnızca hat gösterimi." |
+| 1 | Harita açılır (demo saati için `/?d=60&at=2026-10-27T13:00` bağlantısı) → alt panel "Şu an N derslik uygun görünüyor" | "Kayıt gerekmez. Haritadaki her şey altta listede de var." |
+| 2 | Sağ alttaki **Asistan** → "Çalışacak yer bul" → 60 dakika → Priz → Devam → Fark etmez → "Hayır, konumsuz öner" | "Yapay zekâ API'si yok; kural motoru. Bilmediğini 'bilgi yok' diye söylüyor." |
+| 3 | Bir öneride "Ayrıntı ve check-in" → bugünkü program, "Belgedeki yeri", kaynak | "Programda boş ≠ gerçekten boş." |
+| 4 | Dizüstünde kaynak belgede aynı satır | "Program kurallarla/Gemini ile ayrıştırıldı, elle kontrol edildi." |
+| 5 | B telefonu (jüri) **Liste** sekmesinde. A telefonu basılı QR'ı okutur → "Buradayım, uygun (QR ile check-in)" → "+10 puan" | "Bildirim anonim. B telefonunda 5 saniye içinde 'Öğrenci doğruladı'." |
+| 6 | Aynı sayfada 4 kriteri puanla → "Değerlendirmeyi gönder" | "Ortalama 3 değerlendirmeden önce gösterilmez." |
+| 7 | **Profil**: puan, seviye → "Aylık ödüller" → "SAÜ hesabıyla giriş yap" → çay (örnek, 10 puan) "ödülü al" → `ORNEK-` kupon | "Çekiliş değil, eşik + stok. Sponsor yok; kupon geçersiz. Puanlar sıralamayı etkilemez." |
+| 8 | (İsteğe bağlı) Terminal: `npm run ingest -- <eski dönem PDF> ...` | "Eski dönem belgesi; yayımlanmaz, yalnızca hat gösterimi." |
 
 Hangi verinin örnek, hangisinin gerçek olduğu sözlü olarak da söylenir.
+Google girişi canlı projede doğrulanmadıysa 7. adımda giriş yerine yalnızca puan ve ödül ilerlemesi gösterilir.
+
+## Telefonlarla yerel demo (internet olmadan da)
+
+1. Dizüstü ve telefonlar aynı Wi-Fi'da. Dizüstünün IP'sini bul (macOS: `ipconfig getifaddr en0`).
+2. `npm run demo:lan` — emulator'lar yerel ağa açık, örnek veri yüklenir, üretim derlemesi `0.0.0.0:3000`'de açılır
+   (ilk derleme ~1 dk). Telefonlarda `http://<dizüstü-ip>:3000/?d=60&at=2026-10-27T13:00`.
+   `npm run demo:local` (geliştirme modu) telefondan açılınca sayfa canlanmıyor; telefonlar için `demo:lan` kullan.
+3. QR'lar: ayrı terminalde `npm run qr -- --base http://<dizüstü-ip>:3000 --emulator` → `data/qr/qr-tum.html` yazdır.
+4. Doğrulandı (bu ortamda, yerel ağ IP'siyle açılan tarayıcıdan check-in). Gerçek telefon + Wi-Fi ile denenmedi; provada dene.
+5. `http://` adreste tarayıcılar konum vermez: asistan "Konum alınamadı" deyip mesafesiz önerir. Konumlu demo için
+   canlı (https) adres gerekir.
+6. macOS güvenlik duvarı açıksa Java (emulator) ve Node için gelen bağlantılara izin ver.
 
 ## QR kodlarını hazırlama
 

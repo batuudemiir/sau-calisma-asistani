@@ -18,7 +18,10 @@
     "test:e2e": "playwright test",
     "demo-report": "tsx --env-file-if-exists=.env.local scripts/demo-report/index.ts",
     "seed-campus": "tsx --env-file-if-exists=.env.local scripts/seed-campus/index.ts",
-    "qr": "tsx --env-file-if-exists=.env.development --env-file-if-exists=.env.local scripts/qr/index.ts"
+    "qr": "tsx --env-file-if-exists=.env.development --env-file-if-exists=.env.local scripts/qr/index.ts",
+    "build:demo": "sh -c 'set -a; . ./.env.development; if [ -f .env.local ]; then . ./.env.local; fi; set +a; next build'",
+    "start:demo": "sh -c 'set -a; . ./.env.development; if [ -f .env.local ]; then . ./.env.local; fi; set +a; next start -H 0.0.0.0'",
+    "demo:lan": "firebase emulators:exec --only firestore,auth --project demo-sau-calisma \"npm run seed-campus && DEMO_MODE=true npm run seed-demo && npm run build:demo && npm run start:demo\""
   },
   "devDependencies": {
     "@axe-core/playwright": "4.14.0",

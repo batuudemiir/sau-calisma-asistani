@@ -3,36 +3,36 @@
 Amaç: Final sunumunun (5 dk sunum + 3-5 dk canlı demo + 2-3 dk soru) içeriğini sabitlemek.
 Somut oda, saat ve sayı değerleri yayımlanan gerçek veriye göre son saatte doldurulur; aşağıdakiler yer tutucudur.
 
-## Canlı demo (yaklaşık 3 dakika)
+## Canlı demo (yaklaşık 4 dakika)
 
 | Adım | Ekranda | Veri türü |
 |---|---|---|
-| 1 | Öğrenci uygulamayı telefonda açar: "Şimdi nerede çalışabilirsin?" | — |
-| 2 | Kütüphane kartı: "Dolu bildirildi · 4 dk önce" veya "Örnek demo verisi" etiketli yoğunluk | Bildirim gerçek; seviye simülasyonsa etiketli |
-| 3 | 60 dakika seçer; liste gelir | Gerçek yayımlanmış ders programı |
-| 4 | Bir derslik kartını açar: "Programda boş · 15.00'e kadar · Sonraki ders 15.10 · Kaynak: <bölüm> 2026-2027 Güz programı" | Gerçek |
-| 5 | Jüriye kaynak belgeyi açıp aynı satırı gösterir | Gerçek belge |
-| 6 | "Buradayım, uygun" ile check-in yapar; ikinci telefonda kart "Öğrenci doğruladı" olur | Gerçek bildirim (demo binası) |
-| 6b | Alanı 4 kriterle puanlar; haritada (SVG şema) o odanın ortalama puanı görünür | Gerçek değerlendirme; demo öncesi eklenen örnekler "Örnek demo verisi" etiketli |
-| 7 | (İsteğe bağlı) Terminalde bir PDF'in Gemini ile taslak JSON'a dönüşmesi ve işaretlenen kayıt | Gerçek hat |
+| 1 | Telefonda **neredeçalışalım** açılır: kampüs haritası (Mapbox), altta "Şu an N derslik uygun görünüyor" | Konumlar gerçek (OSM); oda durumları yayımlanan programdan |
+| 2 | Sağ alttaki **asistan**: "Çalışacak yer bul" → 60 dk → Priz → Fark etmez → en iyi 3 öneri, gerekçe ve "bilgi yok" uyarılarıyla | Kural motoru; yapay zekâ API'si yok |
+| 3 | Bir öneriyi açar: "Programda boş · 15.00 saatine kadar · Sonraki ders 15.10 · Kaynak: <bölüm> programı" | Gerçek program (yoksa "Örnek demo verisi") |
+| 4 | Jüriye kaynak belgeyi açıp aynı satırı gösterir | Gerçek belge |
+| 5 | Kapıdaki **QR** okutulur → "QR ile check-in" (+10 puan) → ikinci telefonda kart 5 sn içinde "Öğrenci doğruladı" | Gerçek bildirim |
+| 6 | Hemen ardından 4 kriterle geri bildirim ("Burayı değerlendirelim") | Gerçek değerlendirme; hazır örnekler etiketli |
+| 7 | **Profil**: puan, seviye, aylık ödül ilerlemesi; SAÜ hesabıyla giriş → örnek ödül kuponu (`ORNEK-`) | Puan gerçek; ödüller örnek (sponsor yok) |
+| 8 | (İsteğe bağlı) Terminalde PDF → Gemini → taslak JSON ve işaretlenen kayıt | Gerçek hat |
 
-Hangi adımın gerçek, hangisinin simülasyon olduğu sunumda sözlü olarak da söylenir.
+Hangi adımın gerçek, hangisinin örnek olduğu sunumda sözlü olarak da söylenir.
 
 ## Pitch (60-90 saniye)
 
 Kütüphane doluyken öğrenci boş bir yer aramak için binaları dolaşıyor. Oysa kampüsteki pek çok derslik
-o saatte kullanılmıyor; bunu gösteren bilgi de zaten var, sadece bölüm sitelerinde dağınık PDF'ler hâlinde duruyor.
+o saatte kullanılmıyor; bunu gösteren bilgi zaten var, sadece bölüm sitelerinde dağınık belgeler hâlinde duruyor.
 
-Biz bu mevcut sistemi yeniden tasarladık. Ders programlarını Gemini ile okuyup doğrulama kurallarından geçirerek
-ortak bir veri yapısına aktarıyoruz. Öğrenci kaç dakika çalışacağını seçiyor; uygulama o süre boyunca ders
-başlamayacak derslikleri, geçiş payını da hesaba katarak listeliyor.
+neredeçalışalım bu bilgiyi tek haritada topluyor. Ders programlarını Gemini ile okuyup doğrulama kurallarından
+geçiriyoruz. Öğrenci kaç dakika çalışacağını seçiyor ya da asistana soruyor; uygulama o süre boyunca ders
+başlamayacak derslikleri ve kampüsteki çalışma yerlerini gerekçeleriyle öneriyor.
 
 Önemli bir ayrım yapıyoruz: programda boş olmak, gerçekten boş olmak demek değil. Her sonuç kaynağını ve güven
-düzeyini gösteriyor; öğrenciler tek dokunuşla doğruluyor. Bugün <bina> için gerçek programla çalışıyor;
-kütüphane doluluğu şimdilik öğrenci bildirimiyle ve etiketli demo verisiyle gösteriliyor.
+düzeyini gösteriyor. Öğrenciler kapıdaki QR'ı okutup "buradayım" diyor, sessizlik, priz, internet ve ışığı
+puanlıyor; bu katkılar diğer öğrencilere anında yansıyor ve katkı yapan puan kazanıyor.
 
-Sonraki adım: üniversiteyle bir pilot. Turnike gibi mevcut sistemlerden yalnızca toplam sayılar alınırsa,
-kütüphane doluluğu da tahmin değil ölçüm hâline gelir.
+Sonraki adım: üniversiteyle bir pilot ve kampüs kafeleriyle ödül iş birliği. Turnike gibi mevcut sistemlerden
+yalnızca toplam sayılar alınırsa kütüphane doluluğu da tahmin değil ölçüm hâline gelir.
 
 ## Beklenen jüri soruları
 - **Program boş diyor ama oda kilitli?** → Etiket "Programda boş", erişim "doğrulanmadı" yazıyor; öğrenci bildirimi düzeltiyor.
@@ -42,3 +42,11 @@ kütüphane doluluğu da tahmin değil ölçüm hâline gelir.
   e-posta veritabanımıza yazılmaz (yalnızca Firebase Auth'ta); puanlar yalnızca kişiye görünür ve hesap tek dokunuşla
   silinir. KVKK konusunda garanti vermiyoruz; aydınlatma metni taslağı Hakkında sayfasında.
 - **Kart/turnike verisi?** → Erişimimiz yok, varmış gibi göstermiyoruz. Pilot önerisi olarak anlatıyoruz.
+- **Asistan yapay zekâ mı?** → Hayır; kural tabanlı öneri motoru (`src/domain/assistant.ts`), testli. Her önerinin
+  gerekçesini yazıyor, bilmediğini "bilgi yok" diye söylüyor. Gemini yalnızca belge ayrıştırmada, sunucusuz ve elle kontrollü.
+- **QR ile hile?** → Basılı QR'ın fotoğrafı paylaşılabilir; kesin kanıt demiyoruz. Kod sunucu anahtarıyla imzalı, aynı yerde
+  10 dakikada 8 farklı hesap kullanırsa QR bonusu kesiliyor, puanlar güven etiketini ve sıralamayı hiç etkilemiyor.
+- **Ödüller çekiliş mi?** → Hayır, eşik + stok (çekiliş izin gerektirir). Şu an sponsor yok; ödüller "Örnek demo verisi",
+  kuponlar geçersiz.
+- **Konumum nereye gidiyor?** → Hiçbir yere. Asistan konumu yalnızca telefonda mesafe hesabı için kullanıyor; harita
+  görüntüleri Mapbox'tan geliyor, konum Mapbox'a da gönderilmiyor.

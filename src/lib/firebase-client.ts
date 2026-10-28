@@ -20,8 +20,10 @@ export function firebaseClient() {
   const auth = getAuth(app);
   const db = getFirestore(app);
   if (process.env.NEXT_PUBLIC_USE_EMULATOR === "true") {
-    connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
-    connectFirestoreEmulator(db, "127.0.0.1", 8080);
+    // Sayfanın açıldığı makine: telefon dizüstüne yerel ağ IP'siyle bağlandığında emulator da orada
+    const host = window.location.hostname;
+    connectAuthEmulator(auth, `http://${host}:9099`, { disableWarnings: true });
+    connectFirestoreEmulator(db, host, 8080);
   }
   cached = { app, auth, db };
   return cached;

@@ -79,7 +79,8 @@ Sonra http://localhost:3000 adresini aç (dev modunda ilk API isteği derleme y�
 | `npm test` | Vitest (domain, sunucu servisleri, veri hattı) |
 | `npm run test:e2e` | Playwright: production build + emulator + örnek veriyle 3 uçtan uca senaryo (Java gerekir) |
 | `npm run typecheck` / `npm run lint` | Tip kontrolü / ESLint |
-| `npm run demo:local` | Emulator + örnek veri + dev sunucusu |
+| `npm run demo:local` | Emulator + örnek veri + dev sunucusu (yalnızca bu bilgisayardan) |
+| `npm run demo:lan` | Telefonlarla demo: emulator'lar yerel ağa açık, üretim derlemesi `0.0.0.0:3000` |
 | `npm run seed-campus` | Kampüs kataloğu: çalışma yerleri + bina konumları (gerçek veri, OSM) |
 | `npm run seed-demo [-- --clear \| --only-library]` | Örnek veri yazar / yalnızca `isSimulated` kayıtları siler / yalnızca kütüphane örneği (`DEMO_MODE=true` gerekir) |
 | `npm run demo-report -- <oda> <uygun\|dolu\|kullanilamiyor\|guncel_degil> [--ago dk]` | Demo için etiketli yapay bildirim (`DEMO_MODE=true` gerekir) |
