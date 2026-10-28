@@ -31,10 +31,22 @@ export function latToTileY(lat: number, z: number) {
 export const tileXToLng = (x: number, z: number) => (x / 2 ** z) * 360 - 180;
 export const tileYToLat = (y: number, z: number) => (Math.atan(Math.sinh(Math.PI - (2 * Math.PI * y) / 2 ** z)) * 180) / Math.PI;
 
+export type TileUrl = (z: number, x: number, y: number) => string;
+
+/** CARTO Voyager (varsayılan; anahtarsız). */
 export function tileUrl(z: number, x: number, y: number) {
   const sub = "abcd"[(x + y) % 4];
   return `https://${sub}.basemaps.cartocdn.com/rastertiles/voyager/${z}/${x}/${y}@2x.png`;
 }
+
+/**
+ * Google Map Tiles API (2D, yol haritası). Oturum `createSession` ile alınır (src/components/map/useGoogleTiles.ts);
+ * anahtar NEXT_PUBLIC_ (tarayıcıya gider) ve Google Cloud'da site + API kısıtlamasıyla korunur.
+ */
+export const googleTileUrl =
+  (session: string, key: string): TileUrl =>
+  (z, x, y) =>
+    `https://tile.googleapis.com/v1/2dtiles/${z}/${x}/${y}?session=${encodeURIComponent(session)}&key=${encodeURIComponent(key)}`;
 
 export interface Tile {
   key: string;
@@ -51,6 +63,7 @@ export function tilesFor(
   z: number,
   project: (p: LatLng) => Point,
   unproject: (p: Point) => LatLng,
+  url: TileUrl = tileUrl,
 ): Tile[] {
   const [north, west] = unproject([view.x, view.y]);
   const [south, east] = unproject([view.x + view.w, view.y + view.h]);
@@ -65,7 +78,7 @@ export function tilesFor(
       const [ax, ay] = project([tileYToLat(ty, z), tileXToLng(tx, z)]);
       const [bx, by] = project([tileYToLat(ty + 1, z), tileXToLng(tx + 1, z)]);
       // İzdüşüm 0,1 birime yuvarlanır; döşemeler arasında ince boşluk kalmasın diye hafif bindirme
-      tiles.push({ key: `${z}/${tx}/${ty}`, url: tileUrl(z, tx, ty), x: ax, y: ay, w: bx - ax + 0.3, h: by - ay + 0.3 });
+      tiles.push({ key: `${z}/${tx}/${ty}`, url: url(z, tx, ty), x: ax, y: ay, w: bx - ax + 0.3, h: by - ay + 0.3 });
     }
   }
   return tiles;

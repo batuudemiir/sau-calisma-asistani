@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, useState } from "react";
 import { CAMPUS, buildingShape, osmBuilding } from "@/data/campus";
 import { projector, toPath } from "@/lib/map-geometry";
 import { boxAround, type Box } from "@/lib/pan-zoom";
@@ -9,6 +9,7 @@ import { TILE_ATTRIBUTION, tileZoom, tilesFor } from "@/lib/tiles";
 import type { MapResponse } from "@/server/search-service";
 import { MapControls } from "./MapControls";
 import { FILL } from "./map-style";
+import { useGoogleTiles } from "./useGoogleTiles";
 import { usePanZoom } from "./usePanZoom";
 
 // Kampüs sınırı geniş ormanlık alan içerir; harita binaların kapladığı alanla sınırlanır
@@ -66,12 +67,15 @@ export function CampusMap({
   const svgRef = useRef<SVGSVGElement>(null);
   const center = useMemo(() => centerBox(data), [data]);
   const pz = usePanZoom(svgRef, center, BOUNDS);
-  // Gerçek sokak haritası (dekoratif alt katman): görünen alana ve ölçeğe göre döşemeler
+  // Gerçek sokak haritası (dekoratif alt katman): Google anahtarı varsa Google, yoksa CARTO döşemeleri
+  const google = useGoogleTiles();
+  // Döşeme gerçekten yüklenince yedek çizim (kampüs dolgusu, gri binalar) gizlenir; yüklenmezse harita eskisi gibi
+  const [tilesShown, setTilesShown] = useState(false);
   const tiles = useMemo(() => {
     const [x, y, w, h] = pz.viewBox.split(" ").map(Number);
     const z = tileZoom(pz.px * metersPerUnit, CAMPUS_LAT);
-    return tilesFor({ x, y, w, h }, z, project, unproject);
-  }, [pz.viewBox, pz.px]);
+    return tilesFor({ x, y, w, h }, z, project, unproject, google?.url);
+  }, [pz.viewBox, pz.px, google]);
 
   const appBuildings = data.buildings.flatMap((b) => {
     const shapeOf = buildingShape(b);
@@ -97,25 +101,35 @@ export function CampusMap({
         aria-label="Esentepe kampüsü, gerçek bina konumları. Sürükleyerek kaydır, iki parmakla yakınlaştır."
         {...pz.handlers}
       >
-        <g aria-hidden="true" className="dark:invert dark:hue-rotate-180">
+        <g aria-hidden="true" className={google ? undefined : "dark:invert dark:hue-rotate-180"}>
           {tiles.map((t) => (
-            <image key={t.key} href={t.url} x={t.x} y={t.y} width={t.w} height={t.h} preserveAspectRatio="none" />
+            <image
+              key={t.key}
+              href={t.url}
+              x={t.x}
+              y={t.y}
+              width={t.w}
+              height={t.h}
+              preserveAspectRatio="none"
+              onLoad={tilesShown ? undefined : () => setTilesShown(true)}
+            />
           ))}
         </g>
         <path
           d={shape(CAMPUS.boundary)}
-          className="fill-map-campus stroke-map-boundary"
+          className={`stroke-map-boundary ${tilesShown ? "fill-none" : "fill-map-campus"}`}
           strokeDasharray="4 3"
           vectorEffect="non-scaling-stroke"
         />
-        {CAMPUS.buildings
-          .filter((b) => !appOsm.has(b.osm) && !placeOsm.has(b.osm))
-          .map((b) => (
-            // Döşemede de görünür; döşeme yüklenmezse yedek olarak yarı saydam çizilir
-            <path key={b.osm} d={shape(b.outline)} className="fill-map-building" fillOpacity={0.45}>
-              {b.name && <title>{b.name}</title>}
-            </path>
-          ))}
+        {/* Diğer binalar döşemede zaten var; yalnızca döşeme yokken yedek olarak çizilir */}
+        {!tilesShown &&
+          CAMPUS.buildings
+            .filter((b) => !appOsm.has(b.osm) && !placeOsm.has(b.osm))
+            .map((b) => (
+              <path key={b.osm} d={shape(b.outline)} className="fill-map-building">
+                {b.name && <title>{b.name}</title>}
+              </path>
+            ))}
         {appBuildings.map((b) => {
           const ob = b.shapeOf;
           const [x, y] = project(ob.center);
@@ -195,10 +209,17 @@ export function CampusMap({
           })}
       </svg>
 
-      <p className="absolute top-[7.75rem] right-2 z-10 rounded-sm bg-overlay px-1.5 text-[11px] text-fg-2 lg:top-auto lg:right-auto lg:bottom-2 lg:left-2">
-        <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer" className="underline">
-          {TILE_ATTRIBUTION}
-        </a>
+      <p className="absolute top-[7.75rem] right-2 z-10 flex items-center gap-1.5 rounded-sm bg-overlay px-1.5 text-[11px] text-fg-2 lg:top-auto lg:right-auto lg:bottom-2 lg:left-2">
+        {google ? (
+          <>
+            <span className="text-[13px] font-semibold tracking-tight text-fg-1">Google</span>
+            <span>{google.copyright}</span>
+          </>
+        ) : (
+          <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer" className="underline">
+            {TILE_ATTRIBUTION}
+          </a>
+        )}
       </p>
 
       <MapControls

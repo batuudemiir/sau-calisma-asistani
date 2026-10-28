@@ -140,9 +140,12 @@ Firebase kurmadan canlı link: veri sunucunun belleğinde tutulur. **Hiçbir ort
 yapılandırması (`NEXT_PUBLIC_FIREBASE_PROJECT_ID`) yoksa bu mod kendiliğinden açılır (`src/lib/backend-mode.ts`).
 
 1. vercel.com → Add New → Project → bu GitHub reposunu seç (Framework: Next.js, ayar değiştirme) → Deploy.
-2. İsteğe bağlı: `QR_SECRET` = rastgele uzun bir değer (`openssl rand -hex 32`). Verilmezse herkese açık demo anahtarı
+2. İsteğe bağlı: `NEXT_PUBLIC_GOOGLE_MAPS_KEY` = Google Map Tiles API anahtarı (Google Cloud'da faturalandırma açık,
+   "Map Tiles API" etkin; anahtar **site** (`https://<proje>.vercel.app/*`) ve **API** (yalnızca Map Tiles) ile
+   kısıtlı). Verilirse harita Google haritası olur; yoksa CARTO. Anahtar tarayıcıya gider, repoya yazılmaz.
+3. İsteğe bağlı: `QR_SECRET` = rastgele uzun bir değer (`openssl rand -hex 32`). Verilmezse herkese açık demo anahtarı
    kullanılır (yalnızca bu örnek veri modunda). Ortam değişkeni ekleyip değiştirdikten sonra **Redeploy** gerekir.
-3. QR sayfası: `npm run qr -- --base https://<proje>.vercel.app --demo` (QR_SECRET verdiysen başına `QR_SECRET=<aynı değer>`).
+4. QR sayfası: `npm run qr -- --base https://<proje>.vercel.app --demo` (QR_SECRET verdiysen başına `QR_SECRET=<aynı değer>`).
 
 Bu modda: gerçek fakülte binalarında (OSM konumları) 37 sınıf, uydurma ders programı, her an "x dk önce" görünen 8
 bildirim, değerlendirmeler, kütüphane yoğunluk deseni ve 3 ödül. Ekip kararıyla arayüzde "örnek" etiketi yoktur

@@ -62,3 +62,14 @@ describe("harita döşemeleri", () => {
     expect(tilesFor({ x: -5000, y: -5000, w: 10000, h: 10000 }, 19, project, unproject)).toEqual([]);
   });
 });
+
+describe("Google döşemeleri", () => {
+  it("oturum ve anahtarla 2D döşeme adresi; tilesFor verilen kaynağı kullanır", async () => {
+    const { googleTileUrl } = await import("../../src/lib/tiles");
+    const url = googleTileUrl("oturum+1", "anahtar");
+    expect(url(17, 76579, 49266)).toBe("https://tile.googleapis.com/v1/2dtiles/17/76579/49266?session=oturum%2B1&key=anahtar");
+    const { project, unproject, height } = projector([[40.738, 30.324], [40.745, 30.337]], 360, 12);
+    const tiles = tilesFor({ x: 0, y: 0, w: 360, h: height }, 16, project, unproject, url);
+    expect(tiles.every((t) => t.url.startsWith("https://tile.googleapis.com/v1/2dtiles/16/"))).toBe(true);
+  });
+});

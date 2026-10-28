@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { GOOGLE_TILES } from "@/components/map/useGoogleTiles";
 import { MEMORY_BACKEND, SHOW_SAMPLE_LABELS } from "@/lib/backend-mode";
 import { Wordmark } from "@/components/brand/Wordmark";
 import { OSM_ATTRIBUTION } from "@/data/campus";
@@ -59,7 +60,8 @@ export default function AboutPage() {
           </li>
           <li>
             <strong>Hizmet sağlayıcı:</strong> veriler Google Firebase (Firestore, Authentication) üzerinde işlenir. Harita
-            görüntüleri CARTO sunucularından yüklenir (tarayıcın bu sunuculara bağlanır); &quot;Google Haritalar&apos;da yol
+            görüntüleri {GOOGLE_TILES ? "Google Haritalar" : "CARTO"} sunucularından yüklenir (tarayıcın bu sunuculara
+            bağlanır); &quot;Google Haritalar&apos;da yol
             tarifi&quot; bağlantısı Google Haritalar&apos;ı yeni sekmede açar.
             {MEMORY_BACKEND &&
               " Bu sürümde veriler yalnızca sunucuda geçici olarak tutulur."}

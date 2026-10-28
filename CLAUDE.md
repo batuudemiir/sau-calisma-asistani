@@ -26,8 +26,9 @@ GDG on Campus SAÜ Hackathon, 27-28 Ekim 2026. Teslim: 28 Ekim 13.00.
 8. Firestore'a istemciden yazma yok; yazmalar Route Handler + Admin SDK üzerinden, Zod doğrulamasıyla.
 9. Kullanılmayan paket, özellik, harita kütüphanesi ekleme. Harita el çizimi SVG ile yapılır (`src/components/map/`), paket yok.
    (Mapbox denendi, yüklenmesi yavaş olduğu için kaldırıldı.) Gerçek sokak haritası, SVG'nin altına `<image>` döşemeleriyle
-   gelir (CARTO Voyager / OpenStreetMap, anahtarsız; `src/lib/tiles.ts`); atıf haritada görünür. Google Maps yalnızca
-   "yol tarifi" bağlantısıdır (`src/lib/maps-link.ts`), API/betik yüklenmez.
+   gelir: `NEXT_PUBLIC_GOOGLE_MAPS_KEY` varsa Google Map Tiles API (2D), yoksa CARTO Voyager (anahtarsız;
+   `src/lib/tiles.ts`, `src/components/map/useGoogleTiles.ts`); atıf/logo haritada görünür. Google Maps JS betiği
+   yüklenmez; "yol tarifi" yalnızca bağlantıdır (`src/lib/maps-link.ts`). Anahtar repoya yazılmaz (Vercel ortamı).
 12. Görsel dil `src/app/globals.css` token'larından gelir (neredeçalışalım tasarım sistemi); bileşenlerde ham renk kodu kullanılmaz.
 10. Doğrulanmamış bir entegrasyonun veya özelliğin çalıştığını iddia etme. Emin değilsen "doğrulanmadı" yaz.
 11. Tarih/saat her yerde `Europe/Istanbul`. Gün içi zamanlar gece yarısından itibaren dakika (`startMinute`).
