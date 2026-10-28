@@ -49,7 +49,8 @@ describe("bellek arka ucu (Firebase'siz prototip)", () => {
     expect(view.rewards.find((r) => r.id === "ornek-cay")?.block).toBe("NOT_STUDENT");
     await store.markStudent("c");
     const res = await claimRewardFor(store, "c", { rewardId: "ornek-cay" }, NOW + 12 * 60_000, true);
-    expect(res).toMatchObject({ ok: true, code: expect.stringMatching(/^KAMPUS-/) });
+    // Kupon öneki SHOW_SAMPLE_LABELS'a (Firebase yapılandırması olup olmamasına) bağlı
+    expect(res).toMatchObject({ ok: true, code: expect.stringMatching(/^(KAMPUS|ORNEK)-/) });
     expect(await claimRewardFor(store, "c", { rewardId: "ornek-cay" }, NOW + 13 * 60_000, true)).toMatchObject({
       ok: false,
       status: 409,
