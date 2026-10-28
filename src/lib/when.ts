@@ -83,3 +83,23 @@ export function nextOpenWindow(nowMs: number): { at: string; d: string; label: s
   const dateISO = today ? local.dateISO : toLocalTime(nowMs + DAY_MS).dateISO;
   return { at: `${dateISO}T09:00`, d: "120", label: `${today ? "Bugün" : "Yarın"} 09.00–11.00` };
 }
+
+/** Süre çipleri (dakika). */
+export const DURATION_CHOICES = [30, 60, 90, 120, 180, 240] as const;
+
+/** "30 dk", "1 sa", "1,5 sa", "1 sa 40 dk" */
+export function durationLabel(min: number): string {
+  if (min < 60) return `${min} dk`;
+  if (min % 60 === 0) return `${min / 60} sa`;
+  if (min % 30 === 0) return `${String(min / 60).replace(".", ",")} sa`;
+  return `${Math.floor(min / 60)} sa ${min % 60} dk`;
+}
+
+/** Uzun hâli: "2 saat", "1,5 saat", "45 dakika" */
+export function durationText(min: number): string {
+  return durationLabel(min).replace(/ sa$/, " saat").replace(/ sa /, " saat ").replace(/ dk$/, " dakika");
+}
+
+/** Gün çizelgesinde (08.00–22.00) konum, yüzde. */
+export const dayPercent = (minute: number) =>
+  Math.min(100, Math.max(0, ((minute - OPEN_MINUTE) / (CLOSE_MINUTE - OPEN_MINUTE)) * 100));

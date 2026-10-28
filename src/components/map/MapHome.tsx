@@ -65,7 +65,7 @@ export function MapHome() {
   return (
     <div className="relative flex h-[calc(100dvh-3.5rem-env(safe-area-inset-bottom))] flex-col overflow-hidden lg:h-[calc(100dvh-3.5rem)] lg:flex-row">
       <div className="relative min-h-0 flex-1">
-        <header className="absolute inset-x-2 top-2 z-10 space-y-2 rounded-lg border border-line bg-overlay p-2 shadow-float lg:right-auto lg:w-[28rem]">
+        <header className="absolute inset-x-2 top-2 z-30 has-[button[aria-expanded=true]]:bg-card space-y-2 rounded-lg border border-line bg-overlay p-2 shadow-float lg:right-auto lg:w-[28rem]">
           <h1 className="sr-only">Kampüs haritası</h1>
           {data && <SearchBox data={data} query={query} onSelect={select} />}
           <WhenPicker compact />

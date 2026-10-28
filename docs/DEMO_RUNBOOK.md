@@ -20,7 +20,7 @@ kapsayan aralıkta).
 
 | Adım | Ekran | Söylenecek |
 |---|---|---|
-| 1 | **Şimdi**: "Ne zaman çalışacaksın?" → Yarın → 13.00 → 15.00 → "13.00–15.00 arası boş sınıflar" | "Gün ve saat aralığını seçiyorsun; o aralığın tamamında dersi olmayan sınıflar. En üstte öğrencinin doğruladıkları." |
+| 1 | **Şimdi**: "Ne zaman çalışacaksın?" → Yarın → başlangıç 13.00 → süre 2 sa (çizelgede aralık) → "13.00–15.00 arası boş sınıflar" | "Gün ve saat aralığını seçiyorsun; o aralığın tamamında dersi olmayan sınıflar. En üstte öğrencinin doğruladıkları." |
 | 1b | "Bu saatte açık" → kafeler o aralıkta açık olanlarla süzülür | "Bilinmeyen saat açık sayılmaz." |
 | 2 | Bir karta dokun (BB-103): durum, "17.00'ye kadar boş", bugünkü dersler, puanlar | "Programda boş ≠ gerçekten boş; o yüzden öğrenci doğrulaması ayrı renk." |
 | 3 | **Harita**: binalardaki sayılar = boş sınıf → Bilgisayar ve Bilişim'e dokun → kat görünümü | "Gerçek kampüs haritası (OpenStreetMap), paketsiz ve anında açılır." |

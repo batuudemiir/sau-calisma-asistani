@@ -20,8 +20,8 @@ Programda boş görünen derslik, gerçekten boş olduğu doğrulanmış derslik
 algoritmada, arayüz metninde ve testlerde korunur. Bilinmeyen bilgi asla olumlu kabul edilmez.
 
 ## Kullanıcı akışı
-1. Ana ekran **Şimdi** (`/`): "Ne zaman çalışacaksın?" — gün (Bugün, Yarın, sonraki 5 gün) + başlangıç (Şimdi ya da
-   08.00–21.30) + bitiş (en geç 22.00) → "Şu an boş sınıflar" / "13.00–15.00 arası boş sınıflar": kartta yalnızca
+1. Ana ekran **Şimdi** (`/`): "Ne zaman çalışacaksın?" — gün (Bugün, Yarın, sonraki 5 gün) + başlangıç saati çipleri (Şimdi ya da
+   08.00–21.30) + süre çipleri (30 dk–4 sa, en geç 22.00; gün çizelgesinde gösterilir) → "Şu an boş sınıflar" / "13.00–15.00 arası boş sınıflar": kartta yalnızca
    sınıf, bina, durum ve "17.00'ye kadar"; doğrulanmışlar üstte, dolu/bilinmeyenler açılır bölümde. Altında
    "Kütüphane ve kafeler". Filtreler: Sessiz, Priz var, Şu an açık (bilinmeyen filtreye girmez). Kayıt gerekmez.
 2. **Harita** sekmesi (`/harita`, gerçek OSM konumları): binadaki sayı = boş sınıf; binaya dokununca kat görünümü.

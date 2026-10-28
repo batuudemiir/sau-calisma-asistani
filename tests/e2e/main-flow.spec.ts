@@ -28,22 +28,29 @@ const freeList = (page: Page) => page.getByRole("list", { name: "Boş sınıflar
 test("ana sayfa Şimdi, sekmeler sorguyu taşır, eski bağlantılar yönlendirilir", async ({ page }) => {
   await page.goto(`/?${Q}`);
   await expect(page.getByRole("heading", { level: 1, name: "Ne zaman çalışacaksın?" })).toBeVisible();
-  // Seçilen aralık başlıkta: Salı 27 Ekim 13.00-14.00
-  await expect(page.getByText("Salı 27 Ekim · 13.00–14.00")).toBeVisible();
+  // Seçilen aralık: seçicinin özeti ve sonuç başlığı
+  const when = page.getByRole("group", { name: "Ne zaman" });
+  await expect(when.getByText("13.00 → 14.00")).toBeVisible();
   await expect(page.getByRole("heading", { level: 2, name: /13\.00–14\.00 arası boş sınıflar/ })).toBeVisible();
   const tabs = page.getByRole("navigation", { name: "Ana gezinme" });
   await expect(tabs.getByRole("link", { name: "Şimdi" })).toHaveAttribute("aria-current", "page");
-  // Bitiş 14.30 → süre 90 dk; gün değişince başlangıç saati korunur
-  await page.getByLabel("Bitiş").selectOption("870");
+  // Süre 1,5 sa → d=90; özet ve çip güncellenir
+  await when.getByRole("group", { name: "Süre" }).getByRole("button", { name: "1,5 sa" }).click();
   await expect(page).toHaveURL(/\/\?d=90&at=2026-10-27T13/);
-  await expect(page.getByText("Salı 27 Ekim · 13.00–14.30")).toBeVisible();
-  await page.getByRole("group", { name: "Gün" }).getByRole("button", { name: "Yarın" }).click();
+  await expect(when.getByText("13.00 → 14.30")).toBeVisible();
+  await expect(when.getByRole("group", { name: "Süre" }).getByRole("button", { name: "1,5 sa" })).toHaveAttribute("aria-pressed", "true");
+  // Gün değişince başlangıç ve süre korunur
+  await when.getByRole("group", { name: "Gün" }).getByRole("button", { name: "Yarın" }).click();
   await expect(page).toHaveURL(/d=90&at=\d{4}-\d{2}-\d{2}T13(:|%3A)00/);
-  await expect(page.getByRole("group", { name: "Gün" }).getByRole("button", { name: "Yarın" })).toHaveAttribute("aria-pressed", "true");
-  // Başlangıç "Şimdi": at silinir
-  await page.getByRole("group", { name: "Gün" }).getByRole("button", { name: "Bugün" }).click();
+  await expect(when.getByRole("group", { name: "Gün" }).getByRole("button", { name: "Yarın" })).toHaveAttribute("aria-pressed", "true");
+  // Başlangıç saati çipi
+  await when.getByRole("group", { name: "Başlangıç" }).getByRole("button", { name: "15.00" }).click();
+  await expect(page).toHaveURL(/at=\d{4}-\d{2}-\d{2}T15(:|%3A)00/);
+  await expect(when.getByText("15.00 → 16.30")).toBeVisible();
+  // Bugün: başlangıç "Şimdi", at silinir
+  await when.getByRole("group", { name: "Gün" }).getByRole("button", { name: "Bugün" }).click();
   await expect(page).not.toHaveURL(/at=/);
-  await expect(page.getByLabel("Başlangıç")).toHaveValue("simdi");
+  await expect(when.getByRole("group", { name: "Başlangıç" }).getByRole("button", { name: /^Şimdi/ })).toHaveAttribute("aria-pressed", "true");
   await page.goto(`/?d=90&at=2026-10-27T13:00`);
   await tabs.getByRole("link", { name: "Harita" }).click();
   await expect(page).toHaveURL(/\/harita\?d=90/);

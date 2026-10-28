@@ -35,3 +35,14 @@ describe("arama zamanı (gün + saat aralığı)", () => {
     expect(nextOpenWindow(at(6))).toEqual({ at: "2026-10-28T09:00", d: "120", label: "Bugün 09.00–11.00" });
   });
 });
+
+describe("süre metni ve çizelge", () => {
+  it("kısa ve uzun süre metinleri", async () => {
+    const { durationLabel, durationText, dayPercent } = await import("../../src/lib/when");
+    expect([30, 60, 90, 120, 100].map(durationLabel)).toEqual(["30 dk", "1 sa", "1,5 sa", "2 sa", "1 sa 40 dk"]);
+    expect([45, 120, 90, 100].map(durationText)).toEqual(["45 dakika", "2 saat", "1,5 saat", "1 saat 40 dakika"]);
+    expect(dayPercent(480)).toBe(0);
+    expect(dayPercent(900)).toBe(50);
+    expect(dayPercent(1400)).toBe(100);
+  });
+});

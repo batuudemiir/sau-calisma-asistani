@@ -91,7 +91,7 @@ export function ResultsView() {
           {searching && data ? `${places.length + results.length} sonuç` : ""}
         </p>
         <FilterChips only={["quiet", "power", "open"]} />
-        {data && <WindowSummary now={data.now} durationMin={data.durationMin} basePath="/" />}
+        {data && <WindowSummary now={data.now} durationMin={data.durationMin} basePath="/" showWindow={false} />}
       </header>
 
       {loading && !data && <p role="status">Yükleniyor…</p>}

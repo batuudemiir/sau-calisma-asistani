@@ -13,10 +13,13 @@ export function WindowSummary({
   now,
   durationMin,
   basePath,
+  showWindow = true,
 }: {
   now: SearchResponse["now"];
   durationMin: number;
   basePath: string;
+  /** Aralık metni (seçici zaten gösteriyorsa kapatılır). */
+  showWindow?: boolean;
 }) {
   const params = useSearchParams();
   const end = now.minute + durationMin;
@@ -24,10 +27,12 @@ export function WindowSummary({
   const open = nextOpenWindow(now.nowMs);
   return (
     <div className="space-y-2 text-sm">
-      <p className="text-fg-2">
-        <strong className="text-fg-1">{windowText(now.dateISO, WEEKDAY_NAMES[now.weekday], now.minute, end)}</strong>
-        {now.live && !now.isDemoClock && " · şu an"}
-      </p>
+      {showWindow && (
+        <p className="text-fg-2">
+          <strong className="text-fg-1">{windowText(now.dateISO, WEEKDAY_NAMES[now.weekday], now.minute, end)}</strong>
+          {now.live && !now.isDemoClock && " · şu an"}
+        </p>
+      )}
       {!now.live && (
         <p className="text-fg-2">İleri bir saat seçtin: öğrenci bildirimleri değil, ders programı gösteriliyor.</p>
       )}
