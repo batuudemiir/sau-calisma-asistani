@@ -5,7 +5,7 @@ import { runSearch } from "@/server/search-service";
 
 export async function GET(request: NextRequest) {
   const demoMode = isDemoMode();
-  const q = parseQuery(request.nextUrl.searchParams, demoMode, Date.now());
+  const q = parseQuery(request.nextUrl.searchParams, Date.now());
   if (!q.ok) return Response.json({ error: q.error }, { status: 400 });
 
   try {

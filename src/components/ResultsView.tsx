@@ -2,15 +2,15 @@
 
 import { useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { WEEKDAY_NAMES, time } from "@/lib/labels";
+import { time } from "@/lib/labels";
 import { applyFilters, parseFilters } from "@/lib/filters";
 import { matchesQuery } from "@/lib/search";
 import { carryQuery, durationParam, useApi } from "@/lib/use-api";
 import type { MapResponse, SearchResponse } from "@/server/search-service";
 import { Assistant } from "./assistant/Assistant";
-import { DemoClockNotice } from "./DemoClockNotice";
+import { WindowSummary } from "./WindowSummary";
 import { PlaceRow, RoomCard } from "./home/RoomCard";
-import { DurationChips } from "./nav/DurationChips";
+import { WhenPicker } from "./nav/WhenPicker";
 import { FilterChips } from "./nav/FilterChips";
 
 export const POLL_MS = 4000;
@@ -43,8 +43,9 @@ export function ResultsView() {
     else q.delete("q");
     router.replace(`${pathname}?${q}`, { scroll: false });
   };
-  const places = data ? applyFilters(data.places, filters).filter((p) => matchesQuery(text, p.name)) : [];
-  const results = data ? applyFilters(data.results, filters).filter((r) => matchesQuery(text, r.code, r.buildingName)) : [];
+  const win = data ? { weekday: data.now.weekday, start: data.now.minute, end: data.now.minute + data.durationMin } : undefined;
+  const places = data ? applyFilters(data.places, filters, win).filter((p) => matchesQuery(text, p.name)) : [];
+  const results = data ? applyFilters(data.results, filters, win).filter((r) => matchesQuery(text, r.code, r.buildingName)) : [];
   const free = results.filter((r) => isFree(r.status.code));
   const others = results.filter((r) => !isFree(r.status.code));
   const visible = all || searching ? free : free.slice(0, FIRST);
@@ -55,8 +56,8 @@ export function ResultsView() {
   return (
     <div className="mx-auto w-full max-w-md flex-1 space-y-6 px-4 pt-5 pb-28 lg:max-w-5xl lg:px-8 lg:py-10">
       <header className="space-y-3">
-        <h1 className="text-[28px] leading-8 font-bold">Kaç dakikan var?</h1>
-        <DurationChips basePath="/" />
+        <h1 className="text-[28px] leading-8 font-bold">Ne zaman çalışacaksın?</h1>
+        <WhenPicker />
         <div className="relative">
           <label htmlFor="ara" className="sr-only">
             Sınıf, bina veya yer ara
@@ -90,12 +91,7 @@ export function ResultsView() {
           {searching && data ? `${places.length + results.length} sonuç` : ""}
         </p>
         <FilterChips only={["quiet", "power", "open"]} />
-        {data && (
-          <p className="text-sm text-fg-2">
-            {WEEKDAY_NAMES[data.now.weekday]} <span className="font-mono">{time(data.now.minute)}</span>
-          </p>
-        )}
-        {data && <DemoClockNotice now={data.now} basePath="/" durationMin={d} />}
+        {data && <WindowSummary now={data.now} durationMin={data.durationMin} basePath="/" />}
       </header>
 
       {loading && !data && <p role="status">Yükleniyor…</p>}
@@ -112,7 +108,10 @@ export function ResultsView() {
         <div className="space-y-6 lg:grid lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start lg:gap-8 lg:space-y-0">
           <section aria-labelledby="bos-siniflar" className="space-y-3">
             <h2 id="bos-siniflar" className="text-[22px] leading-7 font-bold">
-              Şu an boş sınıflar <span className="text-fg-2">({free.length})</span>
+              {data.now.live && !data.now.isDemoClock
+                ? "Şu an boş sınıflar"
+                : `${time(data.now.minute)}–${time(Math.min(data.now.minute + data.durationMin, 1439))} arası boş sınıflar`}{" "}
+              <span className="text-fg-2">({free.length})</span>
             </h2>
             {free.length === 0 ? (
               <p className="rounded-md border border-line-strong p-4">
@@ -120,7 +119,7 @@ export function ResultsView() {
                   ? `"${text.trim()}" aramasına uyan boş sınıf yok. Sınıf kodunu (ör. BB-102) veya bina adını dene.`
                   : filters.length > 0
                     ? "Filtreye uyan boş sınıf yok. Bir filtreyi kaldırmayı dene."
-                    : `${d} dakika boyunca boş sınıf görünmüyor. Daha kısa bir süre seç ya da kütüphaneye bak.`}
+                    : "Bu aralıkta boş sınıf görünmüyor. Daha kısa bir aralık ya da başka bir saat seç; kütüphane ve kafeler aşağıda."}
               </p>
             ) : (
               <ul className="space-y-2" aria-label="Boş sınıflar">
@@ -161,7 +160,7 @@ export function ResultsView() {
             ) : (
               <ul className="space-y-2">
                 {places.map((p) => (
-                  <PlaceRow key={p.spaceId} place={p} href={href(p.spaceId)} />
+                  <PlaceRow key={p.spaceId} place={p} href={href(p.spaceId)} weekday={data.now.weekday} />
                 ))}
               </ul>
             )}

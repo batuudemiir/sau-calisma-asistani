@@ -16,8 +16,15 @@ Kod yeri: `src/domain/availability.ts`, `src/domain/trust.ts`, `src/domain/ranki
 | `MIN_RATINGS_TO_SHOW` | 3 | Bu sayının altında ortalama gösterilmez |
 
 ## Girdiler
-`now` (Europe/Istanbul tarih-saat; motor saati kendisi okumaz), `durationMin` ∈ {30, 60, 90, 120},
-aktif dönem, o günün yayımlanmış blokları, aday alanlar, son 30 dakikanın bildirimleri.
+`now` = seçilen aralığın başlangıcı (Europe/Istanbul tarih-saat; kullanıcı gün + başlangıç seçer, seçmezse şimdi;
+motor saati kendisi okumaz), `durationMin` = bitiş − başlangıç (15 dk – 14 saat, tam dakika), aktif dönem, o günün
+yayımlanmış blokları, aday alanlar, son 30 dakikanın bildirimleri.
+
+**Canlılık:** bildirimler "şu an"ı anlatır. Seçilen aralık şimdiyi kapsamıyorsa (başlangıç şimdiden 15 dk'dan fazla
+sonra ya da aralık bitmiş) bildirimler hesaba katılmaz; durum yalnızca programdan gelir ve arayüz bunu yazar
+(`isLive`, `src/server/search-service.ts`). Demo modunda seçilen saat "şimdi" sayılır (demo saati).
+Çalışma yerinin "Bu saatte açık" olması için OSM saatinin aralığın tamamını kapsaması gerekir; yorumlanamayan saat
+açık sayılmaz (`src/domain/opening-hours.ts`).
 
 ## Durum etiketleri (tek kaynak: `src/domain/types.ts`)
 

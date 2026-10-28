@@ -5,7 +5,7 @@ import { expect, test } from "@playwright/test";
 const Q = "d=60&at=2026-10-27T13:00";
 const ROOM = encodeURIComponent("bilisim-fakultesi-BB-102");
 const ROUTES = [
-  { name: "şimdi", path: `/?${Q}`, ready: "Kaç dakikan var?" },
+  { name: "şimdi", path: `/?${Q}`, ready: "Ne zaman çalışacaksın?" },
   { name: "harita", path: `/harita?${Q}`, ready: /boş sınıf/ },
   { name: "bina paneli", path: `/harita?${Q}&b=bilisim-fakultesi`, ready: /Bilgisayar ve Bilişim/ },
   { name: "yer paneli", path: `/harita?${Q}&s=kutuphane-merkez`, ready: /Süleyman Demirel/ },

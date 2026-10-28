@@ -1,6 +1,6 @@
 "use client";
 
-import { DemoClockNotice } from "../DemoClockNotice";
+import { WindowSummary } from "../WindowSummary";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -8,7 +8,7 @@ import { OSM_ATTRIBUTION, buildingShape } from "@/data/campus";
 import { LIBRARY_LEVEL_LABELS, statusTitle } from "@/lib/labels";
 import { carryQuery, durationParam, useApi } from "@/lib/use-api";
 import type { MapResponse, PlaceDTO } from "@/server/search-service";
-import { DurationChips } from "../nav/DurationChips";
+import { WhenPicker } from "../nav/WhenPicker";
 import { buttonClass } from "../ui/Button";
 import { PlaceGlyph } from "../ui/PlaceGlyph";
 import { openingHoursText } from "@/lib/opening-hours";
@@ -68,7 +68,7 @@ export function MapHome() {
         <header className="absolute inset-x-2 top-2 z-10 space-y-2 rounded-lg border border-line bg-overlay p-2 shadow-float lg:right-auto lg:w-[28rem]">
           <h1 className="sr-only">Kampüs haritası</h1>
           {data && <SearchBox data={data} query={query} onSelect={select} />}
-          <DurationChips basePath="/harita" />
+          <WhenPicker compact />
         </header>
 
         {loading && !data && (
@@ -113,7 +113,7 @@ export function MapHome() {
           {data && building && (
             <Panel title={building.name} onClose={close}>
               <p className="text-sm">
-                {d} dakika boyunca <strong>{freeCount(building)}</strong> boş sınıf. Sınıfa dokun: ayrıntı ve check-in.
+                Seçtiğin aralıkta <strong>{freeCount(building)}</strong> boş sınıf. Sınıfa dokun: ayrıntı ve check-in.
               </p>
               <DirectionsLink osm={building.osm} />
               <BuildingMap spaces={building.spaces} query={query} />
@@ -172,7 +172,7 @@ function Panel({ title, onClose, children }: { title: string; onClose: () => voi
 }
 
 function PlaceSummary({ place, nowMs }: { place: PlaceDTO; nowMs: number }) {
-  const hours = openingHoursText(place.openingHours);
+  const hours = openingHoursText(place.openingHours, !place.isSimulated);
   return (
     <div className="space-y-2">
       <StatusBadge status={place.status} isLibrary />
@@ -221,10 +221,10 @@ function Overview({
     <div className="space-y-4">
       <div>
         <h2 id="sheet-title" ref={titleRef} tabIndex={-1} className="text-[21px] leading-[26px] font-bold outline-none">
-          {total > 0 ? `${total} boş sınıf` : "Şu an boş sınıf görünmüyor"}
+          {total > 0 ? `${total} boş sınıf` : "Bu aralıkta boş sınıf görünmüyor"}
         </h2>
         <p className="text-sm text-fg-2">Haritada bir binaya dokun, boş sınıfları gör.</p>
-        <DemoClockNotice now={data.now} basePath="/harita" durationMin={data.durationMin} />
+        <WindowSummary now={data.now} durationMin={data.durationMin} basePath="/harita" />
       </div>
       <section aria-labelledby="buildings-title" className="space-y-2">
         <h3 id="buildings-title" className="sr-only">

@@ -6,9 +6,14 @@ describe("seed-demo planı", () => {
   it("odalar gerçek (OSM konumlu) fakülte binalarında; her kayıt içte isSimulated; çakışan blok yok", () => {
     const p = demoPlan();
     expect(p.source.isSimulated).toBe(true);
-    expect(p.spaces.length).toBeGreaterThanOrEqual(30);
+    expect(p.spaces.filter((s) => s.kind === "CLASSROOM").length).toBeGreaterThanOrEqual(55);
+    // Çalışma alanları gerçek bir binanın içinde (OSM konumu var)
+    const studyAreas = p.spaces.filter((s) => s.kind === "STUDY_AREA");
+    expect(studyAreas.length).toBeGreaterThanOrEqual(6);
+    for (const s of studyAreas) expect(s.osm && osmBuilding(s.osm)).toBeTruthy();
     const places = new Map(CAMPUS_PLACES.map((c) => [c.id, c]));
-    for (const s of p.spaces) {
+    const rooms = p.spaces.filter((s) => s.kind === "CLASSROOM");
+    for (const s of rooms) {
       expect(s.isSimulated).toBe(true);
       const place = places.get(s.buildingId);
       expect(place?.category).toBe("FACULTY");

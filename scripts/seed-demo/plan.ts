@@ -1,6 +1,7 @@
 import type { Reward } from "../../src/domain/rewards";
 import type { Scores } from "../../src/domain/ratings";
 import type { ScheduleBlock, Space, Term, Weekday } from "../../src/domain/types";
+import { osmBuilding, placeById } from "../../src/data/campus";
 
 // Sunum verisi: gerçek fakülte binalarına (OpenStreetMap konumları, src/data/campus.ts) bağlı derslikler ve ders
 // programı. Oda kodları, dersler ve puanlar gerçek SAÜ programından alınmamıştır; her kayıt içte isSimulated=true
@@ -136,6 +137,70 @@ const FACULTIES: { building: string; prefix: string; rooms: string[]; courses: [
       ["HUK105", "Roma Hukuku"],
     ],
   },
+  {
+    building: "ilahiyat-fakultesi",
+    prefix: "ILA",
+    rooms: ["İF-101", "İF-102", "İF-201", "İF-202"],
+    courses: [
+      ["ILA101", "Arap Dili"],
+      ["ILA201", "Tefsir"],
+      ["ILA203", "Din Felsefesi"],
+    ],
+  },
+  {
+    building: "sanat-tasarim-mimarlik",
+    prefix: "STM",
+    rooms: ["STM-101", "STM-102", "STM-103", "STM-201", "STM-202"],
+    courses: [
+      ["MIM101", "Temel Tasarım"],
+      ["MIM201", "Yapı Bilgisi"],
+      ["GRT203", "Tipografi"],
+      ["MIM205", "Mimarlık Tarihi"],
+    ],
+  },
+  {
+    building: "insaat-muhendisligi",
+    prefix: "INS",
+    rooms: ["İM-101", "İM-102", "İM-201", "İM-202", "İM-203"],
+    courses: [
+      ["INS201", "Statik"],
+      ["INS203", "Yapı Malzemesi"],
+      ["INS301", "Zemin Mekaniği"],
+      ["INS303", "Hidrolik"],
+    ],
+  },
+  {
+    building: "muhendislik-m7",
+    prefix: "MAK",
+    rooms: ["M7-101", "M7-102", "M7-201", "M7-202"],
+    courses: [
+      ["MAK201", "Dinamik"],
+      ["MAK203", "Makine Elemanları"],
+      ["MAK301", "Isı Transferi"],
+    ],
+  },
+  {
+    building: "fen-bilimleri-enstitusu",
+    prefix: "FBE",
+    rooms: ["FBE-101", "FBE-102", "FBE-201"],
+    courses: [
+      ["FBE501", "Araştırma Yöntemleri"],
+      ["FBE503", "Bilimsel Etik"],
+    ],
+  },
+];
+
+/**
+ * Fakülte binalarının içindeki kafe/çalışma alanları (konum: binanın OSM kaydı). Adları ve saatleri örnektir.
+ * Kampüs kataloğundaki gerçek yerler (kütüphaneler, kantin, Taş Kafe…) seed-campus'tan gelir.
+ */
+export const DEMO_PLACES: { id: string; name: string; inside: string; openingHours: string }[] = [
+  { id: "bilisim-kantin", name: "Bilişim Kantini", inside: "bilisim-fakultesi", openingHours: "Mo-Fr 08:00-20:00" },
+  { id: "muhendislik-kafe", name: "Mühendislik Kafe", inside: "muhendislik-m4", openingHours: "Mo-Fr 08:00-21:00" },
+  { id: "fen-edebiyat-kantin", name: "Fen Edebiyat Kantini", inside: "fen-edebiyat-fakultesi", openingHours: "Mo-Fr 08:00-19:00" },
+  { id: "hukuk-kafe", name: "Hukuk Kafe", inside: "hukuk-fakultesi", openingHours: "Mo-Fr 08:30-19:00" },
+  { id: "yemekhane-salon", name: "Yemekhane Çalışma Salonu", inside: "ogrenci-yemekhanesi", openingHours: "Mo-Su 08:00-22:00" },
+  { id: "kongre-fuaye", name: "Kongre Merkezi Fuaye", inside: "kultur-kongre", openingHours: "Mo-Fr 09:00-18:00" },
 ];
 
 /** Programı bilinmeyen oda: "Bilinmiyor" durumunu göstermek için. */
@@ -221,9 +286,24 @@ export function demoPlan() {
     isSimulated: true,
   };
 
-  // Odaların yaklaşık yarısında ve kütüphanede değerlendirme
+  const places: Space[] = DEMO_PLACES.map((p) => {
+    const osm = placeById(p.inside)!.osm;
+    return {
+      id: p.id,
+      buildingId: p.id,
+      code: p.name,
+      kind: "STUDY_AREA",
+      accessStatus: "UNKNOWN",
+      dataQuality: "OK",
+      isSimulated: true,
+      osm,
+      openingHours: osmBuilding(osm) ? p.openingHours : null,
+    };
+  });
+
+  // Odaların yaklaşık yarısında, kütüphanede ve yeni çalışma alanlarında değerlendirme
   const rated = spaces.filter((_, i) => i % 2 === 0).map((s) => s.id);
-  const ratings = [...rated, DEMO_LIBRARY.id].flatMap((spaceId, i) =>
+  const ratings = [...rated, DEMO_LIBRARY.id, ...places.map((p) => p.id)].flatMap((spaceId, i) =>
     RATING_PROFILES[i % RATING_PROFILES.length].map((scores, j) => ({
       spaceId,
       uid: "ornek-veri",
@@ -233,5 +313,6 @@ export function demoPlan() {
     })),
   );
 
-  return { term: DEMO_TERM, library: DEMO_LIBRARY, spaces, blocks, source, ratings };
+  // spaces: derslikler + çalışma alanları (ikisi de Firestore "spaces"; arayüz türe göre ayırır)
+  return { term: DEMO_TERM, library: DEMO_LIBRARY, spaces: [...spaces, ...places], blocks, source, ratings };
 }

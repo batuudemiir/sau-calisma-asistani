@@ -9,17 +9,19 @@ Hazırlık (T-30 dk):
 - [ ] BB-102 (veya başka bir sınıf) QR'ı basılı: `npm run qr -- --base https://<proje>.vercel.app --demo`
       (Vercel'de `QR_SECRET` girdiysen başına `QR_SECRET=<aynı değer>` ekle).
 - [ ] Sunum telefonunda bağlantı **gizli sekmede** açık (temiz cihaz: 0 puan).
-- [ ] Gündüz görünümü: `https://<proje>.vercel.app/?d=60&at=2026-10-28T13:00` (gece ise ekrandaki
-      "Gündüz 13.00 görünümüne geç" aynı işi yapar).
+- [ ] Gece/sabah erken sunuluyorsa: ekrandaki "Yarın 09.00–11.00 aralığına bak" ya da gün/saat seçici.
 
-Veri (ekip kararı: bu modda arayüzde "örnek" etiketi yok; jüriye **sözlü** söylenir): 7 gerçek fakülte binasında
-(OSM konumları) 37 sınıf ve uydurma haftalık program; her an "x dk önce" görünen 8 bildirim (BB-103, FE-202, M2-102,
-Lumo Coffee, Merkez Kütüphane "Öğrenci doğruladı"; BB-201, M4-102, Kantin "Dolu"); sınıfların yarısında
-değerlendirme; kütüphane yoğunluk deseni; 3 ödül (kupon `KAMPUS-…`, hiçbir yerde geçmez).
+Veri (ekip kararı: bu modda arayüzde "örnek" etiketi yok; jüriye **sözlü** söylenir): 12 gerçek fakülte binasında
+(OSM konumları) 58 sınıf ve uydurma haftalık program; kampüs kataloğundaki 6 gerçek çalışma yerine ek olarak fakülte
+binalarının içinde 6 örnek kafe/çalışma alanı (saatleriyle); her an "x dk önce" görünen 13 bildirim (doğrulandı/dolu);
+sınıfların yarısında ve kafelerde değerlendirme; kütüphane yoğunluk deseni; 3 ödül (kupon `KAMPUS-…`, geçmez).
+Bu modda seçilen saat "şimdi" sayıldığı için bildirimler her aralıkta görünür (gerçek modda yalnızca şimdiyi
+kapsayan aralıkta).
 
 | Adım | Ekran | Söylenecek |
 |---|---|---|
-| 1 | **Şimdi**: "Kaç dakikan var?" → 60 dk → "Şu an boş sınıflar" | "Açınca tek soru: kaç dakikan var. En üstte öğrencinin doğruladığı sınıflar." |
+| 1 | **Şimdi**: "Ne zaman çalışacaksın?" → Yarın → 13.00 → 15.00 → "13.00–15.00 arası boş sınıflar" | "Gün ve saat aralığını seçiyorsun; o aralığın tamamında dersi olmayan sınıflar. En üstte öğrencinin doğruladıkları." |
+| 1b | "Bu saatte açık" → kafeler o aralıkta açık olanlarla süzülür | "Bilinmeyen saat açık sayılmaz." |
 | 2 | Bir karta dokun (BB-103): durum, "17.00'ye kadar boş", bugünkü dersler, puanlar | "Programda boş ≠ gerçekten boş; o yüzden öğrenci doğrulaması ayrı renk." |
 | 3 | **Harita**: binalardaki sayılar = boş sınıf → Bilgisayar ve Bilişim'e dokun → kat görünümü | "Gerçek kampüs haritası (OpenStreetMap), paketsiz ve anında açılır." |
 | 4 | Asistan (yuvarlak düğme) → Çalışacak yer bul → 60 dk → Priz → Devam → Fark etmez → konumsuz | "Yapay zekâ API'si yok; kural motoru, gerekçesini ve bilmediğini yazar." |

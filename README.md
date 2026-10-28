@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/batuudemiir/sau-calisma-asistani/actions/workflows/ci.yml/badge.svg)](https://github.com/batuudemiir/sau-calisma-asistani/actions/workflows/ci.yml)
 
-Kütüphanede yer bulamayan SAÜ öğrencisine, seçtiği süre (30/60/90/120 dk) boyunca çalışabileceği alanları
+Kütüphanede yer bulamayan SAÜ öğrencisine, seçtiği gün ve saat aralığında (ör. yarın 13.00–15.00) çalışabileceği alanları
 **bilginin kaynağı ve güven düzeyiyle** gösteren mobil uyumlu web uygulaması.
 GDG on Campus SAÜ Hackathon, 27-28 Ekim 2026.
 

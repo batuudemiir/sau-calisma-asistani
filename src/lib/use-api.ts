@@ -43,7 +43,7 @@ export function useApi<T>(url: string, pollMs?: number) {
   return { ...state, reload: load };
 }
 
-/** Sayfalar arası taşınan sorgu: süre, filtreler ve (yalnızca demo modunda) demo saati. */
+/** Sayfalar arası taşınan sorgu: süre (d), seçilen başlangıç (at) ve filtreler. extra'da "" o anahtarı siler. */
 export function carryQuery(params: URLSearchParams, extra: Record<string, string> = {}) {
   const q = new URLSearchParams();
   q.set("d", String(durationParam(params)));
@@ -51,7 +51,10 @@ export function carryQuery(params: URLSearchParams, extra: Record<string, string
   if (at) q.set("at", at);
   const f = params.get("f");
   if (f) q.set("f", f);
-  for (const [k, v] of Object.entries(extra)) q.set(k, v);
+  for (const [k, v] of Object.entries(extra)) {
+    if (v === "") q.delete(k);
+    else q.set(k, v);
+  }
   return q.toString();
 }
 

@@ -93,7 +93,9 @@ describe("program kontrolü — ek kenar durumlar", () => {
 
   it("açılıştan önce listeden çıkar, geçersiz süre hata verir", () => {
     expect(check(at(7, 50), 30)).toEqual({ kind: "EXCLUDED", why: "BUILDING_CLOSED" });
-    expect(() => check(at(13), 45)).toThrow(RangeError);
+    expect(() => check(at(13), 10)).toThrow(RangeError);
+    expect(() => check(at(13), 61.5)).toThrow(RangeError);
+    expect(check(at(13), 45).kind).not.toBe("EXCLUDED"); // serbest aralık (ör. 13.00-13.45)
   });
 });
 

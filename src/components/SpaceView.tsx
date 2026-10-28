@@ -67,7 +67,7 @@ export function SpaceView() {
               <>
                 <span className="inline-flex items-center gap-1.5 rounded-full border border-zinc-600 bg-zinc-100 px-3 py-1 text-sm font-semibold text-zinc-900 dark:border-line-strong dark:bg-zinc-800 dark:text-zinc-100">
                   <span aria-hidden="true">–</span>
-                  {data.durationMin} dakika için uygun değil
+                  Seçtiğin aralıkta uygun değil
                 </span>
                 <p className="text-sm font-semibold">{EXCLUDED_TEXT[s.excludedBecause]}</p>
               </>
@@ -92,10 +92,10 @@ export function SpaceView() {
               {!isLibrary && (
                 <section aria-labelledby="today-title" className="space-y-2">
                   <h2 id="today-title" className="text-xl font-bold">
-                    Bugünkü dersler ({WEEKDAY_NAMES[data.now.weekday]})
+                    {WEEKDAY_NAMES[data.now.weekday]} günü dersler
                   </h2>
                   {data.today.length === 0 ? (
-                    <p className="text-sm">Bugün bu sınıfta ders yok.</p>
+                    <p className="text-sm">O gün bu sınıfta ders yok.</p>
                   ) : (
                     <ul className="divide-y divide-zinc-300 rounded-md border border-line text-sm dark:divide-zinc-700">
                       {data.today.map((b) => (
@@ -111,7 +111,14 @@ export function SpaceView() {
                 </section>
               )}
 
-              {data.place && <PlaceInfo spaceId={s.spaceId} openingHours={data.place.openingHours} osm={data.place.osm} />}
+              {data.place && (
+                <PlaceInfo
+                  spaceId={s.spaceId}
+                  openingHours={data.place.openingHours}
+                  osm={data.place.osm}
+                  fromOsm={!s.isSimulated}
+                />
+              )}
             </div>
 
             <div className="space-y-6">
@@ -166,14 +173,24 @@ export function SpaceView() {
   );
 }
 
-function PlaceInfo({ spaceId, openingHours, osm }: { spaceId: string; openingHours: string | null; osm: string | null }) {
+function PlaceInfo({
+  spaceId,
+  openingHours,
+  osm,
+  fromOsm,
+}: {
+  spaceId: string;
+  openingHours: string | null;
+  osm: string | null;
+  fromOsm: boolean;
+}) {
   const facts = placeById(spaceId)?.facts ?? [];
   return (
     <section aria-labelledby="place-title" className="space-y-2 text-sm">
       <h2 id="place-title" className="text-xl font-bold">
         Bu yer hakkında
       </h2>
-      <p>{openingHoursText(openingHours) ?? "Açılış saatleri bilinmiyor."}</p>
+      <p>{openingHoursText(openingHours, fromOsm) ?? "Açılış saatleri bilinmiyor."}</p>
       <p className="text-fg-2">Doluluk yalnızca öğrenci bildirimleriyle bilinir; ölçüm yoktur.</p>
       {facts.length > 0 && (
         <ul className="list-disc space-y-1 pl-5">

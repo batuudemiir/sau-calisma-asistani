@@ -1,5 +1,6 @@
 import { REPORT_TTL_MIN } from "./config";
 import type { Criterion } from "./ratings";
+import { hoursText } from "./opening-hours";
 import { formatMinute } from "./time";
 import type { SpaceKind, Status } from "./types";
 
@@ -91,7 +92,7 @@ function evaluate(c: Candidate, needs: Needs): Recommendation {
 
   if (isPlace) {
     if (c.openingHours === "24/7") reasons.push("7/24 açık (OpenStreetMap)");
-    else if (c.openingHours) cautions.push(`Açılış saatleri: ${c.openingHours} — gitmeden kontrol et`);
+    else if (c.openingHours) cautions.push(`Açılış saatleri: ${hoursText(c.openingHours)} — gitmeden kontrol et`);
     else cautions.push("Açılış saatleri bilinmiyor");
   }
 

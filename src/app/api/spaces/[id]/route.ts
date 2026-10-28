@@ -9,7 +9,7 @@ export async function GET(
 ) {
   const { id } = await ctx.params;
   const demoMode = isDemoMode();
-  const q = parseQuery(request.nextUrl.searchParams, demoMode, Date.now());
+  const q = parseQuery(request.nextUrl.searchParams, Date.now());
   if (!q.ok) return Response.json({ error: q.error }, { status: 400 });
 
   try {

@@ -27,11 +27,24 @@ const freeList = (page: Page) => page.getByRole("list", { name: "Boş sınıflar
 
 test("ana sayfa Şimdi, sekmeler sorguyu taşır, eski bağlantılar yönlendirilir", async ({ page }) => {
   await page.goto(`/?${Q}`);
-  await expect(page.getByRole("heading", { level: 1, name: "Kaç dakikan var?" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Ne zaman çalışacaksın?" })).toBeVisible();
+  // Seçilen aralık başlıkta: Salı 27 Ekim 13.00-14.00
+  await expect(page.getByText("Salı 27 Ekim · 13.00–14.00")).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: /13\.00–14\.00 arası boş sınıflar/ })).toBeVisible();
   const tabs = page.getByRole("navigation", { name: "Ana gezinme" });
   await expect(tabs.getByRole("link", { name: "Şimdi" })).toHaveAttribute("aria-current", "page");
-  await page.getByRole("link", { name: "90 dk", exact: true }).click();
-  await expect(page).toHaveURL(/\/\?d=90/);
+  // Bitiş 14.30 → süre 90 dk; gün değişince başlangıç saati korunur
+  await page.getByLabel("Bitiş").selectOption("870");
+  await expect(page).toHaveURL(/\/\?d=90&at=2026-10-27T13/);
+  await expect(page.getByText("Salı 27 Ekim · 13.00–14.30")).toBeVisible();
+  await page.getByRole("group", { name: "Gün" }).getByRole("button", { name: "Yarın" }).click();
+  await expect(page).toHaveURL(/d=90&at=\d{4}-\d{2}-\d{2}T13(:|%3A)00/);
+  await expect(page.getByRole("group", { name: "Gün" }).getByRole("button", { name: "Yarın" })).toHaveAttribute("aria-pressed", "true");
+  // Başlangıç "Şimdi": at silinir
+  await page.getByRole("group", { name: "Gün" }).getByRole("button", { name: "Bugün" }).click();
+  await expect(page).not.toHaveURL(/at=/);
+  await expect(page.getByLabel("Başlangıç")).toHaveValue("simdi");
+  await page.goto(`/?d=90&at=2026-10-27T13:00`);
   await tabs.getByRole("link", { name: "Harita" }).click();
   await expect(page).toHaveURL(/\/harita\?d=90/);
   await expect(page.getByRole("heading", { level: 1, name: "Kampüs haritası" })).toBeAttached();
@@ -62,7 +75,7 @@ test("ana sayfa Şimdi, sekmeler sorguyu taşır, eski bağlantılar yönlendiri
 
 test("ana sayfa: boş sınıflar sade kartla; dolu/bilinmeyen ayrı; kütüphane ve kafeler", async ({ page }) => {
   await page.goto(`/?${Q}`);
-  await expect(page.getByRole("heading", { level: 2, name: /Şu an boş sınıflar/ })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: /arası boş sınıflar/ })).toBeVisible();
   await page.getByRole("button", { name: /Tümünü göster/ }).click();
   const card = freeList(page).getByRole("listitem").filter({ hasText: "BB-102" });
   await expect(card.getByText("Programda boş")).toBeVisible();

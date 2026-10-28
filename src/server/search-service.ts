@@ -58,7 +58,8 @@ export interface PlaceDTO {
 
 export interface SearchResponse {
   /** nowMs: gerçek saat ("x dk önce" hesapları için); dateISO/minute/weekday: program saati. */
-  now: { dateISO: string; minute: number; weekday: number; isDemoClock: boolean; nowMs: number };
+  /** live: seçilen aralık şimdiyi kapsıyor; değilse öğrenci bildirimleri hesaba katılmaz (yalnızca program). */
+  now: { dateISO: string; minute: number; weekday: number; isDemoClock: boolean; nowMs: number; live: boolean };
   durationMin: number;
   termLabel: string | null;
   /** İlki her zaman merkez kütüphane. */
@@ -81,6 +82,14 @@ export const DEFAULT_LIBRARY: Space = {
 export const isPlace = (s: Space) => s.kind === "LIBRARY" || s.kind === "STUDY_AREA";
 
 const reportNow = (opts: SearchOptions) => opts.reportNowMs ?? opts.nowMs;
+/** Başlangıç şimdiden en çok bu kadar sonraysa aralık hâlâ "şimdi" sayılır. */
+const LIVE_SLACK_MS = 15 * 60_000;
+/** Seçilen aralık şimdiyi kapsıyor mu (demo modunda her zaman evet). */
+export function isLive(opts: Pick<SearchOptions, "nowMs" | "reportNowMs" | "durationMin" | "demoMode">): boolean {
+  if (opts.demoMode) return true;
+  const real = opts.reportNowMs ?? opts.nowMs;
+  return opts.nowMs <= real + LIVE_SLACK_MS && opts.nowMs + opts.durationMin * 60_000 > real;
+}
 
 async function load(ds: DataSource, opts: SearchOptions) {
   const now = toLocalTime(opts.nowMs);
@@ -98,8 +107,10 @@ async function load(ds: DataSource, opts: SearchOptions) {
     storedSimulation?.pattern === "DAILY"
       ? { ...storedSimulation, level: simulatedLibraryLevel(now.minute), updatedAtMs: reportNow(opts) }
       : storedSimulation;
-  // Demo modu kapalıyken örnek (simüle) bildirimler hiç hesaba katılmaz
-  const reports = opts.demoMode ? fetchedReports : fetchedReports.filter((r) => !r.isSimulated);
+  // Bildirimler "şu an"ı anlatır: seçilen aralık şimdiyi kapsamıyorsa (ileri/geçmiş saat) yalnızca program
+  // kullanılır. Demo modunda seçilen saat "şimdi" sayılır (demo saati). Demo kapalıyken örnek bildirimler hiç sayılmaz.
+  const live = isLive(opts);
+  const reports = !live ? [] : opts.demoMode ? fetchedReports : fetchedReports.filter((r) => !r.isSimulated);
   const buildingName = new Map(buildings.map((b) => [b.id, b.name]));
   const sourceOf = (spaceId: string) => sources.find((s) => s.spaceIds.includes(spaceId)) ?? null;
   const toSourceDTO = (s: SourceSummary | null): SourceDTO | null =>
@@ -126,6 +137,7 @@ async function load(ds: DataSource, opts: SearchOptions) {
   const partialSpaceIds = new Set(sources.filter((s) => s.coverage === "PARTIAL").flatMap((s) => s.spaceIds));
   return {
     now,
+    live,
     term,
     spaces,
     sources,
@@ -147,7 +159,7 @@ async function load(ds: DataSource, opts: SearchOptions) {
 export async function runSearch(ds: DataSource, opts: SearchOptions): Promise<SearchResponse> {
   const d = await load(ds, opts);
   return {
-    now: { ...d.now, isDemoClock: opts.isDemoClock ?? false, nowMs: reportNow(opts) },
+    now: { ...d.now, isDemoClock: opts.isDemoClock ?? false, nowMs: reportNow(opts), live: d.live },
     durationMin: opts.durationMin,
     termLabel: d.term?.label ?? null,
     places: placeDTOs(d, opts),
@@ -209,7 +221,7 @@ export async function spaceDetail(ds: DataSource, spaceId: string, opts: SearchO
   const { status, freeUntil, nextClass, excludedBecause } = evaluateSpace(d, space, isLibrary, opts);
 
   return {
-    now: { ...d.now, isDemoClock: opts.isDemoClock ?? false, nowMs: reportNow(opts) },
+    now: { ...d.now, isDemoClock: opts.isDemoClock ?? false, nowMs: reportNow(opts), live: d.live },
     durationMin: opts.durationMin,
     space: {
       spaceId: space.id,
@@ -307,7 +319,7 @@ export async function mapView(ds: DataSource, opts: SearchOptions): Promise<MapR
   const d = await load(ds, opts);
   const buildingIds = [...new Set(d.spaces.filter((s) => !isPlace(s)).map((s) => s.buildingId))].sort();
   return {
-    now: { ...d.now, isDemoClock: opts.isDemoClock ?? false, nowMs: reportNow(opts) },
+    now: { ...d.now, isDemoClock: opts.isDemoClock ?? false, nowMs: reportNow(opts), live: d.live },
     durationMin: opts.durationMin,
     places: placeDTOs(d, opts),
     results: resultDTOs(d, opts),

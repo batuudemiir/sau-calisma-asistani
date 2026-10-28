@@ -40,8 +40,14 @@ describe("filtreler", () => {
     expect(ids(applyFilters(all, ["quiet", "power"]))).toEqual(["demo"]);
   });
 
-  it("Şu an açık: yalnızca kaynakta 7/24 yazanlar; yorumlanmayan saat dışarıda", () => {
-    expect(ids(applyFilters(all, ["open"]))).toEqual(["kutuphane"]);
+  it("Bu saatte açık: derslikler geçer; çalışma yeri saati aralığı kapsamalı, bilinmeyen dışarıda", () => {
+    const rooms = ["sessiz", "gurultulu", "puansiz", "demo", "dogrulandi"];
+    // Aralık yoksa yalnızca 7/24
+    expect(ids(applyFilters(all, ["open"]))).toEqual([...rooms.slice(0, 4), "kutuphane", "dogrulandi"]);
+    // Çarşamba 13.00-15.00: kafe (Pzt-Cum 08-17) açık
+    expect(ids(applyFilters(all, ["open"], { weekday: 3, start: 780, end: 900 }))).toContain("kafe");
+    // Çarşamba 16.00-18.00: kafe 17.00'de kapanır
+    expect(ids(applyFilters(all, ["open"], { weekday: 3, start: 960, end: 1080 }))).not.toContain("kafe");
   });
 
   it("türler kendi aralarında veya", () => {

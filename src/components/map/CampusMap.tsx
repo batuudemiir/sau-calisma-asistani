@@ -33,9 +33,9 @@ function centerBox(data: MapResponse): Box {
     .filter((c): c is [number, number] => Boolean(c))
     .map(project);
   if (!centers.length) return BOUNDS;
-  // Telefonda alt panel haritanın altını kapatır: kutu aşağı uzatılır, işaretler görünen üst bölgede kalır
+  // Telefonda üstte arama/zaman kutusu, altta panel haritayı kapatır: kutu iki yana da uzatılır, işaretler ortada kalır
   const box = boxAround(centers, 30);
-  return { ...box, h: box.h * 1.8 };
+  return { ...box, y: box.y - box.h * 0.25, h: box.h * 1.9 };
 }
 
 export type MapSelection = { b?: string; s?: string };
@@ -336,7 +336,7 @@ export function CampusMap({
         </g>
       </svg>
 
-      <p className="absolute top-[7.75rem] right-2 z-10 flex items-center gap-1.5 rounded-sm bg-overlay px-1.5 text-[11px] text-fg-2 lg:top-auto lg:right-auto lg:bottom-2 lg:left-2">
+      <p className="absolute right-2 bottom-[16.4rem] z-10 flex items-center gap-1.5 rounded-sm bg-overlay px-1.5 text-[11px] text-fg-2 lg:right-auto lg:bottom-2 lg:left-2">
         {google ? (
           <>
             <span className="text-[13px] font-semibold tracking-tight text-fg-1">Google</span>

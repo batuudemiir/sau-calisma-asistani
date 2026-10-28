@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { STATUS_ICON, STATUS_STYLE, statusTitle, untilText } from "@/lib/labels";
 import type { PlaceDTO, ResultDTO } from "@/server/search-service";
+import { hoursOn } from "@/domain/opening-hours";
 import { PlaceGlyph } from "../ui/PlaceGlyph";
 
 const shown = (r: ResultDTO["rating"]) => r.real.overall ?? r.simulated.overall;
@@ -48,8 +49,9 @@ export function RoomCard({ r, href }: { r: ResultDTO; href: string }) {
 }
 
 /** Kütüphane / kafe satırı. */
-export function PlaceRow({ place, href }: { place: PlaceDTO; href: string }) {
+export function PlaceRow({ place, href, weekday }: { place: PlaceDTO; href: string; weekday: number }) {
   const rating = shown(place.rating);
+  const hours = hoursOn(place.openingHours, weekday);
   return (
     <li>
       <Link
@@ -61,7 +63,7 @@ export function PlaceRow({ place, href }: { place: PlaceDTO; href: string }) {
           <p className="font-semibold leading-5">{place.name}</p>
           <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-fg-2">
             <StatusPill status={place.status} isLibrary />
-            {place.openingHours === "24/7" && <span>7/24 açık</span>}
+            {hours && <span>{hours === "7/24" ? "7/24 açık" : hours === "kapalı" ? "o gün kapalı" : `${hours} açık`}</span>}
             {rating !== null && (
               <span>
                 <span aria-hidden="true">★</span> {rating.toFixed(1)}

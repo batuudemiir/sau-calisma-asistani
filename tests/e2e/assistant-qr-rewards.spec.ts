@@ -107,7 +107,7 @@ test("sunum prototipi (Firebase'siz): etiketsiz örnek veri; QR → SAÜ öğren
   // Gerçek fakülte binası haritada, sayısı boş sınıf
   await p.goto(`/harita?${Q}`);
   await expect(p.getByRole("link", { name: /^Bilgisayar ve Bilişim Bilimleri Fakültesi: \d+ boş sınıf/ })).toBeVisible();
-  await expect(p.getByRole("link", { name: "Şu anki saate dön" })).toBeVisible();
+  await expect(p.getByText("Salı 27 Ekim · 13.00–14.00")).toBeVisible();
 
   // Her an son 30 dakikada olan bildirimler (Çarşamba 13.00: sunum saati)
   await p.goto("/?d=60&at=2026-10-28T13:00");

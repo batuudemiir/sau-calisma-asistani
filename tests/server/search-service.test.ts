@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { parseQuery } from "../../src/server/request";
-import { DEFAULT_LIBRARY, mapView, runSearch, spaceDetail } from "../../src/server/search-service";
+import { DEFAULT_LIBRARY, mapView, runSearch, spaceDetail, isLive } from "../../src/server/search-service";
 import { LIBRARY, TERM, block, hm, nowMsAt, report, space } from "../domain/fixtures";
 import { fakeSource, type FakeData } from "./fake-source";
 
@@ -37,7 +37,7 @@ const opts = { nowMs: nowMsAt(13), durationMin: 60, demoMode: false };
 describe("runSearch", () => {
   it("T3 durumu: freeUntil 14.00, sonraki ders ve kaynak dönüyor; dersi olan elenir; kaynaksız oda UNKNOWN", async () => {
     const res = await runSearch(fakeSource(data()), opts);
-    expect(res.now).toEqual({ dateISO: "2026-10-27", weekday: 2, minute: 780, isDemoClock: false, nowMs: opts.nowMs });
+    expect(res.now).toEqual({ dateISO: "2026-10-27", weekday: 2, minute: 780, isDemoClock: false, nowMs: opts.nowMs, live: true });
     expect(res.results.map((r) => [r.code, r.status.code, r.freeUntil])).toEqual([
       ["A201", "PROGRAM_FREE", 840],
       ["A203", "UNKNOWN", null],
@@ -100,12 +100,22 @@ describe("runSearch", () => {
     expect(res.results[0].status).toMatchObject({ code: "VERIFIED_FREE", minutesAgo: 2 });
   });
 
-  it("demo saati programı kaydırır, bildirimler gerçek saatle değerlendirilir", async () => {
-    const realNow = nowMsAt(23); // gerçek saat gece; demo saati 13.00
+  it("demo modunda seçilen saat programı kaydırır, bildirimler gerçek saatle değerlendirilir", async () => {
+    const realNow = nowMsAt(23); // gerçek saat gece; seçilen saat 13.00
     const d = data({ reports: [report(A201, "AVAILABLE", 2, realNow)] });
-    const res = await runSearch(fakeSource(d), { ...opts, reportNowMs: realNow, isDemoClock: true });
-    expect(res.now).toMatchObject({ minute: 780, isDemoClock: true, nowMs: realNow });
+    const res = await runSearch(fakeSource(d), { ...opts, demoMode: true, reportNowMs: realNow, isDemoClock: true });
+    expect(res.now).toMatchObject({ minute: 780, isDemoClock: true, nowMs: realNow, live: true });
     expect(res.results[0]).toMatchObject({ code: "A201", status: { code: "VERIFIED_FREE", minutesAgo: 2 } });
+  });
+
+  it("ileri bir saat seçilince (demo kapalı) bildirim değil yalnızca program kullanılır", async () => {
+    const realNow = nowMsAt(10); // gerçek saat 10.00; seçilen aralık 13.00-14.00
+    const d = data({ reports: [report(A201, "BUSY", 2, realNow)] });
+    const res = await runSearch(fakeSource(d), { ...opts, reportNowMs: realNow, isDemoClock: true });
+    expect(res.now.live).toBe(false);
+    expect(res.results.find((r) => r.code === "A201")?.status.code).toBe("PROGRAM_FREE");
+    const now = await runSearch(fakeSource(d), { ...opts, nowMs: realNow, reportNowMs: realNow });
+    expect(now.results.find((r) => r.code === "A201")?.status.code).toBe("REPORTED_BUSY");
   });
 
   it("puan özeti karta eklenir; simüle puanlar yalnızca demo modunda, gerçek ortalamaya karışmadan", async () => {
@@ -189,24 +199,25 @@ describe("spaceDetail", () => {
 });
 
 describe("parseQuery", () => {
-  const p = (q: string, demo = false) => parseQuery(new URLSearchParams(q), demo, 1000);
+  const p = (q: string) => parseQuery(new URLSearchParams(q), 1000);
 
-  it("süre doğrulanır, varsayılan 60", () => {
+  it("süre doğrulanır (15 dk - 14 saat), varsayılan 60", () => {
     expect(p("")).toEqual({ ok: true, durationMin: 60, nowMs: 1000, reportNowMs: 1000, isDemoClock: false });
-    expect(p("d=45").ok).toBe(false);
+    expect(p("d=45").ok).toBe(true);
+    expect(p("d=10").ok).toBe(false);
+    expect(p("d=900").ok).toBe(false);
     expect(p("d=abc").ok).toBe(false);
   });
 
-  it("demo saati yalnızca demo modunda, Istanbul saatiyle", () => {
-    expect(p("d=30&at=2026-10-27T13:00").ok).toBe(false);
-    expect(p("d=30&at=2026-10-27T13:00", true)).toEqual({
+  it("seçilen başlangıç (tarih + saat) her modda, Istanbul saatiyle", () => {
+    expect(p("d=30&at=2026-10-27T13:00")).toEqual({
       ok: true,
       durationMin: 30,
       nowMs: nowMsAt(13),
       reportNowMs: 1000,
       isDemoClock: true,
     });
-    expect(p("d=30&at=dün", true).ok).toBe(false);
+    expect(p("d=30&at=dün").ok).toBe(false);
   });
 });
 
@@ -228,5 +239,21 @@ describe("mapView", () => {
     const [map, search] = await Promise.all([mapView(src, opts), runSearch(src, opts)]);
     expect(map.results).toEqual(search.results);
     expect(map.results.map((r) => r.code)).toContain("A201");
+  });
+});
+
+describe("isLive: bildirimler yalnızca şimdiyi kapsayan aralıkta", () => {
+  const REAL = Date.UTC(2026, 9, 28, 7, 0); // Çarşamba 10.00 İstanbul
+  const base = { reportNowMs: REAL, durationMin: 60, demoMode: false };
+  it("şimdi ve birkaç dakika sonrası canlı; ileri saat, yarın ve geçmiş canlı değil", () => {
+    expect(isLive({ ...base, nowMs: REAL })).toBe(true);
+    expect(isLive({ ...base, nowMs: REAL + 10 * 60_000 })).toBe(true);
+    expect(isLive({ ...base, nowMs: REAL + 3 * 3_600_000 })).toBe(false);
+    expect(isLive({ ...base, nowMs: REAL + 24 * 3_600_000 })).toBe(false);
+    expect(isLive({ ...base, nowMs: REAL - 2 * 3_600_000 })).toBe(false);
+    expect(isLive({ ...base, nowMs: REAL - 30 * 60_000 })).toBe(true); // başlamış, hâlâ sürüyor
+  });
+  it("demo modunda seçilen saat şimdi sayılır", () => {
+    expect(isLive({ ...base, demoMode: true, nowMs: REAL + 24 * 3_600_000 })).toBe(true);
   });
 });
