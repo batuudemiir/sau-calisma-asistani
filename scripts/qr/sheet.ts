@@ -23,7 +23,7 @@ export function qrSheetHtml(items: readonly QrItem[], generatedAt: string): stri
 <html lang="tr">
 <head>
 <meta charset="utf-8">
-<title>SAÜ Çalışma Asistanı — sınıf QR kodları</title>
+<title>neredeçalışalım — sınıf QR kodları</title>
 <style>
   body { font-family: system-ui, sans-serif; margin: 12mm; }
   .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8mm; }

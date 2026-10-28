@@ -99,3 +99,29 @@ test("ödül: eşiğe ulaşınca öğrenci hesabı ister; giriş sonrası örnek
   await expect(tea.getByText("Örnek demo kuponu — hiçbir yerde geçerli değildir.")).toBeVisible();
   await expect(tea.getByRole("button")).toHaveCount(0);
 });
+
+test("sunum prototipi (Firebase'siz): Örnek Blok haritada, örnek bildirimler görünür, QR → örnek öğrenci → kupon", async ({
+  browser,
+}) => {
+  test.skip(process.env.E2E_BACKEND !== "memory", "Yalnızca bellek arka ucunda");
+  const p = await phone(browser);
+  await p.goto(`/?${Q}`);
+  await expect(p.getByRole("link", { name: /Örnek Blok · temsili konum/ })).toBeVisible();
+  await expect(p.getByRole("link", { name: "Gerçek saate dön" })).toBeVisible();
+
+  // Etiketli örnek bildirimler her an son 30 dakikada
+  // Çarşamba 13.00: sunumdaki saat
+  await p.goto("/liste?d=60&at=2026-10-28T13:00");
+  await expect(p.getByText("Öğrenci doğruladı").first()).toBeVisible();
+  await expect(p.getByText("Dolu bildirildi").first()).toBeVisible();
+
+  await p.goto(qrPath("201"));
+  await p.getByRole("button", { name: "Buradayım, uygun (QR ile check-in)" }).click();
+  // +10, başka cihazın yakın zamanki bildirimini doğruluyorsa +12
+  await expect(p.getByText(/\+1\d puan kazandın/)).toBeVisible();
+  await p.goto("/profil");
+  await p.getByRole("button", { name: "Örnek öğrenci hesabıyla devam et" }).click();
+  await expect(p.getByText("Örnek öğrenci hesabı (demo).")).toBeVisible();
+  await p.getByRole("button", { name: /Kampüs kafesinde çay — ödülü al/ }).click();
+  await expect(p.getByText(/ORNEK-/)).toBeVisible();
+});

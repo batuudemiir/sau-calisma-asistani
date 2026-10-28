@@ -146,9 +146,11 @@ Firebase kurmadan canlı link: veri sunucunun belleğinde tutulur (`NEXT_PUBLIC_
 3. Deploy. QR sayfası (yerelde, aynı `QR_SECRET` ile):
    `QR_SECRET=<aynı değer> npm run qr -- --base https://<proje>.vercel.app --demo`
 
-Bu modda: Kampüs + örnek bina/oda/ders programı + kütüphane simülasyonu (hepsi "Örnek demo verisi"), bildirim,
-QR check-in, değerlendirme, puan ve ödüller çalışır. Kimlik, tarayıcıdaki rastgele cihaz kimliğidir; Google/öğrenci
-girişi kapalıdır (ödül talep etmek öğrenci girişi istediği için kupon alınamaz, ödül listesi görünür).
+Bu modda: Kampüs + örnek bina/oda/ders programı (haritada "temsili konum") + kütüphane simülasyonu + her an
+"x dk önce" görünen 3 örnek bildirim (hepsi "Örnek demo verisi"); bildirim, QR check-in, değerlendirme, puan ve
+ödüller çalışır. Kimlik, tarayıcıdaki rastgele cihaz kimliğidir; Google girişi yerine Profil → Aylık ödüller'de
+"Örnek öğrenci hesabıyla devam et" vardır (kupon `ORNEK-…`, geçersiz örnek). Gece 08.00-22.00 dışında ekrandaki
+"Sunum için bugün 13.00'e göre göster" demo saatine geçirir. Sunum akışı: `docs/DEMO_RUNBOOK.md`.
 Sınırlar: veri kalıcı değildir (sunucu örneği yeniden başlayınca sıfırlanır) ve Vercel isteği farklı sunucusuz
 örneklere dağıtırsa bir telefonun bildirimi diğerinde görünmeyebilir. Vercel'de iki telefonla paylaşım doğrulanmadı;
 birim ve e2e testleri bu modda yerelde (`npm run test:e2e:memory`) geçiyor.

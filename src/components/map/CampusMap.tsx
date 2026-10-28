@@ -1,7 +1,12 @@
 "use client";
 
 import { useMemo, useRef } from "react";
-import { CAMPUS, CAMPUS_PLACES, osmBuilding } from "@/data/campus";
+import {
+  CAMPUS,
+  CAMPUS_PLACES,
+  buildingShape,
+  osmBuilding,
+} from "@/data/campus";
 import { projector, toPath } from "@/lib/map-geometry";
 import { boxAround, type Box } from "@/lib/pan-zoom";
 import { statusTitle } from "@/lib/labels";
@@ -21,15 +26,20 @@ const shape = (outline: [number, number][]) => toPath(outline.map(project));
 
 /** Merkez görünümü: çalışma yerleri ve derslikli binaların çevresi (~120 m pay). */
 function centerBox(data: MapResponse): Box {
-  const centers = [...data.places.map((p) => p.osm), ...data.buildings.map((b) => b.osm)]
-    .map((o) => (o ? osmBuilding(o)?.center : null))
+  const centers = [
+    ...data.places.map((p) => (p.osm ? osmBuilding(p.osm)?.center : null)),
+    ...data.buildings.map((b) => buildingShape(b)?.center),
+  ]
     .filter((c): c is [number, number] => Boolean(c))
     .map(project);
   return centers.length ? boxAround(centers, 30) : BOUNDS;
 }
 
 /** Numaralı rehber: haritadaki işaret numarası = paneldeki rehber sırası. */
-export const GUIDE = CAMPUS_PLACES.filter((p) => (p.category === "FACULTY" || p.category === "LAB") && osmBuilding(p.osm));
+export const GUIDE = CAMPUS_PLACES.filter(
+  (p) =>
+    (p.category === "FACULTY" || p.category === "LAB") && osmBuilding(p.osm),
+);
 
 export type MapSelection = { b?: string; s?: string };
 
@@ -63,7 +73,10 @@ export function CampusMap({
   const center = useMemo(() => centerBox(data), [data]);
   const pz = usePanZoom(svgRef, center, BOUNDS);
 
-  const appBuildings = data.buildings.filter((b) => b.osm && osmBuilding(b.osm));
+  const appBuildings = data.buildings.flatMap((b) => {
+    const shapeOf = buildingShape(b);
+    return shapeOf ? [{ ...b, shapeOf }] : [];
+  });
   const appOsm = new Set(appBuildings.map((b) => b.osm));
   const placeOsm = new Set(data.places.map((p) => p.osm).filter(Boolean));
 
@@ -93,7 +106,11 @@ export function CampusMap({
         {CAMPUS.buildings
           .filter((b) => !appOsm.has(b.osm) && !placeOsm.has(b.osm))
           .map((b) => (
-            <path key={b.osm} d={shape(b.outline)} className="fill-map-building">
+            <path
+              key={b.osm}
+              d={shape(b.outline)}
+              className="fill-map-building"
+            >
               {b.name && <title>{b.name}</title>}
             </path>
           ))}
@@ -104,8 +121,16 @@ export function CampusMap({
             <g key={p.id} aria-hidden="true">
               <path d={shape(b.outline)} className="fill-map-guide" />
               <g transform={`translate(${x} ${y}) scale(${pz.px})`}>
-                <circle r="9" className="fill-white stroke-ink-900" strokeWidth="1.2" />
-                <text y="3.8" textAnchor="middle" className="fill-ink-900 text-[10px] font-bold">
+                <circle
+                  r="9"
+                  className="fill-white stroke-ink-900"
+                  strokeWidth="1.2"
+                />
+                <text
+                  y="3.8"
+                  textAnchor="middle"
+                  className="fill-ink-900 text-[10px] font-bold"
+                >
                   {i + 1}
                 </text>
               </g>
@@ -113,46 +138,66 @@ export function CampusMap({
           );
         })}
         {appBuildings.map((b) => {
-          const ob = osmBuilding(b.osm!)!;
+          const ob = b.shapeOf;
+          const representative = !b.osm;
           const [x, y] = project(ob.center);
           const free = b.spaces.filter(
-            (s) => !s.excludedBecause && (s.status.code === "PROGRAM_FREE" || s.status.code === "VERIFIED_FREE"),
+            (s) =>
+              !s.excludedBecause &&
+              (s.status.code === "PROGRAM_FREE" ||
+                s.status.code === "VERIFIED_FREE"),
           ).length;
           const active = selected.b === b.id;
           return (
-            <a
-              key={b.id}
-              href={`/?${query}&b=${encodeURIComponent(b.id)}`}
-              onClick={pick({ b: b.id })}
-              aria-label={`${b.name}: ${free} uygun görünen oda. Odaları gör.`}
-              aria-current={active ? "true" : undefined}
-            >
-              <path
-                d={shape(ob.outline)}
-                className={FILL.PROGRAM_FREE}
-                strokeWidth={active ? 3 : 1.5}
-                vectorEffect="non-scaling-stroke"
-              />
-              <g transform={`translate(${x} ${y}) scale(${pz.px})`}>
-                <rect
-                  x="-26"
-                  y="-12"
-                  width="52"
-                  height="24"
-                  rx="12"
-                  className={active ? "fill-ink-900 stroke-ink-900" : FILL.PROGRAM_FREE}
-                  strokeWidth="1.5"
+            <g key={b.id}>
+              <a
+                href={`/?${query}&b=${encodeURIComponent(b.id)}`}
+                onClick={pick({ b: b.id })}
+                aria-label={`${b.name}${representative ? " · temsili konum (örnek demo verisi)" : ""}: ${free} oda uygun görünüyor. Odaları gör.`}
+                aria-current={active ? "true" : undefined}
+              >
+                <path
+                  d={shape(ob.outline)}
+                  className={FILL.PROGRAM_FREE}
+                  strokeWidth={active ? 3 : 1.5}
+                  strokeDasharray={representative ? "5 3" : undefined}
+                  vectorEffect="non-scaling-stroke"
                 />
+                <g transform={`translate(${x} ${y}) scale(${pz.px})`}>
+                  <rect
+                    x="-26"
+                    y="-12"
+                    width="52"
+                    height="24"
+                    rx="12"
+                    className={
+                      active ? "fill-ink-900 stroke-ink-900" : FILL.PROGRAM_FREE
+                    }
+                    strokeWidth="1.5"
+                  />
+                  <text
+                    aria-hidden="true"
+                    y="4.5"
+                    textAnchor="middle"
+                    className={`text-[12px] font-bold ${active ? "fill-lime-500" : "fill-status-program-fg"}`}
+                  >
+                    {free} oda
+                  </text>
+                </g>
+              </a>
+              {/* Bağlantının dışında: aynı bilgi aria-label'da var */}
+              {representative && (
                 <text
                   aria-hidden="true"
-                  y="4.5"
+                  transform={`translate(${x} ${y}) scale(${pz.px})`}
+                  y="28"
                   textAnchor="middle"
-                  className={`text-[12px] font-bold ${active ? "fill-lime-500" : "fill-status-program-fg"}`}
+                  className="fill-fg-2 text-[10px] font-semibold"
                 >
-                  {free} oda
+                  {b.name} · temsili konum
                 </text>
-              </g>
-            </a>
+              )}
+            </g>
           );
         })}
         {data.places
@@ -169,10 +214,24 @@ export function CampusMap({
                 aria-label={`${p.name}: ${statusTitle(p.status, true)}`}
                 aria-current={active ? "true" : undefined}
               >
-                <path d={shape(ob.outline)} className={FILL[p.status.code]} strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
+                <path
+                  d={shape(ob.outline)}
+                  className={FILL[p.status.code]}
+                  strokeWidth="1.5"
+                  vectorEffect="non-scaling-stroke"
+                />
                 <g transform={`translate(${x} ${y}) scale(${pz.px})`}>
-                  <circle r={active ? 14 : 11} className={`fill-ink-900 ${STROKE[p.status.code]}`} strokeWidth="3" />
-                  <text aria-hidden="true" y="5" textAnchor="middle" className="fill-lime-500 font-display text-[14px] font-bold">
+                  <circle
+                    r={active ? 14 : 11}
+                    className={`fill-ink-900 ${STROKE[p.status.code]}`}
+                    strokeWidth="3"
+                  />
+                  <text
+                    aria-hidden="true"
+                    y="5"
+                    textAnchor="middle"
+                    className="fill-lime-500 font-display text-[14px] font-bold"
+                  >
                     {p.kind === "LIBRARY" ? "K" : "C"}
                   </text>
                 </g>

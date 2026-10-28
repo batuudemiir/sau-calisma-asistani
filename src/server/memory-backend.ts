@@ -35,6 +35,28 @@ interface State {
   nextId: number;
 }
 
+/**
+ * Sunumda her durum türü görünsün diye etiketli örnek bildirimler (uid "ornek-veri", isSimulated=true).
+ * Saatleri okunduğu ana göre "x dk önce"dir; böylece 30 dakikalık geçerlilik hiç dolmaz. Puan hesabına katılmaz.
+ */
+export const DEMO_REPORTS: { spaceId: string; type: SpaceReport["type"]; agoMin: number }[] = [
+  { spaceId: "lumo-coffee", type: "AVAILABLE", agoMin: 6 },
+  { spaceId: "demo-blok-Ö-104", type: "AVAILABLE", agoMin: 4 },
+  { spaceId: "demo-blok-Ö-203", type: "BUSY", agoMin: 11 },
+];
+
+function demoReports(nowMs: number): StoredReport[] {
+  return DEMO_REPORTS.map((r, i) => ({
+    id: `ornek-${i}`,
+    spaceId: r.spaceId,
+    type: r.type,
+    uid: "ornek-veri",
+    createdAtMs: nowMs - r.agoMin * 60_000,
+    isSimulated: true,
+    qr: false,
+  }));
+}
+
 /** Bildirimler 30 dk sonra hesaba katılmaz; bellek büyümesin diye 1 günden eskiler atılır. */
 const KEEP_MS = 24 * 60 * 60_000;
 
@@ -91,7 +113,7 @@ export function createMemoryBackend(nowMs = Date.now()): { source: DataSource; s
     blocks: async (termId, weekday) =>
       s.blocks.filter((b) => b.termId === termId && b.weekday === weekday && b.sourceStatus === "PUBLISHED"),
     reportsSince: async (sinceMs, spaceId) =>
-      s.reports.filter((r) => r.createdAtMs >= sinceMs && (!spaceId || r.spaceId === spaceId)),
+      [...demoReports(Date.now()), ...s.reports].filter((r) => r.createdAtMs >= sinceMs && (!spaceId || r.spaceId === spaceId)),
     // seed-demo ile aynı: gün içi örnek desen (okunurken saate göre hesaplanır)
     librarySimulation: async (): Promise<LibrarySimulation> => ({
       level: "BUSY",
@@ -111,7 +133,7 @@ export function createMemoryBackend(nowMs = Date.now()): { source: DataSource; s
       const decision = decide(recent.map((r) => ({ spaceId: r.spaceId, createdAtMs: r.createdAtMs })));
       if (!decision.ok) return decision;
       const windowStart = report.createdAtMs - CONFIRM_WINDOW_MIN * 60_000;
-      const onSpace = s.reports
+      const onSpace = [...demoReports(report.createdAtMs), ...s.reports]
         .filter((r) => r.spaceId === report.spaceId && r.createdAtMs >= windowStart)
         .map((r) => ({ id: r.id, uid: r.uid, type: r.type, createdAtMs: r.createdAtMs, isSimulated: r.isSimulated, qr: r.qr }));
       const id = `m${s.nextId++}`;

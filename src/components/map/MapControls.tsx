@@ -28,7 +28,7 @@ export function MapControls({
   ];
   return (
     <div
-      className={`absolute right-2 bottom-[21.5rem] z-10 flex flex-col gap-2 lg:bottom-20 lg:flex ${hidden ? "max-lg:hidden" : ""}`}
+      className={`absolute top-[11.5rem] right-2 z-10 flex gap-2 lg:top-auto lg:bottom-20 lg:flex-col ${hidden ? "max-lg:hidden" : ""}`}
       role="group"
       aria-label="Harita denetimleri"
     >

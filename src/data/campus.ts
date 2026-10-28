@@ -118,3 +118,24 @@ export const osmUrl = OSM;
 const byOsm = new Map(CAMPUS.buildings.map((b) => [b.osm, b]));
 export const osmBuilding = (osmId: string) => byOsm.get(osmId) ?? null;
 export const placeById = (id: string) => CAMPUS_PLACES.find((p) => p.id === id) ?? null;
+
+/**
+ * Örnek Blok'un (demo binası) haritadaki temsili yeri: gerçek bir bina değildir. Binalara ~70 m uzak boş bir
+ * alana kesik çizgiyle çizilir ve "temsili konum" diye etiketlenir; gerçek binalarla karışmasın diye.
+ */
+const SPOT: LatLng = [40.74315, 30.33098];
+export const SIMULATED_BUILDING_SPOT: { center: LatLng; outline: LatLng[] } = {
+  center: SPOT,
+  outline: [
+    [SPOT[0] - 0.00012, SPOT[1] - 0.00024],
+    [SPOT[0] - 0.00012, SPOT[1] + 0.00024],
+    [SPOT[0] + 0.00012, SPOT[1] + 0.00024],
+    [SPOT[0] + 0.00012, SPOT[1] - 0.00024],
+  ],
+};
+
+/** Haritada çizilecek bina şekli: OSM kaydı; o yoksa örnek bina için temsili yer; ikisi de yoksa null. */
+export function buildingShape(b: { osm: string | null; isSimulated: boolean }) {
+  if (b.osm) return osmBuilding(b.osm);
+  return b.isSimulated ? SIMULATED_BUILDING_SPOT : null;
+}

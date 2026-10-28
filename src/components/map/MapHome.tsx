@@ -1,9 +1,10 @@
 "use client";
 
+import { DemoClockNotice } from "../DemoClockNotice";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { MISSING_LOCATIONS, OSM_ATTRIBUTION, osmBuilding, osmUrl, type PlaceCategory } from "@/data/campus";
+import { MISSING_LOCATIONS, OSM_ATTRIBUTION, buildingShape, osmUrl, type PlaceCategory } from "@/data/campus";
 import { LIBRARY_LEVEL_LABELS, WEEKDAY_NAMES, statusTitle, time } from "@/lib/labels";
 import { applyFilters, parseFilters } from "@/lib/filters";
 import { carryQuery, durationParam, useApi } from "@/lib/use-api";
@@ -255,12 +256,13 @@ function Overview({
   titleRef: React.RefObject<HTMLHeadingElement | null>;
   onSelect: (sel: MapSelection, el: Element) => void;
 }) {
-  const n = data.results.length;
+  // Başlık yalnızca boş görünenleri sayar; dolu bildirilen ve durumu bilinmeyen odalar listede ama "uygun" değil
+  const n = data.results.filter((r) => r.status.code === "PROGRAM_FREE" || r.status.code === "VERIFIED_FREE").length;
   const more = expanded ? "" : "hidden lg:block";
   const filters = parseFilters(useSearchParams().get("f"));
   const results = applyFilters(data.results, filters);
   const places = applyFilters(data.places, filters);
-  const noLocation = data.buildings.filter((b) => !b.osm || !osmBuilding(b.osm));
+  const noLocation = data.buildings.filter((b) => !buildingShape(b));
   return (
     <div className="space-y-3">
       <div>
@@ -271,6 +273,7 @@ function Overview({
           {d} dakika boyunca · çalışma yerleri aşağıda
           {filters.length > 0 && ` · filtre: ${filters.length} etkin, ${results.length} derslik uyuyor`}
         </p>
+        <DemoClockNotice now={data.now} basePath="/" durationMin={d} />
       </div>
       <div className={more}>
         <FilterChips />
@@ -331,7 +334,8 @@ function Overview({
                     }}
                     className="inline-flex min-h-11 items-center underline"
                   >
-                    {b.name} — odaları gör{noLocation.includes(b) ? " (konumu haritada yok)" : ""}
+                    {b.name} — odaları gör
+                    {noLocation.includes(b) ? " (konumu haritada yok)" : !b.osm ? " (haritada temsili konum)" : ""}
                   </a>
                 </li>
               ))}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createMemoryBackend } from "../../src/server/memory-backend";
+import { DEMO_REPORTS, createMemoryBackend } from "../../src/server/memory-backend";
 import { qrToken } from "../../src/server/qr";
 import { submitRating } from "../../src/server/rating-service";
 import { submitReport } from "../../src/server/report-service";
@@ -61,8 +61,21 @@ describe("bellek arka ucu (Firebase'siz prototip)", () => {
     await submitReport(store, "d", { spaceId: ROOM, type: "AVAILABLE" }, NOW);
     await store.deleteAccountData("d");
     expect((await store.profile("d", 20)).user.points).toBe(0);
-    const reports = await source.reportsSince(NOW - 1);
+    const reports = (await source.reportsSince(NOW - 1)).filter((r) => !r.isSimulated);
     expect(reports).toHaveLength(1);
     expect(reports[0].uid).toBe("silinmis");
+  });
+
+  it("örnek bildirimler her an son 30 dakikadadır, etiketlidir ve puan bonusu vermez", async () => {
+    const { source, store } = createMemoryBackend(NOW);
+    const now = Date.now();
+    const demo = await source.reportsSince(now - 30 * 60_000);
+    expect(demo.length).toBeGreaterThanOrEqual(DEMO_REPORTS.length);
+    expect(demo.every((r) => r.isSimulated && r.uid === "ornek-veri")).toBe(true);
+    expect(new Set(demo.map((r) => r.type))).toEqual(new Set(["AVAILABLE", "BUSY"]));
+    // Örnek bildirimi "doğrulayan" gerçek check-in yalnızca kendi puanını alır
+    const res = await submitReport(store, "e", { spaceId: "lumo-coffee", type: "AVAILABLE" }, now);
+    expect(res).toMatchObject({ ok: true, points: 5 });
+    expect((await store.profile("ornek-veri", 20)).user.points).toBe(0);
   });
 });

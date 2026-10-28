@@ -7,7 +7,11 @@ import { checkStudent } from "@/server/student";
 export async function POST(request: Request) {
   const uid = await verifyUid(request);
   if (!uid) return Response.json({ error: "Oturum doğrulanamadı" }, { status: 401 });
-  if (isMemoryBackend()) return Response.json({ error: "Öğrenci girişi bu demoda kapalı" }, { status: 403 });
+  // Firebase'siz prototip: Google doğrulaması yok; cihaz "örnek öğrenci hesabı" olarak işaretlenir (yalnızca sunum)
+  if (isMemoryBackend()) {
+    await writeStore().markStudent(uid);
+    return Response.json({ student: true, demo: true });
+  }
   try {
     const user = await adminAuth().getUser(uid);
     const check = checkStudent(user.providerData);

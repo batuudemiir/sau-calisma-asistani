@@ -2,7 +2,34 @@
 
 Amaç: Canlı demonun (3-5 dk) adım adım provası. `DEMO_AND_PITCH.md` neyin anlatılacağını, bu belge nasıl yapılacağını söyler.
 
-## Demo öncesi (T-30 dk)
+## Jüri sunumu: Vercel prototipi (Firebase'siz)
+
+Hazırlık (T-30 dk):
+- [ ] Vercel bağlantısı açılıyor. Uygulama bir süre boşta kaldıysa ilk açılış birkaç saniye sürebilir; sunumdan
+      hemen önce bir kez aç (veri her yeniden başlatmada sıfırlanır, bu beklenen durum).
+- [ ] Ö-201 (veya başka bir Örnek Blok odası) QR'ı basılı: `QR_SECRET=<Vercel'deki> npm run qr -- --base https://<proje>.vercel.app --demo`.
+- [ ] Sunum telefonunda bağlantı **gizli sekmede** açık (temiz cihaz kimliği: 0 puan).
+- [ ] Demo saati bağlantısı hazır: `https://<proje>.vercel.app/?d=60&at=2026-10-28T13:00`
+      (gerçek saat 08.00-22.00 dışındaysa ekrandaki "Sunum için bugün 13.00'e göre göster" de aynı işi yapar).
+
+Ekranda her zaman görünen örnek veri (hepsi "Örnek demo verisi" etiketli): Örnek Blok'un 8 odası ve ders programı,
+haritada kesik çizgiyle "temsili konum"; her an "x dk önce" yapılmış 3 örnek bildirim (Ö-104 ve Lumo Coffee
+"Öğrenci doğruladı", Ö-203 "Dolu bildirildi"); örnek değerlendirmeler; kütüphane yoğunluk deseni; 3 örnek ödül.
+
+| Adım | Ekran | Söylenecek |
+|---|---|---|
+| 1 | Harita (13.00 demo saati): Örnek Blok "N oda", alt panel "Şu an N derslik uygun görünüyor" | "Kayıt yok. Renk tek başına anlam taşımaz; her şey listede de var." |
+| 2 | Örnek Blok'a dokun → kat görünümü: Doğrulandı / Programda boş / Dolu / Bilinmiyor / Uygun değil | "Programda boş ≠ gerçekten boş. Bilinmeyen asla 'boş' gösterilmez." |
+| 3 | Asistan → Çalışacak yer bul → 60 dk → Priz → Devam → Fark etmez → konumsuz | "Yapay zekâ API'si yok; kural motoru, gerekçesini ve bilmediğini yazar." |
+| 4 | Liste → Ö-104 kartı: "Öğrenci doğruladı · 4 dk önce", kaynak satırı | "Güven etiketi ve kaynak her kartta." |
+| 5 | Basılı QR'ı okut → "Buradayım, uygun (QR ile check-in)" → "+10 puan" → 4 kriteri puanla | "QR kanıtı imzalı; sahte kod reddedilir." |
+| 6 | Profil → 10 puan → "Örnek öğrenci hesabıyla devam et" → "Kampüs kafesinde çay — ödülü al" → `ORNEK-…` kupon | "Eşik + stok, çekiliş değil. Gerçekte SAÜ Google hesabıyla; burada örnek hesap. Kupon geçersiz örnek." |
+| 7 | Profil → "Hesabımı sil" (isteğe bağlı) | "KVKK: kişisel veri silinir, bildirim anonim topluluk verisi olarak kalır." |
+
+Bilinen sınır: veri sunucunun belleğinde; Vercel istekleri farklı örneklere dağıtırsa ikinci telefonda bildirim
+görünmeyebilir (doğrulanmadı). Bu yüzden akış tek telefonla kurgulandı.
+
+## Demo öncesi (T-30 dk, Firebase/yerel demo)
 
 - [ ] Canlı link açılıyor; `DEMO_MODE=true` (demo saati ve etiketli simülasyon için).
 - [ ] Gerçek program yayımlandıysa: `npm run publish-schedule ...` en az 1 dk önce yapıldı (sunucu önbelleği 60 sn).

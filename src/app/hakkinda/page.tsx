@@ -58,6 +58,8 @@ export default function AboutPage() {
           </li>
           <li>
             <strong>Hizmet sağlayıcı:</strong> veriler Google Firebase (Firestore, Authentication) üzerinde işlenir.
+            {process.env.NEXT_PUBLIC_DEMO_BACKEND === "memory" &&
+              " Bu sunum prototipinde Firebase kullanılmaz: veriler yalnızca sunucunun belleğinde tutulur ve sunucu yeniden başlayınca silinir."}
           </li>
           <li>
             <strong>Silme hakkı:</strong> Profil → &quot;Hesabımı sil&quot; ile puanların, katkı geçmişin ve hesabın silinir.

@@ -63,6 +63,8 @@ jobs:
         env:
           NEXT_PUBLIC_USE_EMULATOR: "true"
           DEMO_MODE: "true"
+      # Firebase'siz sunum prototipi (Vercel'deki yapılandırma)
+      - run: npm run test:e2e:memory
       - if: failure()
         uses: actions/upload-artifact@v4
         with:

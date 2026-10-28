@@ -12,6 +12,7 @@ import { DurationChips } from "./nav/DurationChips";
 import { FilterChips } from "./nav/FilterChips";
 import { PlaceCard } from "./PlaceCard";
 import { SpaceCard } from "./SpaceCard";
+import { DemoClockNotice } from "./DemoClockNotice";
 
 export const POLL_MS = 4000;
 
@@ -81,6 +82,7 @@ export function ResultsView() {
             {data.now.isDemoClock && <strong className="ml-1">(demo saati)</strong>}
           </p>
         )}
+        {data && <DemoClockNotice now={data.now} basePath="/liste" durationMin={d} />}
         <Link href={`/?${query}`} className="inline-flex min-h-11 items-center text-sm font-semibold underline">
           Haritada gör →
         </Link>
