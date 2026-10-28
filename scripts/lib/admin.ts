@@ -8,7 +8,11 @@ export function scriptDb(): Firestore {
     // GCLOUD_PROJECT: `firebase emulators:exec` tarafından tanımlanır (.env.local olmadan da çalışsın)
     const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || process.env.GCLOUD_PROJECT;
     if (raw) initializeApp({ credential: cert(JSON.parse(raw)) });
-    else if (process.env.FIRESTORE_EMULATOR_HOST && projectId) initializeApp({ projectId });
+    else if (process.env.FIRESTORE_EMULATOR_HOST && projectId) {
+      // Emulator'da metadata sunucusu yok; aramak her betiği zaman aşımı kadar bekletiyordu
+      process.env.METADATA_SERVER_DETECTION ??= "none";
+      initializeApp({ projectId });
+    }
     else throw new Error("FIREBASE_SERVICE_ACCOUNT veya FIRESTORE_EMULATOR_HOST + NEXT_PUBLIC_FIREBASE_PROJECT_ID gerekli");
   }
   return getFirestore();

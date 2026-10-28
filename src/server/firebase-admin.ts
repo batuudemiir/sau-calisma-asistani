@@ -14,7 +14,11 @@ function adminApp(): App {
 
   // GCLOUD_PROJECT: `firebase emulators:exec` tarafından tanımlanır (.env.local olmadan da çalışsın)
   const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || process.env.GCLOUD_PROJECT;
-  if (process.env.FIRESTORE_EMULATOR_HOST && projectId) return initializeApp({ projectId });
+  if (process.env.FIRESTORE_EMULATOR_HOST && projectId) {
+    // Emulator'da Google Cloud metadata sunucusu yok; kimlik ararken zaman aşımını beklemek ilk isteği ~4-9 sn geciktiriyordu
+    process.env.METADATA_SERVER_DETECTION ??= "none";
+    return initializeApp({ projectId });
+  }
 
   // Firebase App Hosting / Cloud Run: varsayılan uygulama kimliği (servis hesabı JSON'u gerekmez)
   if (process.env.K_SERVICE || process.env.FIREBASE_CONFIG) return initializeApp();
