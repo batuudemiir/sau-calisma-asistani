@@ -9,10 +9,13 @@ export async function GET(request: NextRequest) {
   if (!q.ok) return Response.json({ error: q.error }, { status: 400 });
 
   try {
-    const body = await runSearch(dataSource(), { ...q, demoMode });
+    const body = await runSearch(await dataSource(), { ...q, demoMode });
     return Response.json(body, { headers: { "Cache-Control": "no-store" } });
   } catch (e) {
     console.error("search failed:", e instanceof Error ? e.message : "unknown");
-    return Response.json({ error: "Sonuçlar şu an yüklenemedi" }, { status: 500 });
+    return Response.json(
+      { error: "Sonuçlar şu an yüklenemedi" },
+      { status: 500 },
+    );
   }
 }

@@ -17,7 +17,7 @@ export function useApi<T>(url: string, pollMs?: number) {
     try {
       const res = await fetch(url, { cache: "no-store", signal: ac.signal });
       const body = await res.json().catch(() => null);
-      if (!res.ok) throw new Error(body?.error ?? "Bir sorun oluştu");
+      if (!res.ok) throw new Error(body?.error ?? serverError(res.status));
       setState({ data: body as T, error: null, loading: false });
     } catch (e) {
       if (ac.signal.aborted) return;
@@ -60,3 +60,6 @@ export function durationParam(params: URLSearchParams): number {
   const d = Number(params.get("d"));
   return isDuration(d) ? d : 60;
 }
+
+/** Sunucu JSON yerine platform hata sayfası döndürdüğünde: kod ekranda görünsün (404/500/504 ayrı sorunlardır). */
+export const serverError = (status: number) => `Sunucu yanıt veremedi (HTTP ${status})`;

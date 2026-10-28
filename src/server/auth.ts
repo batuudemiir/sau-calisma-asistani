@@ -1,8 +1,7 @@
 import "server-only";
 
 import type { DecodedIdToken } from "firebase-admin/auth";
-import { isMemoryBackend } from "./backend";
-import { adminAuth } from "./firebase-admin";
+import { adminAuth, isMemoryBackend } from "./backend";
 
 /** "Authorization: Bearer <Firebase ID token>" doğrular. Token, uid veya e-posta loglanmaz. */
 async function verifyToken(request: Request): Promise<DecodedIdToken | null> {
@@ -10,7 +9,7 @@ async function verifyToken(request: Request): Promise<DecodedIdToken | null> {
   const token = header.startsWith("Bearer ") ? header.slice(7) : null;
   if (!token) return null;
   try {
-    return await adminAuth().verifyIdToken(token);
+    return await (await adminAuth()).verifyIdToken(token);
   } catch {
     return null;
   }

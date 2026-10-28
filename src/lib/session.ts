@@ -16,6 +16,7 @@ import { FirebaseError } from "firebase/app";
 import { useEffect, useState } from "react";
 import { MEMORY_BACKEND } from "./backend-mode";
 import { firebaseClient } from "./firebase-client";
+import { serverError } from "./use-api";
 
 /** Firebase'siz prototip (bellek arka ucu): Firebase hiç yüklenmez, istekler rastgele cihaz kimliğiyle gider. */
 export { MEMORY_BACKEND };
@@ -56,7 +57,7 @@ async function withSession<T>(url: string, init: RequestInit = {}, forceRefresh 
     const res = await fetch(url, { ...init, headers: { ...init.headers, authorization }, cache: "no-store" });
     const data = await res.json().catch(() => null);
     if (res.ok) return { ok: true, data: data as T };
-    return { ok: false, error: data?.error ?? "Bir sorun oluştu", status: res.status };
+    return { ok: false, error: data?.error ?? serverError(res.status), status: res.status };
   } catch {
     return { ok: false, error: "Bağlantı kurulamadı" };
   }
