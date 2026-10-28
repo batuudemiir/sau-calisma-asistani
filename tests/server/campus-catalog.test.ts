@@ -28,3 +28,10 @@ describe("kampüs kataloğu", () => {
     expect(CAMPUS.buildings.length).toBeGreaterThan(100);
   });
 });
+
+describe("haritadaki kısa adlar", () => {
+  it("kısa ad tam adın içinde geçer (erişilebilir adla tutarlı)", async () => {
+    const { CAMPUS_PLACES } = await import("../../src/data/campus");
+    for (const p of CAMPUS_PLACES.filter((x) => x.short)) expect(p.name).toContain(p.short!);
+  });
+});

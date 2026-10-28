@@ -1,7 +1,9 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
-import { CAMPUS, buildingShape, osmBuilding } from "@/data/campus";
+import { CAMPUS, buildingShape, osmBuilding, shortName } from "@/data/campus";
+import { declutter, placeLabels } from "@/lib/declutter";
+import { ICON_BOOK, ICON_COFFEE } from "../ui/icons";
 import { projector, toPath } from "@/lib/map-geometry";
 import { boxAround, type Box } from "@/lib/pan-zoom";
 import { statusTitle } from "@/lib/labels";
@@ -37,6 +39,34 @@ function centerBox(data: MapResponse): Box {
 }
 
 export type MapSelection = { b?: string; s?: string };
+
+/** Bina iğnesi (CSS pikseli; ucu 0,0'da, gerçek konum): damla biçimi, gövde merkezi PIN_Y yukarıda. */
+const PIN_Y = 22;
+const PIN = "M0,0 C-5,-7 -16,-12 -16,-22 A16,16 0 1,1 16,-22 C16,-12 5,-7 0,0Z";
+type PinTone = "VERIFIED_FREE" | "PROGRAM_FREE" | "UNKNOWN";
+const PIN_FILL: Record<PinTone, string> = {
+  VERIFIED_FREE: "fill-status-verified-bg",
+  PROGRAM_FREE: "fill-status-program-bg",
+  UNKNOWN: "fill-status-unknown-bg",
+};
+const PIN_TEXT: Record<PinTone, string> = {
+  VERIFIED_FREE: "fill-status-verified-fg",
+  PROGRAM_FREE: "fill-status-program-fg",
+  UNKNOWN: "fill-status-unknown-fg",
+};
+type AppBuilding = MapResponse["buildings"][number];
+const isFree = (s: AppBuilding["spaces"][number]) =>
+  !s.excludedBecause && (s.status.code === "PROGRAM_FREE" || s.status.code === "VERIFIED_FREE");
+const freeOf = (b: AppBuilding) => b.spaces.filter(isFree).length;
+/** Bina rengi: öğrenci doğruladığı boş sınıf varsa yeşil, programa göre boş varsa mavi, yoksa gri. */
+function buildingTone(b: AppBuilding): PinTone {
+  if (b.spaces.some((s) => isFree(s) && s.status.code === "VERIFIED_FREE")) return "VERIFIED_FREE";
+  return freeOf(b) > 0 ? "PROGRAM_FREE" : "UNKNOWN";
+}
+/** Bu ölçeğin altında (metre / ekran pikseli) kısa adlar gösterilir. */
+const LABEL_MPP = 2.6;
+/** İğneler arasında en az bu kadar ekran pikseli. */
+const MIN_GAP_PX = 40;
 
 /** Çalışma yeri işaretinin kenarı: durum rengi (renk tek başına anlam taşımaz; aria-label durumu yazar). */
 const STROKE: Record<string, string> = {
@@ -83,6 +113,54 @@ export function CampusMap({
   });
   const appOsm = new Set(appBuildings.map((b) => b.osm));
   const placeOsm = new Set(data.places.map((p) => p.osm).filter(Boolean));
+  const placeMarkers = data.places.flatMap((p) => {
+    const ob = p.osm ? osmBuilding(p.osm) : null;
+    return ob ? [{ ...p, ob }] : [];
+  });
+
+  // İğneler: gerçek konum (SVG) + üst üste binmesin diye ekran pikselinde kaydırma (dx, dy)
+  const showLabels = pz.px * metersPerUnit < LABEL_MPP;
+  const markers = useMemo(() => {
+    const base = [
+      ...appBuildings.map((b) => {
+        const [x, y] = project(b.shapeOf.center);
+        return { id: b.id, kind: "building" as const, x, y, label: shortName(b.id, b.name), active: selected.b === b.id };
+      }),
+      ...placeMarkers.map((p) => {
+        const [x, y] = project(p.ob.center);
+        return { id: p.spaceId, kind: "place" as const, x, y, label: shortName(p.spaceId, p.name), active: selected.s === p.spaceId };
+      }),
+    ];
+    // Bina iğnesinin gövdesi konumun PIN_Y px yukarısında: çakışma gövdeye göre ölçülür
+    const body = (m: (typeof base)[number]) => (m.kind === "building" ? PIN_Y : 0);
+    const moved = declutter(
+      base.map((m) => ({ id: m.id, x: m.x / pz.px, y: m.y / pz.px - body(m) })),
+      MIN_GAP_PX,
+    );
+    return base.map((m) => {
+      const p = moved.get(m.id)!;
+      return { ...m, dx: p.x - m.x / pz.px, dy: p.y + body(m) - m.y / pz.px };
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- veri ve seçim değişince yeniden
+  }, [data, pz.px, selected.b, selected.s]);
+  const byId = new Map(markers.map((m) => [m.id, m]));
+  // Kısa adlar: yakınlaşınca (seçili olanınki her zaman); başka iğneyi ya da adı kapatan ad gösterilmez
+  const labelled = useMemo(() => {
+    const at = (m: (typeof markers)[number]) => ({ X: m.x / pz.px + m.dx, Y: m.y / pz.px + m.dy });
+    const pins = markers.map((m) => {
+      const { X, Y } = at(m);
+      return m.kind === "building" ? { id: m.id, x: X, y: Y - PIN_Y, r: 18 } : { id: m.id, x: X, y: Y, r: 16 };
+    });
+    const labels = markers
+      .filter((m) => showLabels || m.active)
+      .sort((a, b) => Number(b.active) - Number(a.active))
+      .map((m) => {
+        const { X, Y } = at(m);
+        const w = m.label.length * 7 + 6;
+        return { id: m.id, x: X - w / 2, y: Y + (m.kind === "building" ? 3 : 17), w, h: 15 };
+      });
+    return placeLabels(labels, pins);
+  }, [markers, showLabels, pz.px]);
 
   const pick = (sel: MapSelection) => (e: React.MouseEvent<Element>) => {
     if (e.metaKey || e.ctrlKey || e.shiftKey) return; // yeni sekmede açma serbest
@@ -130,12 +208,54 @@ export function CampusMap({
                 {b.name && <title>{b.name}</title>}
               </path>
             ))}
+        {/* Bina ve yer sınırları (iğnelerin altında) */}
+        {appBuildings.map((b) => (
+          <path
+            key={`sinir-${b.id}`}
+            d={shape(b.shapeOf.outline)}
+            className={FILL[buildingTone(b)]}
+            fillOpacity={0.55}
+            strokeWidth={selected.b === b.id ? 3 : 1.5}
+            vectorEffect="non-scaling-stroke"
+            aria-hidden="true"
+          />
+        ))}
+        {placeMarkers.map((p) => (
+          <path
+            key={`sinir-${p.spaceId}`}
+            d={shape(p.ob.outline)}
+            className={FILL[p.status.code]}
+            fillOpacity={0.55}
+            strokeWidth="1.5"
+            vectorEffect="non-scaling-stroke"
+            aria-hidden="true"
+          />
+        ))}
+
+        {/* Kaydırılan iğnenin gerçek yeri: ince çizgi + nokta */}
+        <g aria-hidden="true">
+          {markers
+            .filter((m) => Math.hypot(m.dx, m.dy) > 2)
+            .map((m) => (
+              <g key={`iz-${m.id}`}>
+                <line
+                  x1={m.x}
+                  y1={m.y}
+                  x2={m.x + m.dx * pz.px}
+                  y2={m.y + m.dy * pz.px}
+                  className="stroke-ink-900"
+                  strokeWidth="1.5"
+                  vectorEffect="non-scaling-stroke"
+                />
+                <circle cx={m.x} cy={m.y} r={2.5 * pz.px} className="fill-ink-900" />
+              </g>
+            ))}
+        </g>
+
         {appBuildings.map((b) => {
-          const ob = b.shapeOf;
-          const [x, y] = project(ob.center);
-          const free = b.spaces.filter(
-            (s) => !s.excludedBecause && (s.status.code === "PROGRAM_FREE" || s.status.code === "VERIFIED_FREE"),
-          ).length;
+          const m = byId.get(b.id)!;
+          const free = freeOf(b);
+          const tone = buildingTone(b);
           const active = selected.b === b.id;
           return (
             <a
@@ -145,23 +265,17 @@ export function CampusMap({
               aria-label={`${b.name}: ${free} boş sınıf. Sınıfları gör.`}
               aria-current={active ? "true" : undefined}
             >
-              <path
-                d={shape(ob.outline)}
-                className={free > 0 ? FILL.PROGRAM_FREE : FILL.UNKNOWN}
-                strokeWidth={active ? 3 : 1.5}
-                vectorEffect="non-scaling-stroke"
-              />
-              <g transform={`translate(${x} ${y}) scale(${pz.px})`}>
-                <circle
-                  r={active ? 14 : 12}
-                  className={active ? "fill-ink-900 stroke-ink-900" : free > 0 ? FILL.PROGRAM_FREE : FILL.UNKNOWN}
-                  strokeWidth="2"
-                />
+              <g
+                transform={`translate(${m.x + m.dx * pz.px} ${m.y + m.dy * pz.px}) scale(${pz.px * (active ? 1.15 : 1)})`}
+                className="drop-shadow-md"
+              >
+                {active && <circle cy={-PIN_Y} r="24" className="fill-accent" fillOpacity={0.22} />}
+                <path d={PIN} className={active ? "fill-ink-900 stroke-card" : `${PIN_FILL[tone]} stroke-card`} strokeWidth="2" />
                 <text
                   aria-hidden="true"
-                  y="4.5"
+                  y={-PIN_Y + 5.5}
                   textAnchor="middle"
-                  className={`text-[13px] font-bold ${active ? "fill-lime-500" : free > 0 ? "fill-status-program-fg" : "fill-status-unknown-fg"}`}
+                  className={`font-display text-[16px] font-bold ${active ? "fill-lime-500" : PIN_TEXT[tone]}`}
                 >
                   {free}
                 </text>
@@ -169,44 +283,57 @@ export function CampusMap({
             </a>
           );
         })}
-        {data.places
-          .filter((p) => p.osm && osmBuilding(p.osm))
-          .map((p) => {
-            const ob = osmBuilding(p.osm!)!;
-            const [x, y] = project(ob.center);
-            const active = selected.s === p.spaceId;
-            return (
-              <a
-                key={p.spaceId}
-                href={`/harita?${query}&s=${encodeURIComponent(p.spaceId)}`}
-                onClick={pick({ s: p.spaceId })}
-                aria-label={`${p.name}: ${statusTitle(p.status, true)}`}
-                aria-current={active ? "true" : undefined}
+
+        {placeMarkers.map((p) => {
+          const m = byId.get(p.spaceId)!;
+          const active = selected.s === p.spaceId;
+          return (
+            <a
+              key={p.spaceId}
+              href={`/harita?${query}&s=${encodeURIComponent(p.spaceId)}`}
+              onClick={pick({ s: p.spaceId })}
+              aria-label={`${p.name}: ${statusTitle(p.status, true)}`}
+              aria-current={active ? "true" : undefined}
+            >
+              <g
+                transform={`translate(${m.x + m.dx * pz.px} ${m.y + m.dy * pz.px}) scale(${pz.px * (active ? 1.15 : 1)})`}
+                className="drop-shadow-md"
               >
+                {active && <circle r="22" className="fill-accent" fillOpacity={0.22} />}
+                <circle r="14" className={`fill-ink-900 ${STROKE[p.status.code]}`} strokeWidth="3.5" />
                 <path
-                  d={shape(ob.outline)}
-                  className={FILL[p.status.code]}
-                  strokeWidth="1.5"
-                  vectorEffect="non-scaling-stroke"
+                  d={p.kind === "LIBRARY" ? ICON_BOOK : ICON_COFFEE}
+                  transform="translate(-8.4 -8.4) scale(0.7)"
+                  fill="none"
+                  className="stroke-lime-500"
+                  strokeWidth="2.4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 />
-                <g transform={`translate(${x} ${y}) scale(${pz.px})`}>
-                  <circle
-                    r={active ? 14 : 11}
-                    className={`fill-ink-900 ${STROKE[p.status.code]}`}
-                    strokeWidth="3"
-                  />
-                  <text
-                    aria-hidden="true"
-                    y="5"
-                    textAnchor="middle"
-                    className="fill-lime-500 font-display text-[14px] font-bold"
-                  >
-                    {p.kind === "LIBRARY" ? "K" : "C"}
-                  </text>
-                </g>
-              </a>
-            );
-          })}
+              </g>
+            </a>
+          );
+        })}
+
+        {/* Kısa adlar: yakınlaşınca ya da seçiliyken (bağlantının dışında; aynı bilgi aria-label'da) */}
+        <g aria-hidden="true">
+          {markers
+            .filter((m) => labelled.has(m.id))
+            .map((m) => (
+              <text
+                key={`ad-${m.id}`}
+                transform={`translate(${m.x + m.dx * pz.px} ${m.y + m.dy * pz.px}) scale(${pz.px})`}
+                y={m.kind === "building" ? 15 : 28}
+                textAnchor="middle"
+                paintOrder="stroke"
+                className="fill-fg-1 stroke-card text-[12px] font-semibold"
+                strokeWidth="3.5"
+                strokeLinejoin="round"
+              >
+                {m.label}
+              </text>
+            ))}
+        </g>
       </svg>
 
       <p className="absolute top-[7.75rem] right-2 z-10 flex items-center gap-1.5 rounded-sm bg-overlay px-1.5 text-[11px] text-fg-2 lg:top-auto lg:right-auto lg:bottom-2 lg:left-2">

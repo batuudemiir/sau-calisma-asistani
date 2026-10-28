@@ -291,9 +291,13 @@ function Legend() {
             {SHORT[t]}
           </li>
         ))}
-        <li>
-          <strong>K</strong> kütüphane · <strong>C</strong> kafe · binadaki sayı: boş sınıf
+        <li className="flex items-center gap-1.5">
+          <PlaceGlyph kind="LIBRARY" size={18} /> kütüphane
         </li>
+        <li className="flex items-center gap-1.5">
+          <PlaceGlyph kind="STUDY_AREA" size={18} /> kafe
+        </li>
+        <li>İğnedeki sayı: boş sınıf</li>
       </ul>
       <p className="text-xs text-fg-3">
         Harita:{" "}
