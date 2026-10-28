@@ -2,7 +2,7 @@
 // Kullanım:
 //   npm run qr -- --base https://<uygulama-adresi> [--building demo-blok] [--out data/qr/sayfa.html]
 //   Yerel demo (emulator açıkken): npm run qr -- --base http://<dizüstü-ip>:3000 --emulator
-//   Firebase'siz prototip (Vercel, NEXT_PUBLIC_DEMO_BACKEND=memory): npm run qr -- --base https://<vercel-adresi> --demo
+//   Firebase'siz prototip (Vercel): npm run qr -- --base https://<vercel-adresi> --demo  (QR_SECRET yoksa demo anahtarı)
 // QR_SECRET sunucudakiyle aynı olmalı (.env.local; yerel demo için .env.development'taki değer kullanılır).
 
 import { mkdir, writeFile } from "node:fs/promises";
@@ -10,7 +10,7 @@ import { dirname } from "node:path";
 import { parseArgs } from "node:util";
 import QRCode from "qrcode";
 import { createMemoryBackend } from "../../src/server/memory-backend";
-import { qrUrl } from "../../src/server/qr";
+import { DEMO_QR_SECRET, qrUrl } from "../../src/server/qr";
 import { scriptDb } from "../lib/admin";
 import { qrSheetHtml } from "./sheet";
 
@@ -25,7 +25,8 @@ const { values } = parseArgs({
 });
 
 async function main() {
-  const secret = process.env.QR_SECRET;
+  // --demo: Vercel'de QR_SECRET girilmediyse sunucu da aynı açık demo anahtarını kullanır
+  const secret = process.env.QR_SECRET || (values.demo ? DEMO_QR_SECRET : undefined);
   if (!secret) throw new Error("QR_SECRET tanımlı değil (.env.local)");
   if (!values.base) throw new Error("--base <uygulama adresi> gerekli, ör. https://ornek.web.app");
   const { spaces, buildings } = values.demo ? await memorySpaces() : await firestoreSpaces();

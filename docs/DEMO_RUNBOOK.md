@@ -7,7 +7,8 @@ Amaç: Canlı demonun (3-5 dk) adım adım provası. `DEMO_AND_PITCH.md` neyin a
 Hazırlık (T-30 dk):
 - [ ] Vercel bağlantısı açılıyor. Uygulama bir süre boşta kaldıysa ilk açılış birkaç saniye sürebilir; sunumdan
       hemen önce bir kez aç (veri her yeniden başlatmada sıfırlanır, bu beklenen durum).
-- [ ] Ö-201 (veya başka bir Örnek Blok odası) QR'ı basılı: `QR_SECRET=<Vercel'deki> npm run qr -- --base https://<proje>.vercel.app --demo`.
+- [ ] Ö-201 (veya başka bir Örnek Blok odası) QR'ı basılı: `npm run qr -- --base https://<proje>.vercel.app --demo`
+      (Vercel'de `QR_SECRET` girdiysen başına `QR_SECRET=<aynı değer>` ekle).
 - [ ] Sunum telefonunda bağlantı **gizli sekmede** açık (temiz cihaz kimliği: 0 puan).
 - [ ] Demo saati bağlantısı hazır: `https://<proje>.vercel.app/?d=60&at=2026-10-28T13:00`
       (gerçek saat 08.00-22.00 dışındaysa ekrandaki "Sunum için bugün 13.00'e göre göster" de aynı işi yapar).

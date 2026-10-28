@@ -14,10 +14,11 @@ import {
 } from "firebase/auth";
 import { FirebaseError } from "firebase/app";
 import { useEffect, useState } from "react";
+import { MEMORY_BACKEND } from "./backend-mode";
 import { firebaseClient } from "./firebase-client";
 
 /** Firebase'siz prototip (bellek arka ucu): Firebase hiç yüklenmez, istekler rastgele cihaz kimliğiyle gider. */
-export const MEMORY_BACKEND = process.env.NEXT_PUBLIC_DEMO_BACKEND === "memory";
+export { MEMORY_BACKEND };
 const DEVICE_KEY = "cihaz-kimligi";
 
 /** Bu cihaza özel rastgele kimlik (yalnızca bu tarayıcıda; kişisel veri değil). */

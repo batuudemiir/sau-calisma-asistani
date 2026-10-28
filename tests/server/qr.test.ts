@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { qrToken, qrUrl, verifyQrToken } from "../../src/server/qr";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { DEMO_QR_SECRET, qrToken, qrUrl, serverQrSecret, verifyQrToken } from "../../src/server/qr";
 
 describe("sınıf QR kodu", () => {
   it("aynı alan ve anahtar aynı kodu üretir; doğrulanır", () => {
@@ -18,5 +18,17 @@ describe("sınıf QR kodu", () => {
 
   it("basılacak adres", () => {
     expect(qrUrl("https://ornek.app/", "a b", "k")).toBe(`https://ornek.app/qr/a%20b/${qrToken("a b", "k")}`);
+  });
+});
+
+describe("serverQrSecret", () => {
+  afterEach(() => vi.unstubAllEnvs());
+
+  it("QR_SECRET varsa onu kullanır; yoksa yalnızca Firebase'siz prototipte açık demo anahtarına düşer", () => {
+    vi.stubEnv("QR_SECRET", "gizli");
+    expect(serverQrSecret(false)).toBe("gizli");
+    vi.stubEnv("QR_SECRET", "");
+    expect(serverQrSecret(true)).toBe(DEMO_QR_SECRET);
+    expect(serverQrSecret(false)).toBeNull();
   });
 });

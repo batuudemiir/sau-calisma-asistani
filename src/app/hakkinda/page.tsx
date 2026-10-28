@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { MEMORY_BACKEND } from "@/lib/backend-mode";
 import { Wordmark } from "@/components/brand/Wordmark";
 import { OSM_ATTRIBUTION } from "@/data/campus";
 
@@ -58,7 +59,7 @@ export default function AboutPage() {
           </li>
           <li>
             <strong>Hizmet sağlayıcı:</strong> veriler Google Firebase (Firestore, Authentication) üzerinde işlenir.
-            {process.env.NEXT_PUBLIC_DEMO_BACKEND === "memory" &&
+            {MEMORY_BACKEND &&
               " Bu sunum prototipinde Firebase kullanılmaz: veriler yalnızca sunucunun belleğinde tutulur ve sunucu yeniden başlayınca silinir."}
           </li>
           <li>

@@ -5,6 +5,16 @@ import { createHmac, timingSafeEqual } from "node:crypto";
  * paylaşılabilir; bu yüzden QR "orada olma" için güçlü ama kesin olmayan bir kanıttır (bkz. points.qrOverused).
  * Gizli anahtar yalnızca sunucuda ve baskı betiğinde (QR_SECRET); istemci paketine girmez.
  */
+/**
+ * Firebase'siz sunum prototipinde QR_SECRET verilmemişse kullanılan herkese açık anahtar. Bu modda her şey örnek
+ * veridir; açık anahtar yalnızca "ayarsız çalışsın" diyedir. Gerçek dağıtımda QR_SECRET zorunludur.
+ */
+export const DEMO_QR_SECRET = "neredecalisalim-sunum-demo";
+
+export function serverQrSecret(memoryBackend: boolean): string | null {
+  return process.env.QR_SECRET || (memoryBackend ? DEMO_QR_SECRET : null);
+}
+
 export function qrToken(spaceId: string, secret: string): string {
   return createHmac("sha256", secret).update(`qr:v1:${spaceId}`).digest("base64url").slice(0, 22);
 }

@@ -136,15 +136,13 @@ Bu kaynaklar `parseMethod=MANUAL` olarak yayımlanır ve kartta "ekip tarafında
 
 ## Sunum prototipi: Vercel, Firebase'siz
 
-Firebase kurmadan canlı link: veri sunucunun belleğinde tutulur (`NEXT_PUBLIC_DEMO_BACKEND=memory`).
+Firebase kurmadan canlı link: veri sunucunun belleğinde tutulur. **Hiçbir ortam değişkeni gerekmez**: Firebase
+yapılandırması (`NEXT_PUBLIC_FIREBASE_PROJECT_ID`) yoksa bu mod kendiliğinden açılır (`src/lib/backend-mode.ts`).
 
-1. vercel.com → Add New → Project → bu GitHub reposunu seç (Framework: Next.js, ayar değiştirme).
-2. Environment Variables:
-   - `NEXT_PUBLIC_DEMO_BACKEND` = `memory`
-   - `QR_SECRET` = rastgele uzun bir değer (ör. `openssl rand -hex 32`)
-   - Firebase değişkenleri gerekmez; `DEMO_MODE` bu modda kendiliğinden açıktır.
-3. Deploy. QR sayfası (yerelde, aynı `QR_SECRET` ile):
-   `QR_SECRET=<aynı değer> npm run qr -- --base https://<proje>.vercel.app --demo`
+1. vercel.com → Add New → Project → bu GitHub reposunu seç (Framework: Next.js, ayar değiştirme) → Deploy.
+2. İsteğe bağlı: `QR_SECRET` = rastgele uzun bir değer (`openssl rand -hex 32`). Verilmezse herkese açık demo anahtarı
+   kullanılır (yalnızca bu örnek veri modunda). Ortam değişkeni ekleyip değiştirdikten sonra **Redeploy** gerekir.
+3. QR sayfası: `npm run qr -- --base https://<proje>.vercel.app --demo` (QR_SECRET verdiysen başına `QR_SECRET=<aynı değer>`).
 
 Bu modda: Kampüs + örnek bina/oda/ders programı (haritada "temsili konum") + kütüphane simülasyonu + her an
 "x dk önce" görünen 3 örnek bildirim (hepsi "Örnek demo verisi"); bildirim, QR check-in, değerlendirme, puan ve

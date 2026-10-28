@@ -1,5 +1,6 @@
 import { verifyUid } from "@/server/auth";
-import { writeStore } from "@/server/backend";
+import { isMemoryBackend, writeStore } from "@/server/backend";
+import { serverQrSecret } from "@/server/qr";
 import { submitReport } from "@/server/report-service";
 
 export async function POST(request: Request) {
@@ -8,7 +9,7 @@ export async function POST(request: Request) {
 
   const body = await request.json().catch(() => null);
   try {
-    const result = await submitReport(writeStore(), uid, body, Date.now(), process.env.QR_SECRET || null);
+    const result = await submitReport(writeStore(), uid, body, Date.now(), serverQrSecret(isMemoryBackend()));
     if (result.ok) {
       return Response.json({ id: result.id, points: result.points ?? 0, qrLimited: result.qrLimited ?? false }, { status: 201 });
     }

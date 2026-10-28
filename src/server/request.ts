@@ -1,9 +1,10 @@
 import { z } from "zod";
+import { MEMORY_BACKEND } from "@/lib/backend-mode";
 import { isDuration } from "@/domain/config";
 import { istanbulLocalToMs } from "@/lib/clock";
 
 // Firebase'siz prototip (bellek arka ucu) yalnızca örnek veriyle çalışır; demo modu onda her zaman açık
-export const isDemoMode = () => process.env.DEMO_MODE === "true" || process.env.NEXT_PUBLIC_DEMO_BACKEND === "memory";
+export const isDemoMode = () => process.env.DEMO_MODE === "true" || MEMORY_BACKEND;
 
 const QuerySchema = z.object({
   d: z.coerce.number().refine(isDuration, "Süre 30, 60, 90 veya 120 olmalı"),
