@@ -50,6 +50,12 @@ Hangi verinin örnek, hangisinin gerçek olduğu sözlü olarak da söylenir.
   (anahtar `.env.development`'tan gelir). Telefonun dizüstüne erişebildiği doğrulanmadı.
 - `data/qr/` gizli imzalı bağlantılar içerir; depoya eklenmez (`.gitignore`).
 
+## Mapbox haritası
+
+- Token repoda değil: yerelde `.env.local` içine `NEXT_PUBLIC_MAPBOX_TOKEN=pk....`, canlıda App Hosting secret'ı (`apphosting.yaml`). Mapbox hesabında (Access tokens → URL restrictions) `http://localhost:3000`,
+  dizüstünün yerel ağ adresi ve canlı alan adı izinli olmalı; değilse harita SVG yedeğe döner (uygulama çalışmaya devam eder).
+- İnternet yoksa harita kendiliğinden SVG'ye geçer (en geç 10 sn). Demo öncesi Mapbox'ın açıldığını telefonda kontrol et.
+
 ## Bilinen tuzaklar
 
 - **Aynı odaya 10 dk içinde ikinci bildirim reddedilir.** Provada kullanılan odayı demoda kullanma ya da yeni gizli sekme aç.

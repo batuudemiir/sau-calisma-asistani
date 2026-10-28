@@ -26,7 +26,7 @@ export default function AboutPage() {
           <li>&quot;Öğrenci doğruladı&quot; ve &quot;Dolu&quot; etiketleri son 30 dakikadaki öğrenci bildirimlerinden gelir.</li>
           <li>Programı bilinmeyen alanlar &quot;Bilinmiyor&quot; olarak gösterilir, asla &quot;boş&quot; değil.</li>
           <li>&quot;Örnek demo verisi&quot; etiketli bilgiler gösterim amaçlı yapay veridir.</li>
-          <li>Bina konumları ve açılış saatleri: {OSM_ATTRIBUTION}.</li>
+          <li>Bina konumları ve açılış saatleri: {OSM_ATTRIBUTION}. Taban harita: Mapbox.</li>
           <li>Puanlar yalnızca sana görünür; sonuçların sırasını ve güven etiketlerini etkilemez.</li>
         </ul>
       </section>
@@ -54,7 +54,9 @@ export default function AboutPage() {
             geçmişi. Bildirimler 30 dakika sonra durum hesabına katılmaz.
           </li>
           <li>
-            <strong>Hizmet sağlayıcı:</strong> veriler Google Firebase (Firestore, Authentication) üzerinde işlenir.
+            <strong>Hizmet sağlayıcı:</strong> veriler Google Firebase (Firestore, Authentication) üzerinde işlenir. Harita
+            görüntüleri Mapbox&apos;tan yüklenir; bu sırada Mapbox IP adresini ve görüntülenen bölgeyi görebilir. Konumun
+            Mapbox&apos;a gönderilmez.
           </li>
           <li>
             <strong>Silme hakkı:</strong> Profil → &quot;Hesabımı sil&quot; ile puanların, katkı geçmişin ve hesabın silinir.

@@ -9,7 +9,8 @@ sürümleri kullanılır, uyumluluk kurulum anında resmî dokümanlardan kontro
 | Konu | Seçim | Gerekçe | Alternatif | Temel risk |
 |---|---|---|---|---|
 | Uygulama | Next.js (App Router) + TypeScript, modüler monolit | Arayüz ve sunucu uçları tek kod tabanında; gizli anahtar sunucuda kalır | Vite + Cloud Functions (iki ayrı dağıtım) | App Router öğrenme eğrisi; Server/Client sınırı |
-| Stil | Tailwind CSS | Hızlı, mobil öncelikli | shadcn/ui (yalnızca gerekirse) | Yok denecek kadar az |
+| Stil | Tailwind CSS 4 + neredeçalışalım tasarım token'ları (`src/app/globals.css`, `@theme`) | Tek kaynakta renk/yazı/köşe; açık-koyu tema | shadcn/ui | Token dışı ham renk kullanımı |
+| Harita | Mapbox GL JS (`light-v11`/`dark-v11` + OSM bina katmanları); yedek: el çizimi SVG | Gerçek taban harita; token/WebGL/ağ yoksa SVG çalışmaya devam eder | Yalnızca SVG | Mapbox kotası ve erişimi; bu ortamdan doğrulanamadı |
 | Veritabanı | Cloud Firestore | Gerçek zamanlı dinleme, sıfır sunucu yönetimi | Supabase | Sorgu/indeks tasarımı |
 | Kimlik | Firebase Anonymous Auth + isteğe bağlı Google (anonim hesaba bağlanır) | Kayıt gerekmez; puanlar istenirse SAÜ öğrenci hesabına bağlanır | E-posta bağlantısı (SAÜ öğrenci e-postası Google değilse) | Anonim hesap çoğaltma |
 | Yazma güvenliği | Route Handler + Firebase Admin SDK + Zod | Tüm yazmalar tek noktada doğrulanır | İstemci yazma + Security Rules | Admin SDK kuralları atlar; doğrulama kodda olmalı |
@@ -171,7 +172,7 @@ Yalnızca `DEMO_MODE=true` iken yazılır ve okunur.
 ### Kampüs kataloğu (`src/data/campus.ts`, `data/campus/esentepe-osm.json`)
 Bina konumları ve sınırları OpenStreetMap'ten (ODbL; bkz. `docs/CAMPUS_RESEARCH.md`). `npm run seed-campus` çalışma
 yerlerini (`spaces`, kind LIBRARY/STUDY_AREA) ve bina konumlarını (`buildings.osm`) yazar. Çalışma yerlerinin ders
-programı yoktur; durumları yalnızca bildirimden gelir (taban: "Doluluk verisi yok"). Harita SVG'dir, paket kullanılmaz.
+programı yoktur; durumları yalnızca bildirimden gelir (taban: "Doluluk verisi yok"). Ana harita Mapbox'tır; Mapbox yüklenemezse SVG yedek harita aynı veriyle çizilir.
 
 ## 5. Veri hazırlama hattı
 
@@ -207,6 +208,9 @@ Eski dönem PDF'leri yalnızca ayrıştırıcı testlerinde kullanılır, asla y
 - Kişisel puanlar (`src/domain/points.ts`): `users/{uid}` (puan, günlük toplam, sayaçlar, `student`) ve `pointEvents`
   (defter). Bildirim/değerlendirme ile aynı transaction'da yazılır; ikisi de istemciye kapalıdır, `/api/profile` yalnızca
   sahibine döndürür. Puanlar sıralamayı ve güven etiketini etkilemez; herkese açık sıralama yoktur.
+- Mapbox: `NEXT_PUBLIC_MAPBOX_TOKEN` public `pk.` token'dır (gizli değil), Mapbox hesabında alan adıyla kısıtlanmalı.
+  Harita karoları Mapbox'tan yüklenir; Mapbox kullanıcının IP adresini ve görüntülenen bölgeyi görebilir. Kullanıcı konumu
+  Mapbox'a gönderilmez (GeolocateControl kullanılmaz). Bina verisi GeoJSON olarak istemcide üretilir (`src/lib/map-geojson.ts`).
 - Asistan (`src/domain/assistant.ts`): saf TS kural motoru; web uygulaması hiçbir yapay zekâ API'sini çağırmaz.
   Kullanıcı konumu `navigator.geolocation` ile yalnızca tarayıcıda alınır, mesafe cihazda hesaplanır, hiçbir yere gönderilmez.
 - Sınıf QR'ı (`src/server/qr.ts`): HMAC-SHA256(`QR_SECRET`, alan kimliği), 22 karakter. Anahtar yalnızca sunucuda ve

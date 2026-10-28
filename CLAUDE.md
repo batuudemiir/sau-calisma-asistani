@@ -1,4 +1,4 @@
-# CLAUDE.md — SAÜ Çalışma Asistanı
+# CLAUDE.md — neredeçalışalım (SAÜ Çalışma Asistanı)
 
 "Şu an nerede çalışabilirim?" — SAÜ öğrencisine seçtiği süre (30/60/90/120 dk) boyunca
 uygun görünen çalışma alanlarını, bilginin kaynağı ve güven etiketiyle listeleyen mobil uyumlu web uygulaması.
@@ -22,7 +22,10 @@ GDG on Campus SAÜ Hackathon, 27-28 Ekim 2026. Teslim: 28 Ekim 13.00.
 6. Simüle edilen her veri `isSimulated: true` taşır ve arayüzde "Örnek demo verisi" etiketiyle görünür.
 7. API anahtarı, token veya kullanıcı kimliği loglama. Gizli anahtar istemci paketine girmez (`NEXT_PUBLIC_` önekli değişkenler hariç, onlar gizli değildir).
 8. Firestore'a istemciden yazma yok; yazmalar Route Handler + Admin SDK üzerinden, Zod doğrulamasıyla.
-9. Kullanılmayan paket, özellik, harita kütüphanesi ekleme. Harita el çizimi SVG ile yapılır (`src/components/map/`), paket yok.
+9. Kullanılmayan paket veya özellik ekleme. Ana harita Mapbox GL JS (`src/components/map/MapboxCampus.tsx`,
+   `NEXT_PUBLIC_MAPBOX_TOKEN`); token yoksa, WebGL yoksa veya Mapbox yüklenemezse el çizimi SVG harita
+   (`SvgCampusMap.tsx`) yedektir ve her zaman çalışır kalmalıdır. Başka harita paketi eklenmez.
+12. Görsel dil `src/app/globals.css` token'larından gelir (neredeçalışalım tasarım sistemi); bileşenlerde ham renk kodu kullanılmaz.
 10. Doğrulanmamış bir entegrasyonun veya özelliğin çalıştığını iddia etme. Emin değilsen "doğrulanmadı" yaz.
 11. Tarih/saat her yerde `Europe/Istanbul`. Gün içi zamanlar gece yarısından itibaren dakika (`startMinute`).
 

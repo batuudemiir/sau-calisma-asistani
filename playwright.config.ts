@@ -26,6 +26,8 @@ export default defineConfig({
       NEXT_PUBLIC_USE_EMULATOR: "true",
       DEMO_MODE: "true",
       QR_SECRET: "e2e-qr-anahtari",
+      // Varsayılan boş: e2e SVG yedek haritayla çalışır. Mapbox yolunu denemek için E2E_MAPBOX_TOKEN verilebilir.
+      NEXT_PUBLIC_MAPBOX_TOKEN: process.env.E2E_MAPBOX_TOKEN ?? "",
     },
   },
 });
