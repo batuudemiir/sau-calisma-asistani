@@ -16,7 +16,8 @@ openstreetmap.org, Overpass ve web.archive.org adreslerine erişime izin vermiyo
 
 - Kaynak: [numanak-b221210105/sau-kampus-qgis-harita](https://github.com/numanak-b221210105/sau-kampus-qgis-harita) →
   `sau_kampus.gpkg` (QuickOSM ile OpenStreetMap'ten alınmış; TUREF/TM30, EPSG:5254).
-- Lisans: © OpenStreetMap katkıda bulunanlar, [ODbL 1.0](https://www.openstreetmap.org/copyright). Uygulamada harita altında atıf var.
+- Lisans: © OpenStreetMap katkıda bulunanlar, [ODbL 1.0](https://www.openstreetmap.org/copyright). Uygulamada harita üzerinde atıf var
+  ("© OpenStreetMap katkıda bulunanlar © CARTO"; döşemeler CARTO Voyager).
 - Dönüşüm: `scripts/campus/gpkg_to_json.py` (yalnızca Python standart kütüphanesi; ters Transverse Mercator, GRS80, 30°D).
   Çıktı `data/campus/esentepe-osm.json`: kampüs sınırı + sınır içindeki **181 bina** (43'ü adlı), her biri OSM kimliğiyle.
 - Doğrulama: kampüs sınırı 40,736–40,748 K / 30,322–30,341 D; resmî tanımla tutarlı (Sapanca Gölü'nün kuzey

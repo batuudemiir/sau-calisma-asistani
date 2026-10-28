@@ -17,7 +17,7 @@ bilinmeyen bilgi asla "boş" kabul edilmez.
 - **Check-in ve bildirim:** anonim oturum, tek dokunuş, hız sınırı (aynı oda 10 dk'da 1, saatte 20)
 - **Değerlendirme:** check-in sonrası 3 saat içinde Sessizlik / Priz / İnternet / Işık için 1-5 puan; 3 değerlendirmeden önce ortalama gösterilmez
 - **Marka:** neredeçalışalım tasarım sistemi (kobalt + limon, Zilla Slab / Public Sans / IBM Plex Mono), token'lar `src/app/globals.css`
-- **Gerçek kampüs haritası:** OpenStreetMap'ten 181 binanın gerçek konum ve sınırları (SVG, harita paketi yok); kat görünümünde her odada durum ve puan
+- **Gerçek kampüs haritası:** altta gerçek sokak haritası döşemeleri (CARTO Voyager, OpenStreetMap verisi; anahtarsız), üstte OpenStreetMap'ten 181 binanın gerçek konum ve sınırları (SVG, harita paketi yok); kat görünümünde her odada durum ve puan; her bina/yerde "Google Haritalar'da yol tarifi"
 - **Çalışma yerleri:** Merkez Kütüphane, Kütüphane Ek Bina ve kampüsteki 4 kafe/kantin — açılış saati (kaynaklıysa), bildirim ve puanla
 - **Kütüphane kartı:** bildirim tabanlı; demo modunda "Örnek demo verisi" etiketli gün içi doluluk deseni
 - **Çalışma asistanı:** haritanın sağ altındaki yuvarlak düğme. Kural tabanlı öneri motoru (`src/domain/assistant.ts`), yapay zekâ API'si yok: süre, ihtiyaç (sessiz/priz/internet/ışık), yer türü ve isteğe bağlı konumla (yalnızca cihazda) en iyi 3 yeri gerekçeleri ve bilinmeyenleriyle önerir
@@ -165,7 +165,8 @@ Plan B: Vercel + Firebase — aynı `NEXT_PUBLIC_*` değişkenleri + `FIREBASE_S
 
 ## Kampüs verisi
 
-Konum verisi © OpenStreetMap katkıda bulunanlar (ODbL). Kaynaklar, doğrulananlar ve eksikler: `docs/CAMPUS_RESEARCH.md`.
+Konum verisi © OpenStreetMap katkıda bulunanlar (ODbL); harita döşemeleri © CARTO (ücretsiz, ticari olmayan
+kullanım için aylık görüntüleme sınırı var; güncel koşullar bu projede doğrulanmadı — sunum ölçeği için sorun beklenmez). Kaynaklar, doğrulananlar ve eksikler: `docs/CAMPUS_RESEARCH.md`.
 Yeniden üretmek için: `python3 -I scripts/campus/gpkg_to_json.py <sau_kampus.gpkg> data/campus/esentepe-osm.json`.
 
 ## Güvenlik ve gizlilik

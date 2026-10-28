@@ -33,7 +33,12 @@ export function projector(points: readonly (readonly [number, number])[], width:
     Math.round((pad + (lng - minLng) * kx * scale) * 10) / 10,
     Math.round((pad + (maxLat - lat) * scale) * 10) / 10,
   ];
-  return { project, height, metersPerUnit: 111_320 / scale };
+  /** SVG koordinatı → enlem/boylam (harita döşemelerini yerleştirmek için). */
+  const unproject = ([x, y]: readonly [number, number]): [number, number] => [
+    maxLat - (y - pad) / scale,
+    minLng + (x - pad) / (kx * scale),
+  ];
+  return { project, unproject, height, metersPerUnit: 111_320 / scale };
 }
 
 export const toPath = (pts: readonly [number, number][]) => `M${pts.map((p) => `${p[0]},${p[1]}`).join("L")}Z`;

@@ -30,6 +30,7 @@ export interface SourceDTO {
 export interface ResultDTO {
   spaceId: string;
   code: string;
+  buildingId: string;
   buildingName: string;
   kind: SpaceKind;
   accessStatus: AccessStatus;
@@ -170,6 +171,7 @@ function resultDTOs(d: Loaded, opts: SearchOptions): ResultDTO[] {
   return out.results.map((r) => ({
     spaceId: r.space.id,
     code: r.space.code,
+    buildingId: r.space.buildingId,
     buildingName: d.buildingName.get(r.space.buildingId) ?? r.space.buildingId,
     kind: r.space.kind,
     accessStatus: r.space.accessStatus,
@@ -212,6 +214,7 @@ export async function spaceDetail(ds: DataSource, spaceId: string, opts: SearchO
     space: {
       spaceId: space.id,
       code: space.code,
+      buildingId: space.buildingId,
       buildingName: d.buildingName.get(space.buildingId) ?? space.buildingId,
       kind: space.kind,
       accessStatus: space.accessStatus,

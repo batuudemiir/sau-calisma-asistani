@@ -12,6 +12,7 @@ import { RatingForm, RatingSummaryView } from "./Ratings";
 import { ReportButtons } from "./ReportButtons";
 import { POLL_MS } from "./ResultsView";
 import { SpaceFacts } from "./SpaceFacts";
+import { DirectionsLink } from "./DirectionsLink";
 import { StatusBadge } from "./StatusBadge";
 
 const EXCLUDED_TEXT = {
@@ -76,6 +77,7 @@ export function SpaceView() {
             {!isLibrary && free && s.freeUntil !== null && (
               <p className="text-lg font-semibold">{untilText(s.freeUntil)} boş</p>
             )}
+            {isLibrary ? <DirectionsLink osm={data.place?.osm} /> : <DirectionsLink placeId={s.buildingId} />}
             {data.simulation && (
               <p className="text-sm">
                 Yoğunluk: <strong>{LIBRARY_LEVEL_LABELS[data.simulation.level]}</strong>

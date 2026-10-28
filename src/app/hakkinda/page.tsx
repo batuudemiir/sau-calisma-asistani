@@ -58,7 +58,9 @@ export default function AboutPage() {
             geçmişi. Bildirimler 30 dakika sonra durum hesabına katılmaz.
           </li>
           <li>
-            <strong>Hizmet sağlayıcı:</strong> veriler Google Firebase (Firestore, Authentication) üzerinde işlenir.
+            <strong>Hizmet sağlayıcı:</strong> veriler Google Firebase (Firestore, Authentication) üzerinde işlenir. Harita
+            görüntüleri CARTO sunucularından yüklenir (tarayıcın bu sunuculara bağlanır); &quot;Google Haritalar&apos;da yol
+            tarifi&quot; bağlantısı Google Haritalar&apos;ı yeni sekmede açar.
             {MEMORY_BACKEND &&
               " Bu sürümde veriler yalnızca sunucuda geçici olarak tutulur."}
           </li>

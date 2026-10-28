@@ -17,6 +17,7 @@ import { ReportButtons } from "../ReportButtons";
 import { POLL_MS } from "../ResultsView";
 import { SimulatedBadge, StatusBadge } from "../StatusBadge";
 import { Assistant } from "../assistant/Assistant";
+import { DirectionsLink } from "../DirectionsLink";
 import { BuildingMap } from "./BuildingMap";
 import { SearchBox } from "./SearchBox";
 import { CampusMap, type MapSelection } from "./CampusMap";
@@ -114,6 +115,7 @@ export function MapHome() {
               <p className="text-sm">
                 {d} dakika boyunca <strong>{freeCount(building)}</strong> boş sınıf. Sınıfa dokun: ayrıntı ve check-in.
               </p>
+              <DirectionsLink osm={building.osm} />
               <BuildingMap spaces={building.spaces} query={query} />
               <Legend />
             </Panel>
@@ -121,6 +123,7 @@ export function MapHome() {
           {data && place && !building && (
             <Panel title={place.name} onClose={close}>
               <PlaceSummary place={place} nowMs={data.now.nowMs} />
+              <DirectionsLink osm={place.osm} />
               <ReportButtons spaceId={place.spaceId} onReported={() => void reload()} />
               <Link
                 href={`/yer/${encodeURIComponent(place.spaceId)}?${query}`}

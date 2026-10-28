@@ -47,6 +47,10 @@ test("ana sayfa Şimdi, sekmeler sorguyu taşır, eski bağlantılar yönlendiri
   await page.goto(`/spaces/${encodeURIComponent(roomId("bilisim-fakultesi", "BB-102"))}?${Q}`);
   await expect(page).toHaveURL(/\/yer\/bilisim-fakultesi-BB-102/);
   await expect(page.getByRole("heading", { level: 1, name: "BB-102" })).toBeVisible();
+  // Sınıfın binasına Google Haritalar'da yürüyerek yol tarifi (yeni sekmede)
+  const directions = page.getByRole("link", { name: /Google Haritalar'da yol tarifi/ });
+  await expect(directions).toHaveAttribute("href", /^https:\/\/www\.google\.com\/maps\/dir\/\?api=1&destination=40\.\d+,30\.\d+&travelmode=walking$/);
+  await expect(directions).toHaveAttribute("target", "_blank");
   await page.goto(`/map?${Q}`);
   await expect(page).toHaveURL(/\/harita\?d=60&at=2026-10-27T13(:|%3A)00$/);
 
@@ -114,6 +118,7 @@ test("değerlendirme check-in ister, check-in başına bir kez; 3 değerlendirme
 
   const map = await newPhone(browser);
   await map.goto(`/harita?${Q}&b=fen-edebiyat-fakultesi`);
+  await expect(map.getByRole("dialog").getByRole("link", { name: /Google Haritalar'da yol tarifi/ })).toBeVisible();
   await expect(map.locator('a[aria-label^="FE-103 "]')).toHaveAttribute("aria-label", /Ortalama puan 4\.0$/);
 });
 
@@ -239,6 +244,7 @@ test("ana sayfa araması Türkçe karakter katlar, URL'de kalır, boş sonuçta 
   await box.fill("kutuphane");
   await expect(page.getByRole("link", { name: /Kütüphane Ek Bina/ })).toBeVisible();
   await expect(page.getByText(/aramasına uyan boş sınıf yok/)).toBeVisible();
+  await expect(page).toHaveURL(/q=kutuphane/); // URL güncellenmeden yenilenirse eski arama gelir
   await page.reload();
   await expect(page.getByRole("searchbox", { name: "Sınıf, bina veya yer ara" })).toHaveValue("kutuphane");
 });

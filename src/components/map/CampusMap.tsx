@@ -5,18 +5,20 @@ import { CAMPUS, buildingShape, osmBuilding } from "@/data/campus";
 import { projector, toPath } from "@/lib/map-geometry";
 import { boxAround, type Box } from "@/lib/pan-zoom";
 import { statusTitle } from "@/lib/labels";
+import { TILE_ATTRIBUTION, tileZoom, tilesFor } from "@/lib/tiles";
 import type { MapResponse } from "@/server/search-service";
 import { MapControls } from "./MapControls";
 import { FILL } from "./map-style";
 import { usePanZoom } from "./usePanZoom";
 
 // Kampüs sınırı geniş ormanlık alan içerir; harita binaların kapladığı alanla sınırlanır
-const { project, height } = projector(
+const { project, unproject, height, metersPerUnit } = projector(
   CAMPUS.buildings.flatMap((b) => b.outline),
   360,
   12,
 );
 const BOUNDS: Box = { x: 0, y: 0, w: 360, h: height };
+const CAMPUS_LAT = CAMPUS.boundary[0][0];
 const shape = (outline: [number, number][]) => toPath(outline.map(project));
 
 /** Merkez görünümü: çalışma yerleri ve derslikli binaların çevresi (~120 m pay). */
@@ -64,6 +66,12 @@ export function CampusMap({
   const svgRef = useRef<SVGSVGElement>(null);
   const center = useMemo(() => centerBox(data), [data]);
   const pz = usePanZoom(svgRef, center, BOUNDS);
+  // Gerçek sokak haritası (dekoratif alt katman): görünen alana ve ölçeğe göre döşemeler
+  const tiles = useMemo(() => {
+    const [x, y, w, h] = pz.viewBox.split(" ").map(Number);
+    const z = tileZoom(pz.px * metersPerUnit, CAMPUS_LAT);
+    return tilesFor({ x, y, w, h }, z, project, unproject);
+  }, [pz.viewBox, pz.px]);
 
   const appBuildings = data.buildings.flatMap((b) => {
     const shapeOf = buildingShape(b);
@@ -89,6 +97,11 @@ export function CampusMap({
         aria-label="Esentepe kampüsü, gerçek bina konumları. Sürükleyerek kaydır, iki parmakla yakınlaştır."
         {...pz.handlers}
       >
+        <g aria-hidden="true" className="dark:invert dark:hue-rotate-180">
+          {tiles.map((t) => (
+            <image key={t.key} href={t.url} x={t.x} y={t.y} width={t.w} height={t.h} preserveAspectRatio="none" />
+          ))}
+        </g>
         <path
           d={shape(CAMPUS.boundary)}
           className="fill-map-campus stroke-map-boundary"
@@ -98,11 +111,8 @@ export function CampusMap({
         {CAMPUS.buildings
           .filter((b) => !appOsm.has(b.osm) && !placeOsm.has(b.osm))
           .map((b) => (
-            <path
-              key={b.osm}
-              d={shape(b.outline)}
-              className="fill-map-building"
-            >
+            // Döşemede de görünür; döşeme yüklenmezse yedek olarak yarı saydam çizilir
+            <path key={b.osm} d={shape(b.outline)} className="fill-map-building" fillOpacity={0.45}>
               {b.name && <title>{b.name}</title>}
             </path>
           ))}
@@ -184,6 +194,12 @@ export function CampusMap({
             );
           })}
       </svg>
+
+      <p className="absolute top-[7.75rem] right-2 z-10 rounded-sm bg-overlay px-1.5 text-[11px] text-fg-2 lg:top-auto lg:right-auto lg:bottom-2 lg:left-2">
+        <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer" className="underline">
+          {TILE_ATTRIBUTION}
+        </a>
+      </p>
 
       <MapControls
         hidden={controlsHidden}
